@@ -1,0 +1,12 @@
+<Request xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" CombinedDecision="false" ReturnPolicyIdList="false">
+<Attributes Category="1wn1eulhn4">
+<Attribute AttributeId="zpbz5p0uwe" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource">
+<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Inactive</AttributeValue>
+</Attribute>
+</Attributes>
+</Request>

@@ -1,0 +1,25 @@
+                                <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" PolicyId="3targets" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:permit-overrides" Version="1.0">
+<Target>
+<AnyOf>
+<AllOf>
+<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">a</AttributeValue>
+<AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true"/>
+</Match>
+</AllOf>
+<AllOf>
+<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">r</AttributeValue>
+<AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true"/>
+</Match>
+</AllOf>
+<AllOf>
+<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">s</AttributeValue>
+<AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id" Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true"/>
+</Match>
+</AllOf>
+</AnyOf>
+</Target>
+<Rule Effect="Deny" RuleId="3c44a075-a1a5-49a9-8d57-56dcfc149c01"/>
+</Policy>

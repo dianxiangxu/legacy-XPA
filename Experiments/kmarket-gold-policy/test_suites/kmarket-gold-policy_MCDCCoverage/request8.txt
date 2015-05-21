@@ -1,0 +1,12 @@
+<Request xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" CombinedDecision="false" ReturnPolicyIdList="false">
+<Attributes Category="lcl4zzmb80">
+<Attribute AttributeId="n31pps76p0" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject">
+<Attribute AttributeId="http://kmarket.com/id/role" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">gold</AttributeValue>
+</Attribute>
+</Attributes>
+</Request>

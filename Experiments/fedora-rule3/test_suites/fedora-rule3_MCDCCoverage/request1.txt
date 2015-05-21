@@ -1,0 +1,17 @@
+<Request xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" CombinedDecision="false" ReturnPolicyIdList="false">
+<Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action">
+<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">urn:fedora:names:fedora:2.1:action:id-purgeDatastream</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="atpzazsq44">
+<Attribute AttributeId="prdqaz6d9u" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject">
+<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">QTWZ258</AttributeValue>
+</Attribute>
+</Attributes>
+</Request>

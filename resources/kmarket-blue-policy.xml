@@ -1,0 +1,102 @@
+<Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+	PolicyId="KmarketBluePolicy"
+	RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides"
+	Version="1.0">
+	<Target>
+		<AnyOf>
+			<AllOf>
+				<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+					<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">target3</AttributeValue>
+					<AttributeDesignator
+						AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id"
+						Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+						DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true" />
+				</Match>
+			</AllOf>
+		</AnyOf>
+	</Target>
+	<Rule Effect="Deny" RuleId="max-drink-amount">
+		<Target>
+			<AnyOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">RESOURCE3</AttributeValue>
+						<AttributeDesignator
+							AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id"
+							Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+							DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true" />
+					</Match>
+				</AllOf>
+			</AnyOf>
+
+		</Target>
+		<Condition>
+			<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:integer-less-than">
+				<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only">
+					<AttributeDesignator AttributeId="http://kmarket.com/id/amount"
+						Category="http://kmarket.com/category" DataType="http://www.w3.org/2001/XMLSchema#integer"
+						MustBePresent="true" />
+				</Apply>
+				<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">10</AttributeValue>
+			</Apply>
+		</Condition>
+	</Rule>
+
+	<Rule Effect="Permit" RuleId="total-amount">
+		<Target>
+			<AnyOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">SUBJECT2</AttributeValue>
+						<AttributeDesignator
+							AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+							Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+							DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true" />
+					</Match>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">SUBJECT3</AttributeValue>
+						<AttributeDesignator
+							AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+							Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+							DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true" />
+					</Match>
+				</AllOf>
+				<AllOf>
+					<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">SUBJECT4</AttributeValue>
+						<AttributeDesignator
+							AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+							Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+							DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="true" />
+					</Match>
+				</AllOf>
+			</AnyOf>
+		</Target>
+		<Condition>
+			<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+				<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:or">
+					<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:integer-greater-than">
+						<Apply
+							FunctionId="urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only">
+							<AttributeDesignator AttributeId="http://kmarket.com/id/totalAmount"
+								Category="http://kmarket.com/category" DataType="http://www.w3.org/2001/XMLSchema#integer"
+								MustBePresent="true" />
+						</Apply>
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">100</AttributeValue>
+					</Apply>
+				</Apply>
+				<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+					<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:integer-greater-than">
+						<Apply
+							FunctionId="urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only">
+							<AttributeDesignator AttributeId="http://kmarket.com/id/totalAmount2"
+								Category="http://kmarket.com/category2" DataType="http://www.w3.org/2001/XMLSchema#integer"
+								MustBePresent="true" />
+						</Apply>
+						<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#integer">1000</AttributeValue>
+					</Apply>
+				</Apply>
+			</Apply>
+		</Condition>
+	</Rule>
+</Policy>

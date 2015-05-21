@@ -1,0 +1,17 @@
+<Request xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" CombinedDecision="false" ReturnPolicyIdList="false">
+<Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource">
+<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Emilio:creator</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action">
+<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">execute</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="zywl9sn4z6">
+<Attribute AttributeId="2r1jto4ixc" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
+</Attribute>
+</Attributes>
+</Request>
