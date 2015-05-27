@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.sun.org.apache.xalan.internal.utils.XMLSecurityManager.NameMap;
 
 public class Call_Z3str {
 
