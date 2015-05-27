@@ -34,11 +34,9 @@ public class TestPanel extends JPanel {
 	private Vector<Vector<Object>> data;
 	private TestTablePanel requestTablePanel;
 	private JPanel requestPanel;
-	protected MutationPanel2 mutationPanel2;
 
 	public TestPanel(XPA xpa) {
 		this.xpa = xpa;
-		mutationPanel2 = new MutationPanel2(xpa, this);
 	}
 
 	public XPA getXPA() {
@@ -125,7 +123,6 @@ public class TestPanel extends JPanel {
 	private JRadioButton MCDCRadio_NoError = new JRadioButton("MC\\DC_NoError");
 	private JRadioButton DecisionCoverageRadio_NoError = new JRadioButton(
 			"Decision coverage_NoError");
-	private JRadioButton MutantTest = new JRadioButton("Mutant test");
 
 	private JPanel createPanel() {
 		JPanel myPanel = new JPanel();
@@ -140,7 +137,6 @@ public class TestPanel extends JPanel {
 		group.add(MCDCRadio);
 		group.add(MCDCRadio_NoError);
 		group.add(DecisionCoverageRadio_NoError);
-		group.add(MutantTest);
 
 		myPanel.setLayout(new GridLayout(4, 2));
 		//myPanel.add(basicRuleCoverageRadio);
@@ -151,14 +147,13 @@ public class TestPanel extends JPanel {
 		myPanel.add(rulePairCoverageRadio);
 		myPanel.add(MCDCRadio);
 		myPanel.add(MCDCRadio_NoError);
-		myPanel.add(MutantTest);
 
 		myPanel.setBorder(new TitledBorder(new EtchedBorder(), ""));
 
 		return myPanel;
 	}
 
-	public void generateTests() {
+	public void generateCoverageBasedTests() {
 		if (!xpa.hasWorkingPolicy()) {
 			JOptionPane.showMessageDialog(xpa, "There is no policy!");
 			return;
@@ -198,13 +193,13 @@ public class TestPanel extends JPanel {
 				ByTwo.writeToExcelFile(workingTestSuiteFileName);
 			} else if (MCDCRadio.isSelected()) {
 				MCDC_converter2 converter = new MCDC_converter2();
-				PolicySpreadSheetTestSuite MCDC = new PolicySpreadSheetTestSuite(
+				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
 						policyx.generate_MCDCCoverage(this,
 								policyx.buildMCDC_Table(policy, converter),
 								"_MCDCCoverage", converter),
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage");
-				MCDC.writeToExcelFile(workingTestSuiteFileName);
+				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
 			} else if (DecisionCoverageRadio_NoError.isSelected()) {
 				PolicySpreadSheetTestSuite decisionCoverage = new PolicySpreadSheetTestSuite(
 						policyx.generate_DecisionCoverage(this,
@@ -214,16 +209,14 @@ public class TestPanel extends JPanel {
 				decisionCoverage.writeToExcelFile(workingTestSuiteFileName);
 			} else if (MCDCRadio_NoError.isSelected()) {
 				MCDC_converter2 converter = new MCDC_converter2();
-				PolicySpreadSheetTestSuite MCDC = new PolicySpreadSheetTestSuite(
+				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
 						policyx.generate_MCDCCoverage(this,
 								policyx.buildMCDC_Table_NoId(policy, converter),
 								"_MCDCCoverage_NoError", converter),
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage_NoError");
-				MCDC.writeToExcelFile(workingTestSuiteFileName);
-			} else if (MutantTest.isSelected()) {
-				mutationPanel2.generateMutants();
-			}
+				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
+			} 
 
 			try {
 				testSuite = new PolicySpreadSheetTestSuite(
@@ -237,6 +230,15 @@ public class TestPanel extends JPanel {
 
 	}
 
+	public void generateMutationBasedTests() {
+		if (!xpa.hasWorkingPolicy()) {
+			JOptionPane.showMessageDialog(xpa, "There is no policy!");
+			return;
+		}
+		MutationPanel2 mutationPanel2 = new MutationPanel2(xpa, this);
+		mutationPanel2.generateMutants();
+	}
+	
 	public void runTests() {
 		if (!xpa.hasWorkingPolicy()) {
 			JOptionPane.showMessageDialog(xpa, "There is no policy!");

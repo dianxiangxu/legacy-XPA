@@ -18,12 +18,10 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	protected Action newAction, openAction, saveAction, saveAsAction,
 			checkSchemaAction;
-	protected Action openTestsAction, generateTestsAction, runTestsAction;
+	protected Action openTestsAction, generateCoverageTestsAction, generateMutationTestsAction, runTestsAction;
 	protected Action openMutantsAction, generateMutantsAction, testMutantsAction;
 	protected JCheckBoxMenuItem[] items;
 	protected Action saveOracleValuesAction;
-	protected Action analyzeCombiningAlgorithmsAction;
-	protected Action analyzeRulesAction;
 
 	VentanaMensajes vm = new VentanaMensajes();
 	boolean showVersionWarning = true;
@@ -133,9 +131,13 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 				createNavigationIcon("opentests"), "OpenTests",
 				new Integer(KeyEvent.VK_O));
 
-		generateTestsAction = new GenerateTestsAction("Generate Tests...",
-				createNavigationIcon("generatetests"), "GenerateTests",
+		generateCoverageTestsAction = new GenerateCoverageBasedTestsAction("Generate Coverage-Based Tests...",
+				createNavigationIcon("generatecoveragetests"), "GenerateCoverageBasedTests",
 				new Integer(KeyEvent.VK_G));
+
+		generateMutationTestsAction = new GenerateMutationBasedTestsAction("Generate Mutation-Based Tests...",
+				createNavigationIcon("generatemutationtests"), "GenerateMutationBasedTests",
+				new Integer(KeyEvent.VK_M));
 
 		runTestsAction = new RunTestsAction("Run Tests",
 				createNavigationIcon("runtests"), "RunTests", new Integer(
@@ -143,7 +145,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 		openMutantsAction = new OpenMutantsAction(
 				"Open Mutants...", createNavigationIcon("openmutants"),
-				"OpenMutants", new Integer(KeyEvent.VK_M));
+				"OpenMutants", new Integer(KeyEvent.VK_P));
 
 		generateMutantsAction = new GenerateMutantsAction(
 				"Generate Mutants...", createNavigationIcon("generatemutants"),
@@ -156,12 +158,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		saveOracleValuesAction = new SaveOraclesAction("Save as Oracles",
 				createNavigationIcon(""), "SaveResults", new Integer(
 						KeyEvent.VK_U));
-		
-		analyzeCombiningAlgorithmsAction = new CompareCombiningAlgorithms("Combining Algorithm Mutants",
-				createNavigationIcon(""), "CombiningAlgorithmMutants", new Integer(KeyEvent.VK_U));
-
-		analyzeRulesAction = new RuleMutation("Rule Mutants",
-				createNavigationIcon(""), "RuleMutants", new Integer(KeyEvent.VK_U));
 
 	}
 
@@ -244,7 +240,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	protected JMenu createTestMenu() {
 		JMenu testMenu = new JMenu("Test");
-		Action[] actions = { openTestsAction, generateTestsAction, runTestsAction, saveOracleValuesAction };
+		Action[] actions = { openTestsAction, generateCoverageTestsAction, generateMutationTestsAction, runTestsAction, saveOracleValuesAction };
 		for (int i = 0; i < actions.length; i++) {
 			JMenuItem menuItem = new JMenuItem(actions[i]);
 			menuItem.setIcon(null); // arbitrarily chose not to use icon
@@ -264,7 +260,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 			menuItem.setIcon(null);
 			mutationMenu.add(menuItem);
 		}
-		mutationMenu.add(createAnalyzeMenu());
 		return mutationMenu;
 	}
 
@@ -280,6 +275,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		return debuggingMenu;
 	}
 
+	/*
 	protected JMenu createAnalyzeMenu() {
 		JMenu analyzeMenu = new JMenu("Analyze Mutants");
 		JMenuItem combiningAlgorithmsItem = new JMenuItem(analyzeCombiningAlgorithmsAction);
@@ -289,7 +285,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		rulesItem.setIcon(null);
 		analyzeMenu.add(rulesItem);
 		return analyzeMenu;
-	}
+	}*/
 
 	protected JMenu createHelpMenu() {
 		JMenu caMenu = new JMenu("Help");
@@ -385,8 +381,8 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 	}
 
-	public class GenerateTestsAction extends AbstractAction {
-		public GenerateTestsAction(String text, ImageIcon icon, String desc,
+	public class GenerateCoverageBasedTestsAction extends AbstractAction {
+		public GenerateCoverageBasedTestsAction(String text, ImageIcon icon, String desc,
 				Integer mnemonic) {
 			super(text, icon);
 			putValue(SHORT_DESCRIPTION, desc);
@@ -394,7 +390,20 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			testPanel.generateTests();		
+			testPanel.generateCoverageBasedTests();		
+		}
+	}
+
+	public class GenerateMutationBasedTestsAction extends AbstractAction {
+		public GenerateMutationBasedTestsAction(String text, ImageIcon icon, String desc,
+				Integer mnemonic) {
+			super(text, icon);
+			putValue(SHORT_DESCRIPTION, desc);
+			putValue(MNEMONIC_KEY, mnemonic);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			testPanel.generateMutationBasedTests();		
 		}
 	}
 
