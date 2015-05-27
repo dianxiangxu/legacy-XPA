@@ -36,7 +36,6 @@ import org.umu.editor.CurrentPath;
 import org.umu.editor.ElementPanel;
 import org.umu.editor.ElementoXACML;
 import org.umu.editor.ElementoXACMLFactoryImpl;
-import org.umu.editor.InsertarOrdenadoElemento;
 import org.umu.editor.MenuContextFactoryImpl;
 import org.umu.editor.MiRenderer;
 import org.umu.editor.PanelDocumento;
@@ -238,7 +237,8 @@ public class PolicyPanel extends JPanel{
 			CurrentCopia.getInstancia().setCurrNode(copiarNodos(copia));
 		}
 	}
-	
+
+	/*
 	protected void paste(){
 		DefaultMutableTreeNode selecto = (DefaultMutableTreeNode) policyTree
 				.getLastSelectedPathComponent();
@@ -280,7 +280,9 @@ public class PolicyPanel extends JPanel{
 			}
 		}		
 	}
+	*/
 	
+	/*
 	protected void add(ActionEvent e){
 		DefaultMutableTreeNode nodo = (DefaultMutableTreeNode) policyTree
 				.getLastSelectedPathComponent();
@@ -310,6 +312,7 @@ public class PolicyPanel extends JPanel{
 		this.valueChanged(new TreeSelectionEvent(this, null, null, null,
 				null));
 	}
+	*/
 	
 	protected void remove(){
 		DefaultMutableTreeNode nodo = (DefaultMutableTreeNode) policyTree
@@ -325,10 +328,10 @@ public class PolicyPanel extends JPanel{
 		else if (e.getActionCommand().equalsIgnoreCase("copy")) {
 			copy();
 		} else if (e.getActionCommand().equalsIgnoreCase("paste")) {
-			paste();
+//			paste();
 		}
 		else if (e.getActionCommand().startsWith("add ")) {
-			add(e);
+//			add(e);
 		}
 		else if (e.getActionCommand().startsWith("remove")) {
 			remove();
@@ -400,6 +403,7 @@ public class PolicyPanel extends JPanel{
 		return true;
 	}
 
+	/*
 	private void crearNodos(String s, DefaultMutableTreeNode nodo) {
 		ElementoXACML aux = ElementoXACMLFactoryImpl.getInstance()
 				.obtenerElementoXACML(s, new Hashtable());
@@ -432,7 +436,8 @@ public class PolicyPanel extends JPanel{
 		}
 
 	}
-
+*/
+	
 	public void valueChanged(TreeSelectionEvent e) {
 		int original = jSplitPane1.getDividerLocation();
 		DefaultMutableTreeNode selecto = (DefaultMutableTreeNode) policyTree
