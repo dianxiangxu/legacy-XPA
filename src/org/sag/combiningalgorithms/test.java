@@ -26,14 +26,9 @@ import org.wso2.balana.Policy;
 import org.wso2.balana.Balana;
 import org.wso2.balana.PDP;
 import org.wso2.balana.PDPConfig;
-import org.wso2.balana.PolicyTreeElement;
-import org.wso2.balana.Rule;
-import org.wso2.balana.combine.CombinerElement;
 import org.wso2.balana.finder.PolicyFinder;
 import org.wso2.balana.finder.PolicyFinderModule;
 import org.wso2.balana.finder.impl.FileBasedPolicyFinderModule;
-
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
