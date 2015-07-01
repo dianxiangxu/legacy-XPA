@@ -16,10 +16,13 @@ import org.sag.combiningalgorithms.TruthTable.RuleRecord;
 import org.sag.combiningalgorithms.TruthTable.TarRecord;
 import org.sag.coverage.PolicySpreadSheetTestRecord;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.gui.MutationPanel;
+import org.sag.gui.MutationPanel2;
 import org.sag.gui.TestPanel;
 import org.sag.gui.XPA;
 import org.sag.mcdc.MCDCConditionSet;
 import org.sag.mcdc.MCDC_converter2;
+import org.sag.mutation.PolicyMutator;
 import org.wso2.balana.Balana;
 import org.wso2.balana.MatchResult;
 import org.wso2.balana.PDP;
@@ -38,6 +41,7 @@ import org.wso2.balana.attr.StringAttribute;
 import org.wso2.balana.attr.TimeAttribute;
 import org.wso2.balana.attr.xacml3.AttributeDesignator;
 import org.wso2.balana.combine.CombinerElement;
+import org.wso2.balana.combine.CombiningAlgorithm;
 import org.wso2.balana.combine.xacml2.FirstApplicableRuleAlg;
 import org.wso2.balana.combine.xacml3.DenyOverridesRuleAlg;
 import org.wso2.balana.combine.xacml3.DenyUnlessPermitRuleAlg;
@@ -4015,6 +4019,2316 @@ public class PolicyX {
 		}
 		return false;
 	}
-
 	
+	//Turner Lehmbecker WIP
+	//Generate PTT request for PTT mutations
+	public PolicySpreadSheetTestRecord generate_PolicyTargetTrue(TestPanel t)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		function f = new function();
+		if(!policy.isTargetEmpty())
+		{
+			Target policyTarget = (Target)policy.getTarget();
+			List<AnyOfSelection> anyOf = policyTarget.getAnyOfSelections();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			if(anyOf.size() != 0)
+			{
+				sb.append(False_Target(policyTarget, collector) + "\n");
+				boolean sat = z3str(sb.toString(), nameMap, typeMap);
+				if(sat)
+				{
+					System.out.println(nameMap.size() + " map size");
+					try
+					{	
+						z3.getValue(collector, nameMap);
+						
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					System.out.println(collector.size() + " collector size");
+					String request = f.print(collector);
+					try
+					{
+						String path = t.getTestOutputDestination("_MutationTests") 
+								+ File.separator + "requestPTT.txt";
+						FileWriter fw = new FileWriter(path);
+						BufferedWriter bw = new BufferedWriter(fw);
+						bw.write(request);
+						bw.close();
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					ptr = new PolicySpreadSheetTestRecord(PolicySpreadSheetTestSuite.TEST_KEYWORD
+							+ " PTT", "requestPTT.txt", request, "");
+					generator.add(ptr);
+				}
+			}
+		}
+		return ptr;
+	}
+	
+		//Turner Lehmbecker WIP
+		//Generate PTF request for PTF mutations
+		public PolicySpreadSheetTestRecord generate_PolicyTargetFalse(TestPanel t)
+		{
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+			function f = new function();
+			if(!policy.isTargetEmpty())
+			{
+				Target policyTarget = (Target)policy.getTarget();
+				List<AnyOfSelection> anyOf = policyTarget.getAnyOfSelections();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				StringBuffer sb = new StringBuffer();
+				if(anyOf.size() != 0)
+				{
+					sb.append(True_Target(policyTarget, collector) + "\n");
+					boolean sat = z3str(sb.toString(), nameMap, typeMap);
+					if(sat)
+					{
+						System.out.println(nameMap.size() + " map size");
+						try
+						{	
+							z3.getValue(collector, nameMap);
+							
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+						}
+						System.out.println(collector.size() + " collector size");
+						String request = f.print(collector);
+						try
+						{
+							String path = t.getTestOutputDestination("_MutationTests") 
+									+ File.separator + "requestPTF.txt";
+							FileWriter fw = new FileWriter(path);
+							BufferedWriter bw = new BufferedWriter(fw);
+							bw.write(request);
+							bw.close();
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+						}
+						ptr = new PolicySpreadSheetTestRecord(PolicySpreadSheetTestSuite.TEST_KEYWORD
+								+ " PTF", "requestPTF.txt", request, "");
+						generator.add(ptr);
+					}
+				}
+			}
+			return ptr;
+		}
+	
+	//Turner Lehmbecker
+	//WIP: Generate RTT requests and z3-str input
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleTargetTrue(TestPanel t)
+	{
+		//PolicySpreadSheetTestRecord ptr = null;
+		//function f = new function();
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		function f = new function();
+		int count = 1;
+		//Step 0: Find default rule, if it exists
+		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
+		
+		//CA Condition 1: rule combining algorithm is permit-overrides
+		if(cmbAlg instanceof PermitOverridesRuleAlg)
+		{
+			//Condition 1: Check if default rule exists
+			//Result 1: Default rule exists in policy
+			if(def != null)
+			{
+				//Condition 1: Default rule exists and effect is "Permit"
+				//Result: Test cannot be generated as policy will always return "Permit"
+				
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
+							+ " combining algorithm");
+					return generator;
+				}
+				//Condition 2: Default rule exists but effect is "Deny"
+				//Result: Continue test generation up to rule n - 1
+				else
+				{
+					//Step 2 of Condition 2: Generate tests for each rule and ensure reachability to each rule
+					System.out.println("Default rule exists, but tests can be generated");
+					if(allPermitRules(rules, rules.size() - 1))
+					{
+						//Condition 1, Step 2: all rules from 0 -> n-1 (exclusive) are permit
+						//Result: Only 1 request needs to be generated
+						System.out.println("!!!All permit rules!!");
+						build_OnlyOne_Request_false(rules, generator, t, 0, count, "RTT");
+					}
+					else if(allDenyRules(rules, rules.size() - 1))
+						build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTT");
+					else
+					{
+						//Condition 2, Step 2: Mixture of rules for policy
+						//Result: Normal test generation
+						
+						//Step 1 of Condition 2: Generate requests for rules 0 -> n-1
+						buildRTTRequests_override(rules, generator, t, 0);
+						
+					}
+				}
+			}
+			//Condition 1: Check if default rule exists
+			//Result 2: Default rule does not exist
+			else
+			{
+				System.out.println("No default rule exists, generating tests as normal...");
+				if(allPermitRules(rules, rules.size()))
+					//Condition 1 of Result 2: Policy contains only permit rules
+					//Result: Only 1 request needs to be generate
+					build_OnlyOne_Request_false(rules, generator, t, 0, count, "RTT");
+				else if(allDenyRules(rules, rules.size()))
+					build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTT");
+				else
+					//Condition 2 of Result 2: Policy contains a mixture of rules
+					//Result: Generate requests as normal
+					buildRTTRequests_override(rules, generator, t, 0);
+			}
+			return generator;
+		}
+		//CA condition 2: CA is deny-overrides
+		else if(cmbAlg instanceof DenyOverridesRuleAlg)
+		{
+			//Step 1: Check if default rule exists
+			if(def != null)
+			{
+				//Condition 1 of Step 1: default rule exists
+				if(def.getEffect() == 1)
+				{
+					//Result 1 of Condition 1, Step 1: default rule effect is "Deny"
+					//Effect: test cannot be generated
+					System.err.println("Test cannot be generated for given policy");
+					System.err.print("Policy contains a default \"Deny\" rule with deny-overrides"
+							+ " combining algorithm");
+					return generator;
+				}
+				else
+				{
+					//Result 2 of Condition 1, Step 1: default rule effect is "Permit"
+					//Effect: tests can be generated as normal up to rule n-1
+					System.out.println("Default rule exists, generate tests up to rule n-1");
+					//Step 2 of Condition 1: Generate requests up to n-1
+					if(allDenyRules(rules, rules.size() - 1))
+					{
+						//Condition 1, Step 2: All rules from 0 to n-1 are deny
+						//Effect/result: Only one request needs to be generated then
+						System.out.println("!!!All Deny!!!");
+						build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTT");
+					}
+					else if(allPermitRules(rules, rules.size() -1))
+						build_OnlyOne_Request_false(rules, generator, t, 0, count, "RTT");
+					else
+					{
+						//Condition 2, Step 2: Mixture of rules
+						//Result: Generate requests as normal
+						
+						//Step 1, Condition 2: Generate requests for rules
+						buildRTTRequests_override(rules, generator, t, 1);
+					}
+				}
+			}
+			else
+			{
+				//Condition 2 of Step 1: no default rule exists
+				System.out.println("No default rule exists, test generation will continue as normal...");
+				if(f.allDenyRule(policy))
+					//Condition 1 of Step 1, Condition 2: Policy contains only deny rules
+					//Result: Only 1 request needs to be generated
+					build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTT");
+				else if(f.allPermitRule(policy))
+					build_OnlyOne_Request_false(rules, generator, t, 0, count, "RTT");
+				else
+					//Condition 2 of Step 1, Condition 2: Policy contains a mixture of rules
+					//Result: Generate requests as normal
+					buildRTTRequests_override(rules, generator, t, 1);
+			}
+		}
+		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("Policy contains a default \"Permit\" rule with" +
+					" deny-unless-permit combining algorithm");
+					return generator;
+				}
+				else
+				{
+					if(f.allDenyRule(policy))
+					{
+						System.err.println("Test cannot be generated for given policy");
+						System.err.println("Policy contains nothing but \"Deny\" rules " +
+						"with deny-unless-permit combining algorithm");
+						System.err.println("Please consider writing a better policy and using a different combining algorithm");
+						return generator;
+					}
+					else
+						buildRTTRequests_unless(rules, generator, t, 0);
+				}
+			}
+			else if(f.allDenyRule(policy))
+			{
+				System.err.println("Test cannot be generated for given policy");
+				System.err.println("Policy contains nothing but \"Deny\" rules " +
+				"with deny-unless-permit combining algorithm");
+				System.err.println("Please consider writing a better policy and using a different combining algorithm");
+				return generator;
+			}
+			else
+				buildRTTRequests_unless(rules, generator, t, 0);
+			return generator;
+		}
+		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("Policy contains a default \"Deny\" rule with" +
+					" permit-unless-deny combining algorithm");
+					return generator;
+				}
+				else
+				{
+					if(f.allPermitRule(policy))
+					{
+						System.err.println("Test cannot be generated for given policy");
+						System.err.println("Policy contains nothing but \"Permit\" rules " +
+						"with permit-unless-deny combining algorithm");
+						System.err.println("Please consider writing a better policy and using a different combining algorithm");
+						return generator;
+					}
+					else
+					{
+						buildRTTRequests_unless(rules, generator, t, 1);
+					}
+				}
+			}
+			else if(f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated for given policy");
+				System.err.println("Policy contains nothing but \"Permit\" rules " +
+				"with permit-unless-deny combining algorithm");
+				System.err.println("Please consider writing a better policy and using a different combining algorithm");
+				return generator;
+			}
+			else
+				buildRTTRequests_unless(rules, generator, t, 1);
+			return generator;
+		}
+		else if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(def != null)
+			{
+				//If default exists, find first rule with differing effect
+				//Set that rule to target false, condition true
+				//so that mutant returns that rule's effect, policy returns N/A
+				//Set all other rules with same effect as default to false
+				//Those rules with different effect, set to target true, condition false
+				build_DefaultRTTRequests_FA(rules, def, generator, t);
+			}
+			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
+			{
+				build_allOne_RequestsFalse(rules, generator, t, "RTT");
+			}
+			else
+				buildRTTRequests_FA(rules, generator, t);
+			return generator;
+		}
+		else
+			System.err.println("Given policy's combining algorithm not currently supported.");
+		return generator;
+	}
+	
+	//Turner Lehmbecker
+	//WIP: Generate RTF requests and RTF z3-str input
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleTargetFalse(TestPanel t, PolicyMutator m)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		Rule def = isDefaultRule(rules.get(rules.size() -1)) ? rules.get(rules.size() -1) : null;
+		function f = new function();
+		if(cmbAlg instanceof PermitOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
+							+ " combining algorithm");
+					return generator;
+				}
+				else
+				{
+					System.out.println("Default rule exists, but tests can be generated");
+					if(allDenyRules(rules, rules.size() - 1))
+					{
+						buildRTFRequests_override(rules, generator, t, 1);
+					}
+					//else if(allPermitRules(rules, rules.size() -1))
+						//build_OnlyOne_Request_true(rules, generator, t, 0, count, "RTF");
+					else
+					{
+						buildRTFRequests_override(rules, generator, t, 0);
+					}
+				}
+			}
+			else
+			{
+				if(allDenyRules(rules,rules.size()))
+				{
+					buildRTFRequests_override(rules, generator, t, 1);
+				}
+				//else if(f.allPermitRule(policy))
+					//build_OnlyOne_Request_false(rules, generator, t, 0, count, "RTF");
+				else
+					buildRTFRequests_override(rules, generator, t, 0);
+			}
+			return generator;
+		}
+		else if(cmbAlg instanceof DenyOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Tests cannot be generated for given policy");
+					System.err.println("Policy contains a default \"Deny\" rule with deny-overrides "
+							+ "combining algorithm.");
+					return generator;
+				}
+				else
+				{
+					System.out.println("Default rule exists, but tests can be generated");
+					if(allPermitRules(rules, rules.size() - 1))
+					{
+						buildRTFRequests_override(rules, generator, t, 0);
+					}
+					//else if(allDenyRules(rules, rules.size() - 1))
+						//build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTF");
+					else
+					{
+						buildRTFRequests_override(rules, generator, t, 1);
+					}
+				}
+			}
+			else
+			{
+				if(allPermitRules(rules, rules.size()))
+					buildRTFRequests_override(rules, generator, t, 0);
+				//else if(f.allDenyRule(policy))
+					//build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTF");
+				else
+					buildRTFRequests_override(rules, generator, t, 1);
+			}
+		}
+		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("Policy contains a default \"Permit\" rule with" +
+					" deny-unless-permit combining algorithm");
+					return generator;
+				}
+				else
+				{
+					if(f.allDenyRule(policy))
+					{
+						System.err.println("Test cannot be generated for given policy");
+						System.err.println("Policy contains nothing but \"Deny\" rules " +
+						"with deny-unless-permit combining algorithm");
+						System.err.println("Please consider writing a better policy and using a different combining algorithm");
+						return generator;
+					}
+					else
+						buildRTFRequests_unless(rules, generator, t, 0);
+				}
+			}
+			else
+			{
+				if(f.allDenyRule(policy))
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("Policy contains nothing but \"Deny\" rules " +
+					"with deny-unless-permit combining algorithm");
+					System.err.println("Please consider writing a better policy and using a different combining algorithm");
+					return generator;
+				}
+				else
+					buildRTFRequests_unless(rules, generator, t, 0);
+			}
+			return generator;
+		}
+		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("Policy contains a default \"Deny\" rule with" +
+					" permit-unless-deny combining algorithm");
+					return generator;
+				}
+				else
+				{
+					if(f.allPermitRule(policy))
+					{
+						System.err.println("Test cannot be generated for given policy");
+						System.err.println("Policy contains nothing but \"Permit\" rules " +
+						"with permit-unless-deny combining algorithm");
+						System.err.println("Please consider writing a better policy and using a different combining algorithm");
+						return generator;
+					}
+					else
+						buildRTFRequests_unless(rules, generator, t, 1);
+				}
+				if(f.allPermitRule(policy))
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("Policy contains nothing but \"Permit\" rules " +
+					"with permit-unless-deny combining algorithm");
+					System.err.println("Please consider writing a better policy and using a different combining algorithm");
+					return generator;
+				}
+				else
+					buildRTFRequests_unless(rules, generator,t, 1);
+			}
+			return generator;
+		}
+		else if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(def != null)
+			{
+				build_DefaultRTFRequests_FA(rules, def, generator, t);
+			}
+			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
+				build_allOne_RequestsTrue(rules, generator, t, "RTF");
+			else
+				buildRTFRequests_FA(rules, generator, t);
+			return generator;
+		}
+		else
+			System.err.print("Policy's rule combining algorithm not currently supported");
+		return generator;
+	}
+	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleConditionTrue(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		int count = 1;
+		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
+		function f = new function();
+		
+		if(cmbAlg instanceof PermitOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated for given policy");
+					System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
+							+ " combining algorithm");
+					return generator;
+				}
+				else
+				{
+					System.out.println("Default rule exists, but tests can be generated");
+					if(allPermitRules(rules, rules.size() - 1) && atLeastOneCondition(rules))
+					{
+						System.out.println("All permit rules");
+						build_OnlyOne_ConditionRequest_false(rules, generator, t, 0, count, "RCT");
+					}
+					else if(allDenyRules(rules, rules.size()-1))
+						buildRCTRequests_override(rules, generator, t, 1);
+					else
+					{
+						buildRCTRequests_override(rules, generator, t, 0);
+					}
+				}
+			}
+			else if(f.allPermitRule(policy) && atLeastOneCondition(rules))
+				build_OnlyOne_ConditionRequest_false(rules, generator, t, 0, count, "RCT");
+			else if(f.allDenyRule(policy))
+				buildRCTRequests_override(rules, generator, t, 1);
+			else
+				buildRCTRequests_override(rules, generator, t, 0);
+			return generator;
+		}
+		else if(cmbAlg instanceof DenyOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(allDenyRules(rules, rules.size() - 1) && atLeastOneCondition(rules))
+				{
+					System.out.println("All deny rules");
+					build_OnlyOne_ConditionRequest_false(rules, generator, t, 1, count, "RCT");
+				}
+				else if(allPermitRules(rules, rules.size() - 1))
+					buildRCTRequests_override(rules, generator, t, 0);
+				else
+				{
+					buildRCTRequests_override(rules, generator, t, 1);
+				}
+					
+			}
+			else if(f.allDenyRule(policy) && atLeastOneCondition(rules))
+			{
+				System.out.println("All deny rules");
+				build_OnlyOne_ConditionRequest_false(rules, generator, t, 1, count, "RCT");
+			}
+			else if(f.allPermitRule(policy))
+				buildRCTRequests_override(rules, generator, t, 0);
+			else
+			{
+				buildRCTRequests_override(rules, generator, t, 1);
+			}
+			return generator;
+		}
+		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildRCTRequests_unless(rules, generator, t, 0);
+			}
+			else if(f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildRCTRequests_unless(rules, generator, t, 0);
+			return generator;
+		}
+		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildRCTRequests_unless(rules, generator, t, 1);
+			}
+			else if(f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildRCTRequests_unless(rules, generator, t, 1);
+			return generator;
+		}
+		else if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(def != null)
+				build_DefaultRCTRequests_FA(rules, def, generator, t);
+			else if(f.allPermitRule(policy) || f.allDenyRule(policy))
+				build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT");
+			else
+				buildRCTRequests_FA(rules, generator, t);
+				
+		}
+		else
+			System.err.println("Combining algorithm not currently supported");
+		return generator;
+	}
+	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleConditionFalse(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
+		function f = new function();
+		if(cmbAlg instanceof PermitOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+				{
+					if(f.allDenyRule(policy))
+					{
+						buildRCFRequests_override(rules, generator, t, 1);
+					}
+					else
+						buildRCFRequests_override(rules, generator, t, 0);
+				}
+			}
+			else if(f.allDenyRule(policy))
+			{
+				buildRCFRequests_override(rules, generator, t, 1);
+			}
+			else
+				buildRCFRequests_override(rules, generator, t, 0);
+			return generator;
+		}
+		else if(cmbAlg instanceof DenyOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allPermitRule(policy))
+				{
+					buildRCFRequests_override(rules, generator, t, 0);
+				}
+				else
+					buildRCFRequests_override(rules, generator, t, 1);
+			}
+			else if(f.allPermitRule(policy))
+			{
+				buildRCFRequests_override(rules, generator, t, 0);
+			}
+			else
+				buildRCFRequests_override(rules, generator, t, 1);
+			return generator;
+		}
+		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allPermitRule(policy))
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildRCFRequests_unless(rules, generator, t, 1);
+			}
+			else if(f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildRCFRequests_unless(rules, generator, t, 1);
+			return generator;
+		}
+		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allDenyRule(policy))
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildRCFRequests_unless(rules, generator, t, 0);
+			}
+			else if(f.allDenyRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildRCFRequests_unless(rules, generator, t, 0);
+			return generator;
+		}
+		else if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(def != null)
+				build_DefaultRCFRequests_FA(rules, def, generator, t);
+			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
+				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF");
+			else
+				buildRCFRequests_FA(rules, generator, t);
+			return generator;
+		}
+		return generator;
+	}
+	
+	private void buildRCTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(r.getEffect() == effect && !r.isConditionEmpty())
+			{
+				System.err.println("Matching effect");
+				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCT");
+			}
+			else if(r.getEffect() != effect && !r.isConditionEmpty())
+			{
+				System.err.println("Effect does not match");
+				ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCT");
+			}
+			else
+				System.err.println("Rule does not contain a condition");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRTTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		
+		
+		for(Rule temp : rules)
+		{
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(temp.getEffect() == effect)
+				ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTT");
+			else
+				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTT");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRTFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule temp : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(temp.getEffect() == effect)
+				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+			else
+				ptr = buildRequest_false2(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRCFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(r.getEffect() == effect && !r.isConditionEmpty())
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
+			else if(r.getEffect() != effect && !r.isConditionEmpty())
+				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCF");
+			else
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_false(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		//Make current rule evaluate to false
+		sb.append(False_Target((Target)rule.getTarget(), collector) + "\n");
+		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		
+		//Ensure rules before and following current evaluate to false (NotApplicable)
+		for(int i = 0; i < stop; i++)
+		{
+			Rule temp = rules.get(i);
+			if(temp.getId().equals(rule.getId()) || isDefaultRule(temp))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
+		}
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			System.out.println(request);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_false2(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		//Make current rule evaluate to false
+		if(!rule.isTargetEmpty())
+		{
+			if(rule.isConditionEmpty())
+				sb.append(True_Target((Target)rule.getTarget(), collector) + "\n");
+			else
+			{
+				sb.append(False_Target((Target)rule.getTarget(), collector) + "\n");
+				sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+			}
+		}
+		else
+			sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		
+		//Ensure rules before and following current evaluate to false (NotApplicable)
+		for(int i = 0; i < stop; i++)
+		{
+			Rule temp = rules.get(i);
+			if(temp.getId().equals(rule.getId()) || isDefaultRule(temp))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
+		}
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			System.out.println(request);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildConditionRequest_false(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(TrueTarget_FalseCondition(rule, collector) + "\n");
+		
+		for(int i = 0; i < stop; i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildConditionRequest_true(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(TrueTarget_TrueCondition(rule, collector) + "\n");
+		
+		for(int i = 0; i < stop; i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	
+	private PolicySpreadSheetTestRecord buildRequest_Allfalse(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type, int effect)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		Rule firstDiff = null;
+		//For a policy containing a default rule
+		//we must ensure that the policy never returns the default rule's effect 
+		//and the mutant always returns the default rule's effect
+		//To do this, we find the first rule regardless of the position in the policy
+		//that has a different effect than the default rule and make sure that it evals to true
+		//therefore returning either the opposite of the default rule's effect or ID
+		//this method is only called when there is at least 1 rule with a different effect than the default rule
+		//otherwise, a different method is called
+		int diffIndex = -1;
+		int currentIndex = rules.indexOf(current);
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getEffect() != effect)
+			{
+				firstDiff = r;
+				diffIndex = i;
+				break;
+			}
+		}
+
+		//if the index of the differing rule is 0 or -1 (i.e. the first rule or a differing rule could not be found)
+		//then there is no possible way to generate a valid test
+		if(diffIndex <= 0)
+			return ptr;
+		
+		//if the index of the differing rule is less than that of the current rule
+		//we need to backtrack and find the the first rule before the differing that has the same
+		//effect as the default rule and set this to false target, true condition
+		//while this will inevitably cause the test to fail to detect most mutants
+		//it guarantees that at least one mutant will be discovered with this test
+		//based on our validation algorithm
+		else if(diffIndex < currentIndex)
+		{
+			for(int i = diffIndex - 1; i >= 0; i--)
+			{
+				Rule r = rules.get(i);
+				if(r.getEffect() != firstDiff.getEffect())
+					current = r;
+			}
+			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
+			sb.append(True_Condition(current.getCondition(), collector) + "\n");
+			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
+		}
+		else
+		{
+			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
+			sb.append(True_Condition(current.getCondition(), collector) + "\n");
+			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
+		}
+		//Ensure rules before and following current evaluate to false (NotApplicable)
+		for(int i = 0; i < stop; i++)
+		{	
+			Rule temp = rules.get(i);
+			if(isDefaultRule(temp) || temp.getId().equals(current.getId()) || temp.getId().equals(firstDiff.getId()))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
+		}
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			System.out.println(request);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildConditionRequest_AllFalse(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type, int effect)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		Rule firstDiff = null;
+		int diffIndex = -1;
+		int currentIndex = rules.indexOf(current);
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getEffect() != effect)
+			{
+				if(!r.isConditionEmpty())
+				{
+					diffIndex = i;
+					firstDiff = r;
+					break;
+				}
+			}
+		}
+		
+		if(diffIndex <= 0)
+			return ptr;
+		else if(diffIndex < currentIndex)
+		{
+			for(int i = diffIndex - 1; i >= 0; i--)
+			{
+				Rule r = rules.get(i);
+				if(r.getEffect() != firstDiff.getEffect())
+					current = r;
+			}
+			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
+			sb.append(True_Condition(current.getCondition(), collector) + "\n");
+			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
+		}
+		else
+		{
+			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
+			sb.append(True_Condition(current.getCondition(), collector) + "\n");
+			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
+		}
+		
+		for(int i = 0; i < stop; i++)
+		{
+			Rule temp = rules.get(i);
+			if(isDefaultRule(temp) || temp.getId().equals(current.getId()) || temp.getId().equals(firstDiff.getId()))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
+		}
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_true(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		
+		//Ensure that current rule evaluates to true
+		sb.append(TrueTarget_TrueCondition(rule, collector) + "\n");
+		
+		//ensure rules before and following current evaluate to false
+		for(int i = 0; i < stop; i++)
+		{
+			Rule temp = rules.get(i);
+			if(temp.getId().equals(rule.getId()) || isDefaultRule(temp))
+				continue;
+			else
+				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
+		}
+		
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			System.out.println(request);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_firstDifferent_fromDefault(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		int firstDiff = -1;
+		for(int i = rules.indexOf(rule) - 1; i >= 0; i--)
+		{
+			Rule r = rules.get(i);
+			if(r.getEffect() != rule.getEffect())
+			{
+				sb.append(TrueTarget_TrueCondition(r, collector) + "\n");
+				firstDiff = i;
+				break;
+			}
+		}
+		for(int i = 0; i < rules.indexOf(rule); i++)
+		{
+			if(i != firstDiff)
+				sb.append(FalseTarget_FalseCondition(rules.get(i), collector) + "\n");
+		}
+		System.out.println("Z3: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	//Turner Lehmbecker
+	//Helper method to check if rules from 0 to a specified index are all permit rules 
+	//returns true if all rules from 0 to index are permit
+	//false if at least one rule from 0 to index is deny
+	//NEEDED IN SOME CASES
+	private boolean allPermitRules(List<Rule> rules, int index)
+	{
+		int stop = (index < 0 || index > rules.size()) ? (index < 0 ? 0 : (index > rules.size() ? rules.size() : index)) : index;
+		if(stop == 0)
+		{
+			return rules.get(stop).getEffect() == 0;
+		}
+		boolean allPermit = true;
+		int i = 0;
+		while(i < stop && allPermit)
+		{
+			allPermit = rules.get(i).getEffect() == 0;
+			i++;
+		}
+		return allPermit;
+	}
+	
+	//Turner Lehmbecker
+	//Helper method to check if rules from 0 to a specified index are all deny rules 
+	//returns true if all rules from 0 to index are deny
+	//false if at least one rule from 0 to index is permit
+	//NEEDED IN SOME CASES
+	private boolean allDenyRules(List<Rule> rules, int index)
+	{
+		int stop = (index < 0 || index > rules.size()) ? (index < 0 ? 0 : (index > rules.size() ? rules.size() : index)) : index;
+		if(stop == 0)
+		{
+			return rules.get(stop).getEffect() == 1;
+		}
+		boolean allDeny = true;
+		int i = 0;
+		while(i < stop && allDeny)
+		{
+			allDeny = rules.get(i).getEffect() == 1;
+			i++;
+		}
+		return allDeny;
+	}
+	
+	private void build_OnlyOne_Request_false(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, int count, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		StringBuffer sb = new StringBuffer();
+		ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+		function f = new function();
+		
+		if(!policy.isTargetEmpty())
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(!isDefaultRule(r))
+			{
+				if(r.getEffect() == effect)
+				{
+					if(!r.isTargetEmpty() && !r.isConditionEmpty())
+					{
+						sb.append(False_Target((Target)r.getTarget(), collector) + "\n");
+						sb.append(True_Condition(r.getCondition(), collector) + "\n");
+					}
+					else if(r.isTargetEmpty() && !r.isConditionEmpty())
+						sb.append(False_Condition(r.getCondition(), collector) + "\n");
+					else if(!r.isTargetEmpty() && r.isConditionEmpty())
+						sb.append(False_Target((Target)r.getTarget(), collector) + "\n");
+					else
+						continue;
+				}
+				else
+					sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+			}
+		}
+		System.out.println("Z3: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+			if(ptr != null)
+				generator.add(ptr);
+		}
+		else
+		{
+			if(type.compareTo("RTT") == 0)
+				buildRTTRequests_override(rules, generator, t, effect);
+			else if(type.compareTo("RTF") == 0)
+				buildRTFRequests_override(rules, generator, t, effect);
+		}
+	}
+	
+	private void build_OnlyOne_ConditionRequest_false(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, int count, String type)
+	{
+		System.err.println("Generating only one test");
+		PolicySpreadSheetTestRecord ptr = null;
+		StringBuffer sb = new StringBuffer();
+		ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+		function f = new function();
+		sb.append(TruePolicyTarget(policy, collector) + "\n");
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(!isDefaultRule(r))
+			{
+				if(r.getEffect() == effect)
+				{
+					if(!r.isTargetEmpty() && !r.isConditionEmpty())
+						sb.append(TrueTarget_FalseCondition(r, collector) + "\n");
+					else if(r.isTargetEmpty() && !r.isConditionEmpty())
+						sb.append(False_Condition(r.getCondition(), collector) + "\n");
+					else
+						sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+				}
+				else
+					sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+			}
+		}
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+		else
+		{
+			if(type.compareTo("RCT") == 0)
+				buildRCTRequests_override(rules, generator, t, effect);
+			else if(type.compareTo("RCF") == 0)
+				buildRCFRequests_override(rules, generator, t, effect);
+		}
+	}
+	
+	private PolicySpreadSheetTestRecord buildConditionRequest_unlessFalse(List<Rule> rules, Rule firstMatch, StringBuffer sb, TestPanel t, int count, int effect, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+		function f = new function();
+		sb.append(TruePolicyTarget(policy, collector) + "\n");
+		sb.append(TrueTarget_FalseCondition(firstMatch, collector) + "\n");
+		int firstIndex = rules.indexOf(firstMatch);
+		for(int i = 0; i < firstIndex; i++)
+		{
+			sb.append(FalseTarget_FalseCondition(rules.get(i), collector) + "\n");
+		}
+		
+		for(int i = firstIndex + 1; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getEffect() == effect)
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_unlessFalse(List<Rule> rules, Rule firstMatch, StringBuffer sb, TestPanel t,  int index, int count, int effect, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+		System.out.println("Found a match!");
+		function f = new function();
+		sb.append(TruePolicyTarget(policy, collector) + "\n");
+		
+		if(!firstMatch.isTargetEmpty())
+			sb.append(False_Target((Target)firstMatch.getTarget(), collector) + "\n");
+		if(!firstMatch.isConditionEmpty())
+			sb.append(True_Condition(firstMatch.getCondition(), collector) + "\n");
+		
+		for(int i = 0; i < index; i++)
+			sb.append(FalseTarget_FalseCondition(rules.get(i), collector) + "\n");
+			
+		for(int j = index + 1; j < rules.size(); j++)
+		{
+			Rule temp = rules.get(j);
+			if(temp.getEffect() == effect)
+				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
+		}
+		System.out.println("Z3-input: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" +type+ count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bmw = new BufferedWriter(fw);
+				bmw.write(request);
+				bmw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		else
+		{
+			System.err.println("Z3 input does not meet boolean satisfiability requirements");
+			System.err.println("Test could not be generated");
+		}
+		return ptr;
+	}
+	
+	private void buildRTTRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1, index = 0;
+		for(Rule temp : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			if(temp.getEffect() == effect)
+				ptr = buildRequest_unlessFalse(rules, temp, sb, t, index, count, effect, "RTT");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+			index++;
+		}
+	}
+	
+	private void buildRCTRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			if(r.getEffect() == effect && !r.isConditionEmpty())
+				ptr = buildConditionRequest_unlessFalse(rules, r, sb, t, count, effect, "RCT");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRTFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule temp : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(temp.getEffect() == effect)
+				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+			else if(isDefaultRule(temp))
+				ptr = buildRequest_firstDifferent_fromDefault(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRCFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if((r.getEffect() == effect && !r.isConditionEmpty()) || !isDefaultRule(r))
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
+			else
+				ptr = buildRequest_firstDifferent_fromDefault(rules, r, sb, collector, count, t, rules.size(), "RCF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRTTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		if(rules.size() != 0)
+		{
+			int count = 1;
+			for(Rule temp : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				ptr = buildRequest_falseFA(rules, temp, sb, collector, count, t, "RTT");
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+				
+			}
+		}
+		else
+			System.err.println("Must have at least rule to generate a test");
+	}
+	
+	private void buildRCTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty())
+				ptr = buildConditionRequest_falseFA(rules, r, sb, collector, count, t, "RCT");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRCFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty())
+				ptr = buildConditionRequest_trueFA(rules, r, sb, collector, count, t, "RCF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRTFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		if(rules.size() != 0)
+		{
+			int count = 1;
+			for(Rule temp : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				ptr = buildRequest_trueFA(rules, temp, sb, collector, count, t, "RTF");
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+				
+			}
+		}
+		else
+			System.err.println("Must have at least rule to generate a test");
+	}
+	
+	private void build_DefaultRTTRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		if(rules.size() != 0)
+		{
+			int count = 1;
+			int effect = defaultRule.getEffect();
+			function checker = new function();
+			if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
+			{
+				build_allOne_RequestsFalse(rules, generator, t, "RTT");
+				checker = null;
+			}
+			else
+			{
+				for(Rule r : rules)
+				{
+					StringBuffer sb = new StringBuffer();
+					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+					PolicySpreadSheetTestRecord ptr = null;
+					sb.append(TruePolicyTarget(policy, collector) + "\n");
+					if(r.getEffect() == effect)
+						ptr = buildRequest_Allfalse(rules, r, sb, collector, count, t, rules.size(), "RTT", effect);
+					else
+						ptr = buildRequest_false(rules, r, sb, collector, count, t, rules.size(), "RTT");
+					if(ptr != null)
+					{
+						generator.add(ptr);
+						count++;
+					}
+				}
+			}
+		}
+	}
+	
+	private void build_DefaultRCTRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		int effect = defaultRule.getEffect();
+		function checker = new function();
+		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
+		{
+			build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT");
+			checker = null;
+		}
+		else
+		{
+			for(Rule r : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				if(r.getEffect() == effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCT", effect);
+				else if(r.getEffect() != effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCT");
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+			}
+		}
+	}
+	
+	private void build_DefaultRCFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		int effect = defaultRule.getEffect();
+		function checker = new function();
+		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
+			build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF");
+		else
+		{
+			for(Rule r : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				if(r.getEffect() == effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
+				else if(r.getEffect() != effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+			}
+		}
+	}
+	
+	private void build_DefaultRTFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		if(rules.size() != 0)
+		{
+			int count = 1;
+			int effect = defaultRule.getEffect();
+			function checker = new function();
+			if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
+			{
+				build_allOne_RequestsTrue(rules, generator, t, "RTF");
+				checker = null;
+			}
+			else
+			{
+				for(Rule r : rules)
+				{
+					StringBuffer sb = new StringBuffer();
+					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+					PolicySpreadSheetTestRecord ptr = null;
+					sb.append(TruePolicyTarget(policy, collector) + "\n");
+					if(r.getEffect() == effect)
+						ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RTF");
+					else
+						ptr = buildRequest_Allfalse(rules, r, sb, collector, count, t, rules.size(), "RTF", effect);
+					if(ptr != null)
+					{
+						generator.add(ptr);
+						count++;
+					}
+				}
+			}
+		}
+	}
+	
+	private void build_allOne_RequestsFalse(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	{
+		if(rules.size() != 0)
+		{
+			int count = 1;
+			for(Rule r : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				ptr = buildRequest_false(rules, r, sb, collector, count, t, rules.size(), type);
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+			}
+		}
+	}
+	
+	private void build_AllOne_ConditionRequestsFalse(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty())
+				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), type);
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void build_AllOne_ConditionRequestsTrue(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty() || !isDefaultRule(r))
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
+			else
+				continue;
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void build_allOne_RequestsTrue(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	{
+		if(rules.size() != 0)
+		{
+			int count = 1;
+			for(Rule r : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+			}
+		}
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_falseFA(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
+		sb.append(True_Condition(current.getCondition(), collector) + "\n");
+		int currentIndex = rules.indexOf(current);
+		int firstDifferent = -1;
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getId().equals(current.getId()) || isDefaultRule(r))
+				continue;
+			else if(i > currentIndex)
+			{
+				if(r.getEffect() == current.getEffect())
+					sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+				else if(firstDifferent < 0 && r.getEffect() != current.getEffect())
+					firstDifferent = i;
+				else
+					continue;
+			}
+			else
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		if(firstDifferent > 0)
+		{
+			sb.append(TrueTarget_TrueCondition(rules.get(firstDifferent), collector) + "\n");
+		}
+		System.out.println("Z3-input: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildConditionRequest_falseFA(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(TrueTarget_FalseCondition(current, collector) + "\n");
+		int currentIndex = rules.indexOf(current);
+		int diffIndex = -1;
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getId().equals(current.getId()) || isDefaultRule(r))
+				continue;
+			else if(i > currentIndex)
+			{
+				if(r.getEffect() == current.getEffect())
+					sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+				else if(diffIndex < 0 && r.getEffect() != current.getEffect() && !r.isConditionEmpty())
+					diffIndex = i;
+				else
+					continue;
+			}
+			else
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		if(diffIndex > 0)
+			sb.append(TrueTarget_TrueCondition(rules.get(diffIndex), collector) + "\n");
+		System.out.println("Z3: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildConditionRequest_trueFA(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(TrueTarget_TrueCondition(current, collector) + "\n");
+		int currentIndex = rules.indexOf(current);
+		int diffIndex = -1;
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getId().equals(current.getId()) || isDefaultRule(r))
+				continue;
+			else if(i > currentIndex)
+			{
+				if(r.getEffect() == current.getEffect())
+					sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+				else if(diffIndex < 0 && r.getEffect() != current.getEffect() && !r.isConditionEmpty())
+					diffIndex = i;
+				else
+					continue;
+			}
+			else
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		if(diffIndex > 0)
+			sb.append(TrueTarget_TrueCondition(rules.get(diffIndex), collector) + "\n");
+		System.out.println("Z3: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_trueFA(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(TrueTarget_TrueCondition(current, collector) + "\n");
+		int currentIndex = rules.indexOf(current);
+		int firstDifferent = -1;
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getId().equals(current.getId()) || isDefaultRule(r))
+				continue;
+			else if(i > currentIndex)
+			{
+				if(r.getEffect() == current.getEffect())
+					sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+				else if(firstDifferent < 0 && r.getEffect() != current.getEffect())
+					firstDifferent = i;
+				else
+					continue;
+			}
+			else
+				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+		}
+		if(firstDifferent > 0)
+		{
+			sb.append(TrueTarget_TrueCondition(rules.get(firstDifferent), collector) + "\n");
+		}
+		System.out.println("Z3-input: " + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private boolean atLeastOneCondition(List<Rule> rules)
+	{
+		for(Rule r : rules)
+		{
+			if(r.isConditionEmpty())
+				return false;
+		}
+		return true;
+	}
 }

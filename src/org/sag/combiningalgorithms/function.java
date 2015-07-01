@@ -251,6 +251,32 @@ public class function {
 		buildEnd(sb);
 		return sb.toString();
 	}
+	
+	public String print(ArrayList<MyAttr> newversion, boolean start, boolean end) {
+		StringBuilder sb = new StringBuilder();
+		if(start)
+			buildHeader(sb);
+		ArrayList<String> log = new ArrayList<String>();
+		for (int j = 0; j < newversion.size(); j++) {
+			if (exist(newversion.get(j).getCategory(), log)) {
+				continue;
+			} else {
+				log.add(newversion.get(j).getCategory().toString());
+				buildCategoryHead(sb, newversion.get(j)); // category header
+			}
+			for (int k = j; k < newversion.size(); k++) {
+				if (newversion.get(k).getCategory()
+						.equals(newversion.get(j).getCategory())) {
+					buildRequest(sb, newversion.get(k), newversion.get(k)
+							.getDomain().get(0));
+				}
+			}
+			buildCategoryEnd(sb);
+		}
+		if(end)
+			buildEnd(sb);
+		return sb.toString();
+	}
 
 	//
 	// public void test(List<CombinerElement> childElements, AbstractTarget

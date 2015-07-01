@@ -47,6 +47,9 @@ public class MutationPanel extends JPanel {
 	private JCheckBox boxFDR = new JCheckBox("First Deny Rules (FDR)");
 	private JCheckBox boxRTR = new JCheckBox("Rule Type Replaced (RTR) - Not implemented");
 	private JCheckBox boxFCF = new JCheckBox("Flip Comparison Function (FCF)");
+	
+	//private JCheckBox boxRUF = new JCheckBox("Remove Uniqueness Function (RUF) - Not Implemented"); Turner Lehmbecker
+	
 	private JCheckBox boxANF = new JCheckBox("Add Not Function (ANF)");
 	private JCheckBox boxRNF = new JCheckBox("Remove Not Function (RNF)");
 	private JCheckBox boxRPTE = new JCheckBox("Remove Parallel Target Element (RPTE)");
@@ -99,6 +102,7 @@ public class MutationPanel extends JPanel {
 		myPanel.add(boxRNF);
 		myPanel.add(boxRPTE);
 		myPanel.add(boxRPCE);
+		//myPanel.add(boxRUF);
 		myPanel.add(boxSelectAll);
 		myPanel.add(boxSelectEight);
 		
@@ -154,6 +158,8 @@ public class MutationPanel extends JPanel {
 		try {
 			String[] columnNames = { "No", "Mutant Name", "Mutant File", "Bug Position", "Test Result" };
 			data = mutantSuite.getMutantData();
+			System.out.println(data.size() + " data size");
+			System.out.println(data.toString());
 			tablePanel = new GeneralTablePanel(data, columnNames, 5);
 			tablePanel.setMinRows(30);
 			JScrollPane scrollpane = new JScrollPane(tablePanel);

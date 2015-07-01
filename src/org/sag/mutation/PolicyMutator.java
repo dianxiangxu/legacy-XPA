@@ -86,8 +86,11 @@ public class PolicyMutator {
 //			e.printStackTrace();
 //		}
 		removeDirectoryMutantFileName();
-		//	System.out.println(getMutantsSpreadSheetFileName());
+		System.out.println(getMutantsSpreadSheetFileName());
 		PolicySpreadSheetMutantSuite.writePolicyMutantsSpreadSheet(mutantList, getMutantsSpreadSheetFileName());
+		System.out.println(mutantList.size() + " total mutants");
+		System.out.println(policyFilePath);
+		System.out.println(mutantSpreadSheetFolderName);
 		return new PolicySpreadSheetMutantSuite(mutantSpreadSheetFolderName, mutantList, policyFilePath);
 	}
 
@@ -753,12 +756,12 @@ public class PolicyMutator {
 	public void createAddUniquenessFunctionMutants() {
 		
 	}
-	//TODO
+	//TODO CNF
 	public void createChangeNOFFunctionMutants() {
 		
 	}
 	
-	//TODO
+	//TODO CLF
 	public void createChangeLogicalFunctionMutants() {
 		
 	}
@@ -1289,7 +1292,7 @@ public class PolicyMutator {
 	}
 	
 	// Get mutant filename. in "mutation folder".
-	private String getMutantFileName(String mutantID) {
+	public String getMutantFileName(String mutantID) {
 		int lastDotIndex = mutantFileNameBase.lastIndexOf(".");
 		if (lastDotIndex>0)
 			return mutantFileNameBase.substring(0, lastDotIndex)+"_"+mutantID+".xml";
@@ -1382,6 +1385,10 @@ public class PolicyMutator {
 	public String getMutantFileNameBase(){
 		return this.mutantFileNameBase;
 	}
-
+	
+	public ArrayList<PolicyMutant> getMutantList()
+	{
+		return this.mutantList;
+	}
 
 }

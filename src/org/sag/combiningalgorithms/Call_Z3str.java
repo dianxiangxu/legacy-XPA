@@ -66,7 +66,7 @@ public class Call_Z3str {
 		Runtime run = Runtime.getRuntime();
 		try {
 			Process p = run
-					.exec("sudo /home/nshen/Work/z3-str/Z3-str.py -f ./Z3_input");
+					.exec("sudo /home/turner/z3-str/Z3-str.py -f ./Z3_input");
 			BufferedInputStream in = new BufferedInputStream(p.getInputStream());
 			BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
 			StringBuffer tmpTrack = new StringBuffer();

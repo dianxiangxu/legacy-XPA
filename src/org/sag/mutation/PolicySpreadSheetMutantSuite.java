@@ -139,7 +139,7 @@ public class PolicySpreadSheetMutantSuite {
 		HSSFWorkbook workBook = new HSSFWorkbook();
 		workBook.createSheet("fault-detection-info");
 		Sheet sheet = workBook.getSheetAt(0);
-		int numTests = tests.getNumberOfTests();;
+		int numTests = tests.getNumberOfTests();
 		// An integer array to store counts of how many mutants that a test can detect,
 		// plus the last cell is the count of detection for the whole test suite. 
 		int[] detectionCount = new int[numTests+1];
@@ -378,6 +378,11 @@ public class PolicySpreadSheetMutantSuite {
 //		System.out.println("\n");	
 //		}
 		
+	}
+	
+	public ArrayList<PolicyMutant> getMutantList()
+	{
+		return this.policyMutantSuite;
 	}
 	
 }

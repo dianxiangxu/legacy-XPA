@@ -47,6 +47,16 @@ public class TestPanel extends JPanel {
 	public PolicySpreadSheetTestSuite getPolicySpreadSheetTestSuite() {
 		return testSuite;
 	}
+	
+	public void setTestSuite(PolicySpreadSheetTestSuite p)
+	{
+		this.testSuite = p;
+	}
+	
+	public void setWorkingTestSuiteFileName(String filename)
+	{
+		this.workingTestSuiteFileName = filename;
+	}
 
 	public void setUpTestPanel() {
 		removeAll();
