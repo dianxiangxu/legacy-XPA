@@ -65,6 +65,7 @@ public class Call_Z3str {
 	public void buildZ3Output() {
 		Runtime run = Runtime.getRuntime();
 		try {
+			//replace with path to your z3-str directory
 			Process p = run
 					.exec("sudo /home/turner/z3-str/Z3-str.py -f ./Z3_input");
 			BufferedInputStream in = new BufferedInputStream(p.getInputStream());
