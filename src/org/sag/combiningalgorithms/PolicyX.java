@@ -4441,6 +4441,7 @@ public class PolicyX {
 				else
 					buildRTFRequests_override(rules, generator, t, 1);
 			}
+			return generator;
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
 		{
@@ -4665,7 +4666,7 @@ public class PolicyX {
 				build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT");
 			else
 				buildRCTRequests_FA(rules, generator, t);
-				
+			return generator;	
 		}
 		else
 			System.err.println("Combining algorithm not currently supported");
@@ -4794,6 +4795,77 @@ public class PolicyX {
 		}
 		return generator;
 	}
+	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveOneRule(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		function f = new function();
+		boolean allDeny = false;
+		boolean allPermit = false;
+		boolean defaultRule = isDefaultRule(rules.get(rules.size() - 1));
+		if(defaultRule)
+		{
+			allDeny = allDenyRules(rules, rules.size() - 1);
+			if(!allDeny)
+				allPermit = allPermitRules(rules, rules.size() - 1);
+		}
+		else
+		{
+			allDeny = f.allDenyRule(policy);
+			if(!allDeny)
+				allPermit = f.allPermitRule(policy);
+		}
+		int count = 1;
+		for(Rule r : rules)
+		{
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+			{
+				if(allDeny)
+				{
+					System.err.println("Test cannot be generated");
+					System.err.println("Policy contains all deny rules");
+					System.err.println("COMBINING ALGORITHM: " + cmbAlg.toString());
+					return generator;
+				}
+				else if(r.getEffect() == 0)
+					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
+				else
+					continue;
+			}
+			else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+			{
+				if(allPermit)
+				{
+					System.err.println("Test cannot be generated");
+					System.err.println("Policy contains all permit rules");
+					System.err.println("COMBINING ALGORITHM: " + cmbAlg.toString());
+					return generator;
+				}
+				else if(r.getEffect() == 1)
+					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
+				else
+					continue;
+			}
+			else
+			{
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
+			}
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+		return generator;
+	}
+	
+	
 	
 	private void buildRCTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
 	{
@@ -5322,7 +5394,7 @@ public class PolicyX {
 			}
 			System.out.println(collector.size() + " collection size");
 			String request = f.print(collector);
-			System.out.println(request);
+			//System.out.println(request);
 			try
 			{
 				String path = t.getTestOutputDestination("_MutationTests")
@@ -5749,8 +5821,6 @@ public class PolicyX {
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
 			if(temp.getEffect() == effect)
 				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTF");
-			else if(isDefaultRule(temp))
-				ptr = buildRequest_firstDifferent_fromDefault(rules, temp, sb, collector, count, t, rules.size(), "RTF");
 			if(ptr != null)
 			{
 				generator.add(ptr);
