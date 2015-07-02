@@ -305,7 +305,8 @@ public class MutationPanel2 extends JPanel {
 				}
 				if (boxRER.isSelected()) {
 					policyMutator.createRemoveRuleMutants();
-					
+					ArrayList<PolicySpreadSheetTestRecord> rer = policyx.generate_RemoveOneRule(getTestPanel());
+					determineValidTests(rer, policyMutator, policyPath, "RER");
 				}
 
 				if (boxANR.isSelected()) {
@@ -525,10 +526,14 @@ public class MutationPanel2 extends JPanel {
 					for(PolicyMutant m : mutator.getMutantList())
 					{
 						String mutantPath2 = m.getMutantFilePath();
-						if(validation(policyPath, mutantPath2, req))//find at least one mutant that fails
+						String muType = m.getNumber().substring(m.getNumber().indexOf(' ') + 1, m.getNumber().length() - 1);
+						if(muType.compareTo(type) == 0)
 						{
-							valid.add(record);
-							break;
+							if(validation(policyPath, mutantPath2, req))//find at least one mutant that fails
+							{
+								valid.add(record);
+								break;
+							}
 						}
 					}
 				}
