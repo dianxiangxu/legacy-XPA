@@ -4876,15 +4876,9 @@ public class PolicyX {
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
-			if(r.getEffect() == effect && !r.isConditionEmpty())
+			if(!r.isConditionEmpty())
 			{
-				System.err.println("Matching effect");
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCT");
-			}
-			else if(r.getEffect() != effect && !r.isConditionEmpty())
-			{
-				System.err.println("Effect does not match");
-				ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCT");
 			}
 			else
 				System.err.println("Rule does not contain a condition");
@@ -4899,18 +4893,13 @@ public class PolicyX {
 	private void buildRTTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
 	{
 		int count = 1;
-		
-		
 		for(Rule temp : rules)
 		{
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
-			if(temp.getEffect() == effect)
-				ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTT");
-			else
-				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTT");
+			ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTT");
 			if(ptr != null)
 			{
 				generator.add(ptr);
@@ -5177,7 +5166,6 @@ public class PolicyX {
 		return ptr;
 	}
 	
-	
 	private PolicySpreadSheetTestRecord buildRequest_Allfalse(List<Rule> rules, Rule current, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type, int effect)
 	{
 		PolicySpreadSheetTestRecord ptr = null;
@@ -5401,60 +5389,6 @@ public class PolicyX {
 						+ File.separator + "request" + type + count + ".txt";
 				FileWriter fw = new FileWriter(path);
 				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(request);
-				bw.close();
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-			ptr = new PolicySpreadSheetTestRecord(
-					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
-					"request" + type + count + ".txt", request, "");
-		}
-		return ptr;
-	}
-	
-	private PolicySpreadSheetTestRecord buildRequest_firstDifferent_fromDefault(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
-	{
-		PolicySpreadSheetTestRecord ptr = null;
-		function f = new function();
-		int firstDiff = -1;
-		for(int i = rules.indexOf(rule) - 1; i >= 0; i--)
-		{
-			Rule r = rules.get(i);
-			if(r.getEffect() != rule.getEffect())
-			{
-				sb.append(TrueTarget_TrueCondition(r, collector) + "\n");
-				firstDiff = i;
-				break;
-			}
-		}
-		for(int i = 0; i < rules.indexOf(rule); i++)
-		{
-			if(i != firstDiff)
-				sb.append(FalseTarget_FalseCondition(rules.get(i), collector) + "\n");
-		}
-		System.out.println("Z3: " + sb.toString());
-		boolean sat = z3str(sb.toString(), nameMap, typeMap);
-		if(sat)
-		{
-			System.out.println(nameMap.size() + " map size");
-			try
-			{
-				z3.getValue(collector, nameMap);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-			System.out.println(collector.size() + " collection size");
-			String request = f.print(collector);
-			try
-			{
-				String path = t.getTestOutputDestination("_MutationTests")
-						+ File.separator + "request" + type + count + ".txt";
-				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
 				bw.write(request);
 				bw.close();
 			}
