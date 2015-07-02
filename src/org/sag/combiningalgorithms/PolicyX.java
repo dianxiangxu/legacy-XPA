@@ -5840,8 +5840,6 @@ public class PolicyX {
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
 			if((r.getEffect() == effect && !r.isConditionEmpty()) || !isDefaultRule(r))
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
-			else
-				ptr = buildRequest_firstDifferent_fromDefault(rules, r, sb, collector, count, t, rules.size(), "RCF");
 			if(ptr != null)
 			{
 				generator.add(ptr);
