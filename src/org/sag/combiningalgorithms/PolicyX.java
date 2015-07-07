@@ -4865,7 +4865,37 @@ public class PolicyX {
 		return generator;
 	}
 	
-	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_AddNotFunction(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		function f = new function();
+		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
+		if(cmbAlg instanceof PermitOverridesRuleAlg)
+		{
+			
+		}
+		else if(cmbAlg instanceof DenyOverridesRuleAlg)
+		{
+			
+		}
+		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			
+		}
+		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			
+		}
+		else if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			
+		}
+		else
+			System.err.println("Combining algorithm not currently supported");
+		return generator;
+	}
 	
 	private void buildRCTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
 	{
@@ -5177,11 +5207,11 @@ public class PolicyX {
 		//To do this, we find the first rule regardless of the position in the policy
 		//that has a different effect than the default rule and make sure that it evals to true
 		//therefore returning either the opposite of the default rule's effect or ID
-		//this method is only called when there is at least 1 rule with a different effect than the default rule
+		//this method is only generates a test when there is at least 1 rule with a different effect than the default rule
 		//otherwise, a different method is called
 		int diffIndex = -1;
 		int currentIndex = rules.indexOf(current);
-		for(int i = 0; i < rules.size(); i++)
+		for(int i = currentIndex + 1; i < rules.size(); i++)
 		{
 			Rule r = rules.get(i);
 			if(r.getEffect() != effect)
@@ -5194,27 +5224,9 @@ public class PolicyX {
 
 		//if the index of the differing rule is 0 or -1 (i.e. the first rule or a differing rule could not be found)
 		//then there is no possible way to generate a valid test
-		if(diffIndex <= 0)
+		if(diffIndex < 0)
 			return ptr;
 		
-		//if the index of the differing rule is less than that of the current rule
-		//we need to backtrack and find the the first rule before the differing that has the same
-		//effect as the default rule and set this to false target, true condition
-		//while this will inevitably cause the test to fail to detect most mutants
-		//it guarantees that at least one mutant will be discovered with this test
-		//based on our validation algorithm
-		else if(diffIndex < currentIndex)
-		{
-			for(int i = diffIndex - 1; i >= 0; i--)
-			{
-				Rule r = rules.get(i);
-				if(r.getEffect() != firstDiff.getEffect())
-					current = r;
-			}
-			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
-			sb.append(True_Condition(current.getCondition(), collector) + "\n");
-			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
-		}
 		else
 		{
 			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
@@ -5297,14 +5309,14 @@ public class PolicyX {
 				if(r.getEffect() != firstDiff.getEffect())
 					current = r;
 			}
-			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
-			sb.append(True_Condition(current.getCondition(), collector) + "\n");
+			sb.append(True_Target((Target)current.getTarget(), collector) + "\n");
+			sb.append(False_Condition(current.getCondition(), collector) + "\n");
 			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
 		}
 		else
 		{
-			sb.append(False_Target((Target)current.getTarget(), collector) + "\n");
-			sb.append(True_Condition(current.getCondition(), collector) + "\n");
+			sb.append(True_Target((Target)current.getTarget(), collector) + "\n");
+			sb.append(False_Condition(current.getCondition(), collector) + "\n");
 			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
 		}
 		
@@ -5951,6 +5963,8 @@ public class PolicyX {
 				if(r.getEffect() == effect && !r.isConditionEmpty())
 					ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
 				else if(r.getEffect() != effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
+				else
 					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
 				if(ptr != null)
 				{
