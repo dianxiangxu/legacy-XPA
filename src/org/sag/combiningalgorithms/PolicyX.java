@@ -2203,6 +2203,30 @@ public class PolicyX {
 		}
 		return output;
 	}
+	
+	public StringBuffer Negate_OneTargetAttribute(Target target, ArrayList<MyAttr> local, int attribute)
+	{
+		String[] lines = getTargetAttribute(target, local).split("\n");
+		StringBuffer output = new StringBuffer();
+		if(attribute < 0 || attribute >= lines.length)
+			return output;
+		else
+		{
+			String attr = lines[attribute];
+			StringBuffer sb = new StringBuffer();
+			sb.append("(not ");
+			sb.append(attr);
+			sb.append(")");
+			for(String s : lines)
+			{
+				if(s.compareTo(attr) != 0)
+					output.append(s);
+				else
+					output.append(sb);
+			}
+			return output;
+		}
+	}
 
 	public StringBuffer FalseTarget_FalseCondition(Rule rule,
 			ArrayList<MyAttr> collector) {
@@ -4785,13 +4809,143 @@ public class PolicyX {
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
-			if(def != null)
+			if(def != null)	
 				build_DefaultRCFRequests_FA(rules, def, generator, t);
 			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
 				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF");
 			else
 				buildRCFRequests_FA(rules, generator, t);
 			return generator;
+		}
+		return generator;
+	}
+	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveNotFunction(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
+		function f = new function();
+		if(cmbAlg instanceof PermitOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allDenyRule(policy))
+					buildRNFRequests_override(rules, generator, t, 1);
+				else
+					buildRNFRequests_override(rules, generator, t, 0);
+			}
+			else if(f.allDenyRule(policy))
+				buildRNFRequests_override(rules, generator, t, 1);
+			else
+				buildRNFRequests_override(rules, generator, t, 0);
+		}
+		else if(cmbAlg instanceof DenyOverridesRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allPermitRule(policy))
+					buildRNFRequests_override(rules, generator, t, 0);
+				else
+					buildRNFRequests_override(rules, generator, t, 1);
+			}
+			else if(f.allPermitRule(policy))
+				buildRNFRequests_override(rules, generator, t, 0);
+			else
+				buildRNFRequests_override(rules, generator, t, 1);
+		}
+		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allPermitRule(policy))
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildRNFRequests_unless(rules, generator, t, 1);
+			}
+			else if(f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildRNFRequests_unless(rules, generator, t, 1);
+		}
+		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allDenyRule(policy))
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildRNFRequests_unless(rules, generator, t, 0);
+			}
+			else if(f.allDenyRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildRNFRequests_unless(rules, generator, t, 0);
+		}
+		else if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(def != null)
+				buildRNFRequests_default(rules, def, generator, t);
+			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
+				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RNF");
+			else
+				buildRNFRequests_FA(rules, generator, t);
+		}
+		else
+			System.err.println("Combining algorithm not current supported");
+		return generator;
+	}
+	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_FlipRuleEffect(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		int count = 1;
+		for(Rule r : rules)
+		{
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "CRE");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
 		}
 		return generator;
 	}
@@ -4874,27 +5028,133 @@ public class PolicyX {
 		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
 		if(cmbAlg instanceof PermitOverridesRuleAlg)
 		{
-			
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(allPermitRules(rules, rules.size() -1) && atLeastOneCondition(rules))
+				{
+					build_OnlyOne_ConditionRequest_false(rules, generator, t, 0, 1, "ANF");
+				}
+				else
+					buildANFRequests_override(rules, generator, t);
+			}
+			else if(f.allPermitRule(policy) && atLeastOneCondition(rules))
+			{
+				build_OnlyOne_ConditionRequest_false(rules, generator, t, 0, 1, "ANF");
+			}
+			else
+				buildANFRequests_override(rules, generator, t);
+			return generator;
 		}
 		else if(cmbAlg instanceof DenyOverridesRuleAlg)
 		{
-			
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(allDenyRules(rules, rules.size() - 1) && atLeastOneCondition(rules))
+				{
+					build_OnlyOne_ConditionRequest_false(rules, generator, t, 1, 1, "ANF");
+				}
+				else
+					buildANFRequests_override(rules, generator, t);
+			}
+			else if(f.allPermitRule(policy) && atLeastOneCondition(rules))
+			{
+				build_OnlyOne_ConditionRequest_false(rules, generator, t, 1, 1, "ANF");
+			}
+			else
+				buildANFRequests_override(rules, generator, t);
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
 		{
-			
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allPermitRule(policy))
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildANFRequests_unless(rules, generator, t, 1);
+			}
+			else if(f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildANFRequests_unless(rules, generator, t, 1);
+			return generator;
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
 		{
-			
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else if(f.allDenyRule(policy))
+				{
+					System.err.println("Test cannot be generated");
+					return generator;
+				}
+				else
+					buildANFRequests_unless(rules, generator, t, 0);
+			}
+			else if(f.allDenyRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+				buildANFRequests_unless(rules, generator, t, 0);
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
-			
+			if(def != null)
+				buildANFRequests_default(rules, def, generator, t);
+			if(f.allDenyRule(policy) || f.allPermitRule(policy))
+				build_AllOne_ConditionRequestsFalse(rules, generator, t, "ANF");
+			else
+				buildANFRequests_FA(rules, generator, t);
 		}
 		else
 			System.err.println("Combining algorithm not currently supported");
 		return generator;
+	}
+	
+	private void buildANFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty())
+				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "ANF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
 	}
 	
 	private void buildRCTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
@@ -4974,6 +5234,27 @@ public class PolicyX {
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCF");
 			else
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRNFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(r.getEffect() == effect && !r.isConditionEmpty())
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RNF");
+			else if(r.getEffect() != effect && !r.isConditionEmpty())
+				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RNF");
 			if(ptr != null)
 			{
 				generator.add(ptr);
@@ -5284,7 +5565,6 @@ public class PolicyX {
 		function f = new function();
 		Rule firstDiff = null;
 		int diffIndex = -1;
-		int currentIndex = rules.indexOf(current);
 		for(int i = 0; i < rules.size(); i++)
 		{
 			Rule r = rules.get(i);
@@ -5301,18 +5581,7 @@ public class PolicyX {
 		
 		if(diffIndex <= 0)
 			return ptr;
-		else if(diffIndex < currentIndex)
-		{
-			for(int i = diffIndex - 1; i >= 0; i--)
-			{
-				Rule r = rules.get(i);
-				if(r.getEffect() != firstDiff.getEffect())
-					current = r;
-			}
-			sb.append(True_Target((Target)current.getTarget(), collector) + "\n");
-			sb.append(False_Condition(current.getCondition(), collector) + "\n");
-			sb.append(TrueTarget_TrueCondition(firstDiff, collector) + "\n");
-		}
+		
 		else
 		{
 			sb.append(True_Target((Target)current.getTarget(), collector) + "\n");
@@ -5323,7 +5592,7 @@ public class PolicyX {
 		for(int i = 0; i < stop; i++)
 		{
 			Rule temp = rules.get(i);
-			if(isDefaultRule(temp) || temp.getId().equals(current.getId()) || temp.getId().equals(firstDiff.getId()))
+			if(isDefaultRule(temp) || temp.getId().equals(current.getId()) || temp != null ? temp.getId().equals(firstDiff.getId()) : false)
 				continue;
 			else
 				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
@@ -5756,6 +6025,23 @@ public class PolicyX {
 		}
 	}
 	
+	private void buildANFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			if(r.getEffect() == effect && !r.isConditionEmpty())
+				ptr = buildConditionRequest_unlessFalse(rules, r, sb, t, count, effect, "ANF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
 	private void buildRTFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
 	{
 		int count = 1;
@@ -5793,6 +6079,26 @@ public class PolicyX {
 			}
 		}
 	}
+	
+	private void buildRNFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(r.getEffect() == effect && !r.isConditionEmpty())
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RNF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
 	
 	private void buildRTTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
 	{
@@ -5837,6 +6143,25 @@ public class PolicyX {
 		}
 	}
 	
+	private void buildANFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty())
+				ptr = buildConditionRequest_falseFA(rules, r, sb, collector, count, t, "ANF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
 	private void buildRCFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
 	{
 		int count = 1;
@@ -5848,6 +6173,25 @@ public class PolicyX {
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
 			if(!r.isConditionEmpty())
 				ptr = buildConditionRequest_trueFA(rules, r, sb, collector, count, t, "RCF");
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private void buildRNFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		int count = 1;
+		for(Rule r : rules)
+		{
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			PolicySpreadSheetTestRecord ptr = null;
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			if(!r.isConditionEmpty())
+				ptr = buildConditionRequest_trueFA(rules, r, sb, collector, count, t, "RNF");
 			if(ptr != null)
 			{
 				generator.add(ptr);
@@ -5945,6 +6289,33 @@ public class PolicyX {
 		}
 	}
 	
+	private void buildANFRequests_default(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		function checker = new function();
+		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
+			build_AllOne_ConditionRequestsFalse(rules, generator, t, "ANF");
+		else
+		{
+			int count = 1, effect = defaultRule.getEffect();
+			for(Rule r : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				if(r.getEffect() == effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "ANF", effect);
+				else if(r.getEffect() != effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "ANF");
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+			}
+		}
+	}
+	
 	private void build_DefaultRCFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
 	{
 		int count = 1;
@@ -5966,6 +6337,33 @@ public class PolicyX {
 					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
 				else
 					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
+				if(ptr != null)
+				{
+					generator.add(ptr);
+					count++;
+				}
+			}
+		}
+	}
+	
+	private void buildRNFRequests_default(List<Rule> rules, Rule defRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	{
+		function checker = new function();
+		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
+			build_AllOne_ConditionRequestsTrue(rules, generator, t, "RNF");
+		else
+		{
+			int count = 1;
+			int effect = defRule.getEffect();
+			for(Rule r : rules)
+			{
+				StringBuffer sb = new StringBuffer();
+				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+				PolicySpreadSheetTestRecord ptr = null;
+				if(r.getEffect() == effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RNF");
+				else if(r.getEffect() != effect && !r.isConditionEmpty())
+					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RNF", effect);
 				if(ptr != null)
 				{
 					generator.add(ptr);
@@ -6347,4 +6745,5 @@ public class PolicyX {
 		}
 		return true;
 	}
+	
 }
