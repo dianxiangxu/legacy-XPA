@@ -33,6 +33,7 @@ import org.wso2.balana.PolicyTreeElement;
 import org.wso2.balana.Rule;
 import org.wso2.balana.TargetMatch;
 import org.wso2.balana.XACMLConstants;
+import org.wso2.balana.attr.AttributeValue;
 import org.wso2.balana.attr.BooleanAttribute;
 import org.wso2.balana.attr.DateAttribute;
 import org.wso2.balana.attr.IPAddressAttribute;
@@ -916,6 +917,63 @@ public class PolicyX {
 		}
 		return "";
 	}
+	
+	//Grab a single, specified target attribute value
+	//Used for selective negation of attribute values for RPTE test generation
+	public String getTargetAttributeValue(Target target, ArrayList<MyAttr> local, int attrIndex)
+	{
+		if(attrIndex < 0 || attrIndex >= local.size())
+			return "";
+		StringBuffer sb = new StringBuffer();
+		if(target != null)
+		{
+			List<AnyOfSelection> anyOf = target.getAnyOfSelections();
+			for(AnyOfSelection any : anyOf)
+			{
+				List<AllOfSelection> allOf = any.getAllOfSelections();
+				for(AllOfSelection all : allOf)
+				{
+					List<TargetMatch> matches = all.getMatches();
+					if(attrIndex >= matches.size())
+						continue;
+					else
+					{
+						TargetMatch match = matches.get(attrIndex);
+						if(match.getEval() instanceof AttributeDesignator)
+						{
+							AttributeDesignator attr = (AttributeDesignator)match.getEval();
+							if(attr.getId().toString().compareTo(local.get(attrIndex).getName()) == 0)
+							{
+								//System.err.println(attr.getId().toString());
+								sb.append(" (" + al.returnFunction(match.getMatchFunction().encode())
+										+ " " + getName(attr.getId().toString()) + " ");
+								if(attr.getType().toString().contains("string"))
+								{
+									String val = match.getAttrValue().encode();
+									val = val.replaceAll("\n", "");
+									val = val.trim();
+									sb.append("\"" + val + "\")");
+								}
+								else if(attr.getType().toString().contains("integer"))
+								{
+									String val = match.getAttrValue().encode();
+									val = val.replaceAll("\n", "");
+									val = val.trim();
+									sb.append(val + ")");
+								}
+								//System.err.println(sb.toString());
+							}
+							else
+								continue;
+						}
+					}
+				}
+			}
+			return sb.toString();
+		}
+		return "";
+	}
+		
 
 	public StringBuffer ApplyStatements(Apply apply, String function,
 			StringBuffer sb, ArrayList<MyAttr> collector) {
@@ -5270,7 +5328,10 @@ public class PolicyX {
 		//Make current rule evaluate to false
 		sb.append(False_Target((Target)rule.getTarget(), collector) + "\n");
 		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		ArrayList<MyAttr> local = new ArrayList<MyAttr>();
 		
+		getTargetAttribute((Target)rule.getTarget(), local);
+		System.out.println(getTargetAttributeValue((Target)rule.getTarget(), local, 0));
 		//Ensure rules before and following current evaluate to false (NotApplicable)
 		for(int i = 0; i < stop; i++)
 		{
