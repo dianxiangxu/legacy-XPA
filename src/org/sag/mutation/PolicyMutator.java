@@ -437,10 +437,14 @@ public class PolicyMutator {
 						String idPermit = myrulePermit.getId().toString();
 						
 						// find the deny rule
-						int denyruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + "Deny" + "\"  >"); 
+						int denyruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + "Deny" + "\"  >");
+						if(denyruleStartingIndex < 0)
+							denyruleStartingIndex = builder.indexOf("<Rule Effect=\"Deny\" RuleId=\"" + id + "\">");
 						int denyruleEndingIndex = builder.indexOf("</Rule>", denyruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// find the permit rule
-						int permitruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + idPermit + "\" Effect=\"" + "Permit" + "\"  >"); 
+						int permitruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + idPermit + "\" Effect=\"" + "Permit" + "\"  >");
+						if(permitruleStartingIndex < 0)
+							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"Permit\" RuleId=\"" + idPermit + "\">");
 						int permitruleEndingIndex = builder.indexOf("</Rule>", permitruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// copy of permit rule
 						String permitrule = builder.substring(permitruleStartingIndex, permitruleEndingIndex);
@@ -523,10 +527,14 @@ public class PolicyMutator {
 						String idDeny = myruleDeny.getId().toString();
 						
 						// find the permit rule
-						int permitruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + "Permit" + "\"  >"); 
+						int permitruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + "Permit" + "\"  >");
+						if(permitruleStartingIndex < 0)
+							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"Permit\" RuleId=\"" + id + "\">");
 						int permitruleEndingIndex = builder.indexOf("</Rule>", permitruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// find the deny rule
 						int denyruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + idDeny + "\" Effect=\"" + "Deny" + "\"  >"); 
+						if(denyruleStartingIndex < 0)
+							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"Deny\" RuleId=\"" + idDeny + "\">");
 						int denyruleEndingIndex = builder.indexOf("</Rule>", denyruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// copy of deny rule
 						String denyrule = builder.substring(denyruleStartingIndex, denyruleEndingIndex);
