@@ -5196,6 +5196,78 @@ public class PolicyX {
 		return generator;
 	}
 	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_FirstDenyRule(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		function f = new function();
+		int count = 1;
+		if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(f.allDenyRule(policy) || f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+			{
+				for(Rule r : rules)
+				{
+					StringBuffer sb = new StringBuffer();
+					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+					PolicySpreadSheetTestRecord ptr = null;
+					if(r.getEffect() == 0)
+						ptr = buildRequest_trueFA(rules, r, sb, collector, count, t, "FDR");
+					if(ptr != null)
+					{
+						generator.add(ptr);
+						break;
+					}
+				}
+			}
+		}
+		else
+			System.err.println("Test can only be generated for first-applicable combining algorithm");
+		return generator;
+	}
+	
+	public ArrayList<PolicySpreadSheetTestRecord> generate_FirstPermitRule(TestPanel t)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		List<Rule> rules = getRuleFromPolicy(policy);
+		function f = new function();
+		int count = 1;
+		if(cmbAlg instanceof FirstApplicableRuleAlg)
+		{
+			if(f.allDenyRule(policy) || f.allPermitRule(policy))
+			{
+				System.err.println("Test cannot be generated");
+				return generator;
+			}
+			else
+			{
+				for(Rule r : rules)
+				{
+					StringBuffer sb = new StringBuffer();
+					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+					PolicySpreadSheetTestRecord ptr = null;
+					if(r.getEffect() == 1)
+						ptr = buildRequest_trueFA(rules, r, sb, collector, count, t, "FDR");
+					if(ptr != null)
+					{
+						generator.add(ptr);
+						break;
+					}
+				}
+			}
+		}
+		else
+			System.err.println("Test can only be generated for first-applicable combining algorithm");
+		return generator;
+	}
+	
 	private void buildANFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
 	{
 		int count = 1;
