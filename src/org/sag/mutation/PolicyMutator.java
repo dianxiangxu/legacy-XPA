@@ -412,7 +412,7 @@ public class PolicyMutator {
 				if (effect==1) {
 					d = i;
 					// then find the next permit rule to swap with.
-					int currentindex = d + 1; // starting searching index. avoid -1
+					int currentindex = (p == -1 ? 0 : p); // starting searching index. avoid -1
 					while(currentindex<policy.getChildElements().size()) {
 						CombinerElement temprule = policy.getChildElements().get(currentindex);
 						PolicyTreeElement temptree = temprule.getElement();
@@ -426,7 +426,7 @@ public class PolicyMutator {
 						}
 						currentindex++;
 					}
-					if (p<policy.getChildElements().size()) {
+					if ( p>d && p<policy.getChildElements().size()) {
 						// set applicable true.
 						applicable = true;
 						// swap rule p and rule d.
@@ -439,12 +439,12 @@ public class PolicyMutator {
 						// find the deny rule
 						int denyruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + "Deny" + "\"  >");
 						if(denyruleStartingIndex < 0)
-							denyruleStartingIndex = builder.indexOf("<Rule Effect=\"Deny\" RuleId=\"" + id + "\">");
+							denyruleStartingIndex = builder.indexOf("<Rule Effect=\"" + "Deny" + "\" RuleId=\"" + id + "\"  >");
 						int denyruleEndingIndex = builder.indexOf("</Rule>", denyruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// find the permit rule
 						int permitruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + idPermit + "\" Effect=\"" + "Permit" + "\"  >");
 						if(permitruleStartingIndex < 0)
-							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"Permit\" RuleId=\"" + idPermit + "\">");
+							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"" + "Permit" + "\" RuleId=\"" + idPermit + "\"  >");
 						int permitruleEndingIndex = builder.indexOf("</Rule>", permitruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// copy of permit rule
 						String permitrule = builder.substring(permitruleStartingIndex, permitruleEndingIndex);
@@ -502,7 +502,7 @@ public class PolicyMutator {
 				if (effect==0) {
 					p = i;
 					// then find the next deny rule to swap with.
-					int currentindex = p + 1; // starting searching index. avoid -1
+					int currentindex = (d == -1 ? 0 : d); // starting searching index. avoid -1
 					while(currentindex<policy.getChildElements().size()) {
 						CombinerElement temprule = policy.getChildElements().get(currentindex);
 						PolicyTreeElement temptree = temprule.getElement();
@@ -516,7 +516,7 @@ public class PolicyMutator {
 						}
 						currentindex++;
 					}
-					if (d<policy.getChildElements().size()) {
+					if (d>p && d<policy.getChildElements().size()) {
 						// set applicable true.
 						applicable = true;
 						// swap rule d and rule p.
@@ -529,12 +529,12 @@ public class PolicyMutator {
 						// find the permit rule
 						int permitruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + "Permit" + "\"  >");
 						if(permitruleStartingIndex < 0)
-							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"Permit\" RuleId=\"" + id + "\">");
+							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"" + "Permit" + "\" RuleId=\"" + id + "\"  >");
 						int permitruleEndingIndex = builder.indexOf("</Rule>", permitruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// find the deny rule
 						int denyruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + idDeny + "\" Effect=\"" + "Deny" + "\"  >"); 
 						if(denyruleStartingIndex < 0)
-							permitruleStartingIndex = builder.indexOf("<Rule Effect=\"Deny\" RuleId=\"" + idDeny + "\">");
+							denyruleStartingIndex = builder.indexOf("<Rule Effect=\"" + "Deny" + "\" RuleId=\"" + idDeny + "\"  >");
 						int denyruleEndingIndex = builder.indexOf("</Rule>", denyruleStartingIndex) + 7+1; // +1 to kill the blank line.
 						// copy of deny rule
 						String denyrule = builder.substring(denyruleStartingIndex, denyruleEndingIndex);
