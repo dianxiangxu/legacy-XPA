@@ -390,7 +390,8 @@ public class PolicyMutator {
 //		// Do not create equivalent mutant: when combiningAlgorithm = deny-overrides
 //		if (policy.getCombiningAlg().getIdentifier().equals((new DenyOverridesRuleAlg()).getIdentifier()))
 //			return;
-		
+		if(!(policy.getCombiningAlg() instanceof FirstApplicableRuleAlg))
+			return;
 		final int MUTANTINDEX=1; // fixed
 		
 		StringBuilder builder = new StringBuilder();
@@ -480,7 +481,8 @@ public class PolicyMutator {
 //		// Do not create equivalent mutant: when combiningAlgorithm = permit-overrides
 //		if (policy.getCombiningAlg().getIdentifier().equals((new PermitOverridesRuleAlg()).getIdentifier()))
 //			return;
-		
+		if(!(policy.getCombiningAlg() instanceof FirstApplicableRuleAlg))
+			return;
 		final int MUTANTINDEX=1; // fixed
 		
 		StringBuilder builder = new StringBuilder();
