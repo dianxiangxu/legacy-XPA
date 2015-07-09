@@ -348,8 +348,7 @@ public class PolicyMutator {
 				// pull out the rule:
 				String theRule = builder1.substring(ruleStartingIndex, ruleEndingIndex);
 				String mutantRule1 = "";
-
-				// method 1: append a new rule with negative effect.
+				// method 1: append a new rule with negative effect and false target.
 				if (effect==0) {
 					mutantRule1 = theRule.replace("Effect=\"" + "Permit", "Effect=\"" + "Deny"); 
 				} else {
@@ -363,7 +362,7 @@ public class PolicyMutator {
 				saveStringToTextFile(builder1.toString(), mutantFileName1);
 				mutantIndex++;
 				// method 2: when there is a target, append a new rule with empty target.
-				if (!myrule.isTargetEmpty()) {
+				if(!myrule.isTargetEmpty()){
 					String mutantRule2 = "";
 					// default target starting/ending index.
 					int targetStartingIndex = theRule.indexOf("<Target>");
@@ -413,7 +412,7 @@ public class PolicyMutator {
 				if (effect==1) {
 					d = i;
 					// then find the next permit rule to swap with.
-					int currentindex = (p==-1 ? 0 : p); // starting searching index. avoid -1
+					int currentindex = d + 1; // starting searching index. avoid -1
 					while(currentindex<policy.getChildElements().size()) {
 						CombinerElement temprule = policy.getChildElements().get(currentindex);
 						PolicyTreeElement temptree = temprule.getElement();
@@ -427,7 +426,7 @@ public class PolicyMutator {
 						}
 						currentindex++;
 					}
-					if (p>d && p<policy.getChildElements().size()) {
+					if (p<policy.getChildElements().size()) {
 						// set applicable true.
 						applicable = true;
 						// swap rule p and rule d.
@@ -499,7 +498,7 @@ public class PolicyMutator {
 				if (effect==0) {
 					p = i;
 					// then find the next deny rule to swap with.
-					int currentindex = (d==-1 ? 0 : d); // starting searching index. avoid -1
+					int currentindex = p + 1; // starting searching index. avoid -1
 					while(currentindex<policy.getChildElements().size()) {
 						CombinerElement temprule = policy.getChildElements().get(currentindex);
 						PolicyTreeElement temptree = temprule.getElement();
@@ -513,7 +512,7 @@ public class PolicyMutator {
 						}
 						currentindex++;
 					}
-					if (d>p && d<policy.getChildElements().size()) {
+					if (d<policy.getChildElements().size()) {
 						// set applicable true.
 						applicable = true;
 						// swap rule d and rule p.
