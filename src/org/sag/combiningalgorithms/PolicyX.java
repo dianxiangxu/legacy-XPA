@@ -5354,7 +5354,7 @@ public class PolicyX {
 				else if(r.getEffect() == 0)
 					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
 				else
-					continue;
+					buildRequest_false(rules, r, sb, collector, count, t, rules.size(), "RER");
 			}
 			else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
 			{
@@ -5368,7 +5368,7 @@ public class PolicyX {
 				else if(r.getEffect() == 1)
 					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
 				else
-					continue;
+					buildRequest_false(rules, r, sb, collector, count, t, rules.size(), "RER");
 			}
 			else
 			{
@@ -7165,6 +7165,8 @@ public class PolicyX {
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
 			if(temp.getEffect() == effect)
 				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+			else
+				ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTF");
 			if(ptr != null)
 			{
 				generator.add(ptr);
@@ -7816,10 +7818,15 @@ public class PolicyX {
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
-			if((!r.isConditionEmpty() && containsNot(r)) || (!isDefaultRule(r) && containsNot(r)))
-				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
+			if(type.compareTo("RNF") == 0)
+			{
+				if(!r.isConditionEmpty() && containsNot(r))
+					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
+				else
+					continue;
+			}
 			else
-				continue;
+				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
 			if(ptr != null)
 			{
 				generator.add(ptr);

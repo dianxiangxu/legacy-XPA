@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 import java.util.List;
 
@@ -115,6 +116,8 @@ public class MutationPanel2 extends JPanel {
 																	// RCF)
 	private JCheckBox boxOptimize = new JCheckBox("Do optimization - will significantly increase generation time");
 	private JCheckBox boxOTF = new JCheckBox("On the fly optimization - faster than normal optimization but still slow");
+	private JCheckBox boxOPT2 = new JCheckBox("Optimize v2 - potentially faster");
+	private JCheckBox boxOPT3 = new JCheckBox("Optimize v3 - Fastest, but not the most accurate");
 	
 	private JPanel createPanel() {
 		setAllIndividualBoxes(true);
@@ -164,6 +167,7 @@ public class MutationPanel2 extends JPanel {
 		myPanel.add(boxSelectAll);
 		myPanel.add(boxSelectEight);
 		myPanel.add(boxOptimize);
+		myPanel.add(boxOPT2);
 		myPanel.setBorder(new TitledBorder(new EtchedBorder(), ""));
 
 		return myPanel;
@@ -285,7 +289,8 @@ public class MutationPanel2 extends JPanel {
 		
 		long totalOptimizationTime = 0;
 		long totalGenerationTime = 0;
-		boolean otf = boxOTF.isSelected();
+		if(boxOPT2.isSelected() && boxOptimize.isSelected())
+			boxOptimize.setSelected(false);
 		if (result == JOptionPane.OK_OPTION) {
 			try {
 				PolicyMutator policyMutator = new PolicyMutator(
@@ -336,7 +341,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> cre = policyx.generate_FlipRuleEffect(getTestPanel());
 					determineValidTests(cre, policyMutator, policyPath, "CRE");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(cre.size() > 1)
+					if(cre.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "CRE");
 				}
 				if (boxRER.isSelected()) {
@@ -345,7 +350,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rer = policyx.generate_RemoveOneRule(getTestPanel());
 					determineValidTests(rer, policyMutator, policyPath, "RER");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rer.size() > 1)
+					if(rer.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RER");
 				}
 
@@ -360,7 +365,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rtt = policyx.generate_RuleTargetTrue(getTestPanel());
 					determineValidTests(rtt, policyMutator, policyPath, "RTT");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rtt.size() > 1)
+					if(rtt.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RTT");
 				}
 				
@@ -371,7 +376,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rtf = policyx.generate_RuleTargetFalse(getTestPanel(), policyMutator);
 					determineValidTests(rtf, policyMutator, policyPath, "RTF");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rtf.size() > 1)
+					if(rtf.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RTF");
 				}
 				
@@ -382,7 +387,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rct = policyx.generate_RuleConditionTrue(getTestPanel());
 					determineValidTests(rct, policyMutator, policyPath, "RCT");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rct.size() > 1)
+					if(rct.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RCT");
 				}
 				
@@ -393,7 +398,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rcf = policyx.generate_RuleConditionFalse(getTestPanel());
 					determineValidTests(rcf, policyMutator, policyPath, "RCF");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rcf.size() > 1)
+					if(rcf.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RCF");
 				}
 
@@ -403,7 +408,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> fpr = policyx.generate_FirstPermitRule(getTestPanel());
 					determineValidTests(fpr, policyMutator, policyPath, "FPR");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(fpr.size() > 1)
+					if(fpr.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "FPR");
 				}							
 				
@@ -414,7 +419,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> fdr = policyx.generate_FirstDenyRule(getTestPanel());
 					determineValidTests(fdr, policyMutator, policyPath, "FDR");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(fdr.size() > 1)
+					if(fdr.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "FDR");
 				}
 				
@@ -434,7 +439,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> anf = policyx.generate_AddNotFunction(getTestPanel());
 					determineValidTests(anf, policyMutator, policyPath, "ANF");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(anf.size() > 1)
+					if(anf.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "ANF");
 				}
 				
@@ -444,7 +449,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rnf = policyx.generate_RemoveNotFunction(getTestPanel());
 					determineValidTests(rnf, policyMutator, policyPath, "RNF");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rnf.size() > 1)
+					if(rnf.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RNF");
 					
 				}
@@ -455,7 +460,7 @@ public class MutationPanel2 extends JPanel {
 					ArrayList<PolicySpreadSheetTestRecord> rpte = policyx.generate_RemoveParallelTargetElement(getTestPanel());
 					determineValidTests(rpte, policyMutator, policyPath, "RPTE");
 					totalGenerationTime += System.currentTimeMillis() - start;
-					if(rpte.size() > 1)
+					if(rpte.size() >= 1)
 						getMutantsByType(policyMutator.getMutantList(), testable, "RPTE");
 				}
 				
@@ -472,7 +477,7 @@ public class MutationPanel2 extends JPanel {
 				System.out.println("Testable size: " + testable.size());
 				
 				
-				if(boxOptimize.isSelected() && !otf)
+				if(boxOptimize.isSelected())
 				{
 					PolicySpreadSheetTestRecord[] records = new PolicySpreadSheetTestRecord[valid.size()];
 					PolicyMutant[] mutants = new PolicyMutant[policyMutator.getMutantList().size()];
@@ -486,28 +491,21 @@ public class MutationPanel2 extends JPanel {
 					totalOptimizationTime += (end - start);
 					System.out.println("Optimization time: " + ((double)(end - start))/1000.00 + "s");
 				}
-				else if(boxOptimize.isSelected() && otf)
+				
+				if(boxOPT2.isSelected())
 				{
-					PolicySpreadSheetTestRecord[] records = new PolicySpreadSheetTestRecord[valid.size()];
-					PolicyMutant[] mutants = new PolicyMutant[policyMutator.getMutantList().size()];
-					ArrayList<PolicyMutant> muts = policyMutator.getMutantList();
-					for(int i = 0; i < optimal.size(); i++)
-						records[i] = optimal.get(i);
-					for(int i = 0; i < muts.size(); i++)
-						mutants[i] = muts.get(i);
-					muts = null;
 					long start = System.currentTimeMillis();
-					optimize(optimal, records, policyMutator.getMutantList(), policyMutator);
-					long end = System.currentTimeMillis();
-					totalOptimizationTime += (end - start);
-					System.out.println("Optimization time: " + ((double)(end - start))/1000.00 + "s");
+					optimize2(valid, policyMutator);
+					totalOptimizationTime += (System.currentTimeMillis() - start);
 				}
-				else if(otf)
+				
+				if(boxOPT3.isSelected())
 				{
-					valid = new ArrayList<PolicySpreadSheetTestRecord>();
-					for(PolicySpreadSheetTestRecord record : optimal)
-						valid.add(record);
+					long start = System.currentTimeMillis();
+					optimize3(valid, policyMutator);
+					totalOptimizationTime += (System.currentTimeMillis() - start);
 				}
+				
 				if(validTests > 0)
 					System.out.printf("Generated tests: " + tests.size() + "\nValid tests: " + validTests + "\nPercent valid: %.2f\n", ((double)validTests/(double)tests.size()) * 100.00);
 				System.out.println("Mutants: " + numMutants);
@@ -671,27 +669,7 @@ public class MutationPanel2 extends JPanel {
 				String mutantPath = mutator.getMutantFileName(type + mutantNum);
 				if(validation(policyPath, mutantPath, req))
 					valid.add(record);
-					
 				else
-				{
-					System.err.println("Failed on: " + mutantPath);
-					for(PolicyMutant m : mutator.getMutantList())
-					{
-						String mutantPath2 = m.getMutantFilePath();
-						String muType = m.getNumber().substring(m.getNumber().indexOf(' ') + 1, m.getNumber().length() - 1);
-						if(muType.compareTo(type) == 0)
-						{
-							if(validation(policyPath, mutantPath2, req))//find at least one mutant that fails
-							{
-								valid.add(record);
-								break;
-							}
-							else
-								System.err.println("Failed on: " + mutantPath2);
-						}
-					}
-				}
-				if(!valid.contains(record))
 				{
 					System.err.println(req);
 					Runtime run = Runtime.getRuntime();
@@ -703,7 +681,6 @@ public class MutationPanel2 extends JPanel {
 					{
 						System.err.println("File deletion failed");
 					}
-					
 				}
 			}
 		}
@@ -727,12 +704,12 @@ public class MutationPanel2 extends JPanel {
 			{
 				if(records[j] == null)
 					continue;
-				PolicyMutant m = mutants.get(j);
-				String mutant = m.getNumber().substring(m.getNumber().indexOf(' ') + 1, m.getNumber().length());
-				String mutantPath = mutator.getMutantFileName(mutant);
-				if(validation(policyPath, mutantPath, req) && mutant.compareTo(testNum) == 0)
+				
+				String mnum = records[j].getNumber().substring(records[j].getNumber().indexOf(' ') + 1, records[j].getNumber().length());
+				String mutantPath = mutator.getMutantFileName(mnum);
+				if(validation(policyPath, mutantPath, req) && mnum.compareTo(testNum) == 0)
 					continue;
-				if(validation(policyPath, mutantPath, req) && mutant.compareTo(testNum) != 0)
+				if(validation(policyPath, mutantPath, req) && mnum.compareTo(testNum) != 0)
 				{
 					String rem = testPanel.getTestOutputDestination("_MutationTests")
 							+ File.separator + records[j].getRequestFile();
@@ -755,6 +732,85 @@ public class MutationPanel2 extends JPanel {
 		for(int i = 0; i < records.length; i++)
 			if(records[i] != null)
 				valid.add(records[i]);
+	}
+	
+	private void optimize2(ArrayList<PolicySpreadSheetTestRecord> records, PolicyMutator mutator)
+	{
+		//LinkedHashSet<PolicySpreadSheetTestRecord> record_set = new LinkedHashSet<PolicySpreadSheetTestRecord>();
+		//for(PolicySpreadSheetTestRecord record : records)
+			//record_set.add(record);
+		String policyPath = xpa.getWorkingPolicyFilePath();
+		for(int i = 0; i < records.size(); i++)
+		{
+			PolicySpreadSheetTestRecord psstr = records.get(i);
+			String req = testPanel.getTestOutputDestination("_MutationTests")
+					+ File.separator + psstr.getRequestFile();
+			String testNum = psstr.getNumber().substring(psstr.getNumber().indexOf(' ') + 1, psstr.getNumber().length());
+			for(int j = 0; j < records.size(); j++)
+			{
+				PolicySpreadSheetTestRecord m = records.get(j);
+				String mnum = m.getNumber().substring(m.getNumber().indexOf(' ') + 1, m.getNumber().length());
+				String mutantPath = mutator.getMutantFileName(mnum);
+				if(validation(policyPath, mutantPath, req) && mnum.contains(testNum))
+					continue;
+				else if(validation(policyPath, mutantPath, req) && !mnum.contains(testNum))
+				{
+					String rem = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + records.get(j).getRequestFile();
+					Runtime run = Runtime.getRuntime();
+					try
+					{
+						run.exec("sudo rm" + rem);
+					}
+					catch(Exception e)
+					{
+						System.err.println("Unable to delete associated file");
+					}
+					records.remove(j);
+				}
+			}
+		}
+		valid = new ArrayList<PolicySpreadSheetTestRecord>();
+		for(PolicySpreadSheetTestRecord record : records)
+			valid.add(record);
+	}
+	
+	private void optimize3(ArrayList<PolicySpreadSheetTestRecord> records, PolicyMutator mutator)
+	{
+		String policyPath = xpa.getWorkingPolicyFilePath();
+		for(int i = 0; i < records.size() / 2; i++)//do a round of optimization for each mutation type
+		{
+			for(int j = 0; j < records.size() - 1; j++)
+			{
+				PolicySpreadSheetTestRecord psstr = records.get(j);
+				PolicySpreadSheetTestRecord next = records.get(j + 1);
+				String req = testPanel.getTestOutputDestination("_MutationTests")
+						+ File.separator + psstr.getRequestFile();
+				String testNum = psstr.getNumber().substring(psstr.getNumber().indexOf(' ') + 1, psstr.getNumber().length());
+				String mnum = next.getNumber().substring(next.getNumber().indexOf(' ') + 1, next.getNumber().length());
+				String mutantPath = mutator.getMutantFileName(mnum);
+				if(validation(policyPath, mutantPath, req))
+				{
+					String rem = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + next.getRequestFile();
+					Runtime run = Runtime.getRuntime();
+					try
+					{
+						run.exec("sudo rm" + rem);
+					}
+					catch(Exception e)
+					{
+						System.err.println("Unable to delete associated file");
+					}
+					records.remove(j);
+				}
+				else
+					continue;
+			}
+		}
+		valid = new ArrayList<PolicySpreadSheetTestRecord>();
+		for(PolicySpreadSheetTestRecord record : records)
+			valid.add(record);
 	}
 	
 	private void getMutantsByType(ArrayList<PolicyMutant> mutants, ArrayList<PolicyMutant> sublist, String type)
@@ -816,5 +872,32 @@ public class MutationPanel2 extends JPanel {
 			if(recs[i] != null)
 				valid.add(recs[i]);
 		return tot;
+	}
+	
+	private void optimize4(int low, int high, ArrayList<PolicySpreadSheetTestRecord> records, PolicyMutator mutator)
+	{
+		if(low < high)
+		{
+			int mid = low + (high - low) / 2;
+			optimize4(low, mid, records, mutator);
+			optimize4(mid + 1, high, records, mutator);
+			merge_kill(low, mid, high, records, mutator);
+		}
+	}
+	
+	private void merge_kill(int low, int mid, int high, ArrayList<PolicySpreadSheetTestRecord> records, PolicyMutator mutator)
+	{
+		ArrayList<PolicySpreadSheetTestRecord> helper = new ArrayList<PolicySpreadSheetTestRecord>();
+		for(int i = low; i <= high; i++)
+			helper.add(records.get(i));
+		
+		int i = low;
+		int j = mid + 1;
+		int k = low;
+		
+		while(i <= mid && j <= high)
+		{
+			
+		}
 	}
 }
