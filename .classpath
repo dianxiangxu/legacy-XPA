@@ -4,11 +4,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/home/turner/git/XPA/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/home/turner/git/XPA/lib/jdom-1.1.3.jar"/>
-	<classpathentry kind="lib" path="/home/turner/git/XPA/lib/poi-3.5-beta4-20081128.jar"/>
-	<classpathentry kind="lib" path="/home/turner/git/XPA/lib/poi-contrib-3.5-beta4-20081128.jar"/>
-	<classpathentry kind="lib" path="/home/turner/git/XPA/lib/poi-ooxml-3.5-beta4-20081128.jar"/>
-	<classpathentry kind="lib" path="/home/turner/git/XPA/lib/poi-scratchpad-3.5-beta4-20081128.jar"/>
+	<classpathentry kind="lib" path="/home/nshen/xpa/XPA/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/home/nshen/xpa/XPA/lib/jdom-1.1.3.jar"/>
+	<classpathentry kind="lib" path="/home/nshen/xpa/XPA/lib/poi-3.5-beta4-20081128.jar"/>
+	<classpathentry kind="lib" path="/home/nshen/xpa/XPA/lib/poi-contrib-3.5-beta4-20081128.jar"/>
+	<classpathentry kind="lib" path="/home/nshen/xpa/XPA/lib/poi-ooxml-3.5-beta4-20081128.jar"/>
+	<classpathentry kind="lib" path="/home/nshen/xpa/XPA/lib/poi-scratchpad-3.5-beta4-20081128.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

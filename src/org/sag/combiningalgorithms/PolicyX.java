@@ -1553,8 +1553,8 @@ public class PolicyX {
 					if (sat == true) {
 						z3.getValue(localcollector, nameMap);
 						String request = f.print(localcollector);
-						System.out.println(request);
-						System.out.println(PolicyEvaluate(policy, request));
+//						System.out.println(request);
+//						System.out.println(PolicyEvaluate(policy, request));
 						return request;
 					}
 				}
@@ -1581,7 +1581,7 @@ public class PolicyX {
 							// for indeterminate
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-							System.out.println(PolicyEvaluate(policy, request));
+//							System.out.println(PolicyEvaluate(policy, request));
 							return request;
 						}
 					}
@@ -1610,7 +1610,7 @@ public class PolicyX {
 							// localcollector.add(ind);
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-							System.out.println(PolicyEvaluate(policy, request));
+//							System.out.println(PolicyEvaluate(policy, request));
 							return request;
 						}
 					}
@@ -1643,7 +1643,7 @@ public class PolicyX {
 				if (sat == true) {
 					z3.getValue(localcollector, nameMap);
 					String request = f.print(localcollector);
-					System.out.println(PolicyEvaluate(policy, request));
+					//System.out.println(PolicyEvaluate(policy, request));
 					return request;
 				}
 			}
@@ -1662,7 +1662,7 @@ public class PolicyX {
 				if (sat == true) {
 					z3.getValue(localcollector, nameMap);
 					String request = f.print(localcollector);
-					System.out.println(PolicyEvaluate(policy, request));
+					//System.out.println(PolicyEvaluate(policy, request));
 					return request;
 				}
 			}
@@ -1679,7 +1679,7 @@ public class PolicyX {
 				z3.getValue(localcollector, nameMap);
 				localcollector.add(invalidAttr()); // at least one attribute
 				String request = f.print(localcollector);
-				System.out.println(PolicyEvaluate(policy, request));
+				//System.out.println(PolicyEvaluate(policy, request));
 				return request;
 			}
 		}
@@ -1713,7 +1713,7 @@ public class PolicyX {
 							// localcollector.add(ind);
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-							System.out.println(PolicyEvaluate(policy, request));
+							//System.out.println(PolicyEvaluate(policy, request));
 							return request;
 						}
 					}
@@ -1732,7 +1732,7 @@ public class PolicyX {
 				z3.getValue(localcollector, nameMap);
 				localcollector.add(invalidAttr());
 				String request = f.print(localcollector);
-				System.out.println(PolicyEvaluate(policy, request));
+				//System.out.println(PolicyEvaluate(policy, request));
 				return request;
 			}
 		}
@@ -1768,7 +1768,6 @@ public class PolicyX {
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
 							System.out.println(request);
-							System.out.println("Printl here");
 							return request;
 						}
 					}
@@ -1811,7 +1810,7 @@ public class PolicyX {
 								localcollector.add(invalidAttr());
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-							System.out.println(PolicyEvaluate(policy, request));
+							//System.out.println(PolicyEvaluate(policy, request));
 							return request;
 						}
 					}
@@ -1851,8 +1850,8 @@ public class PolicyX {
 																	// is empty
 								z3.getValue(localcollector, nameMap);
 								String request = f.print(localcollector);
-								System.out.println(PolicyEvaluate(policy,
-										request));
+//								System.out.println(PolicyEvaluate(policy,
+//										request));
 								return request;
 							}
 
@@ -1888,8 +1887,6 @@ public class PolicyX {
 							if (sat == true) {
 								z3.getValue(localcollector, nameMap);
 								String request = f.print(localcollector);
-								System.out.println(PolicyEvaluate(policy,
-										request));
 								return request;
 								// TODO here, need a test?
 							} else {
@@ -1910,8 +1907,6 @@ public class PolicyX {
 								sat = z3str(sb.toString(), nameMap, typeMap);
 								if (sat == true) {
 									String request = f.print(localcollector);
-									System.out.println(PolicyEvaluate(policy,
-											request));
 									return request;
 								}
 							}
@@ -1942,8 +1937,6 @@ public class PolicyX {
 																	// empty
 								z3.getValue(localcollector, nameMap);
 								String request = f.print(localcollector);
-								System.out.println(PolicyEvaluate(policy,
-										request));
 								return request;
 							} else {
 								// IP & D;
@@ -1964,8 +1957,7 @@ public class PolicyX {
 										localcollector.add(invalidAttr());
 									z3.getValue(localcollector, nameMap);
 									String request = f.print(localcollector);
-									System.out.println(PolicyEvaluate(policy,
-											request));
+									
 									return request;
 								}
 							}
@@ -2007,7 +1999,6 @@ public class PolicyX {
 								localcollector.add(invalidAttr());
 							}
 							String request = f.print(localcollector);
-							System.out.println(PolicyEvaluate(policy, request));
 							return request;
 						}
 					}
@@ -2027,7 +2018,6 @@ public class PolicyX {
 				localcollector.add(invalidAttr());
 				String request = f.print(localcollector);
 				System.out.println();
-				System.out.println(PolicyEvaluate(policy, request));
 				return request;
 			}
 		}
@@ -2057,7 +2047,6 @@ public class PolicyX {
 				if (sat == true) {
 					z3.getValue(localcollector, nameMap);
 					String request = f.print(localcollector);
-					System.out.println(PolicyEvaluate(policy, request));
 					return request;
 				}
 			}
@@ -2076,7 +2065,6 @@ public class PolicyX {
 				if (sat == true) {
 					z3.getValue(localcollector, nameMap);
 					String request = f.print(localcollector);
-					System.out.println(PolicyEvaluate(policy, request));
 					return request;
 				}
 			}
@@ -2093,7 +2081,6 @@ public class PolicyX {
 				z3.getValue(localcollector, nameMap);
 				localcollector.add(invalidAttr());
 				String request = f.print(localcollector);
-				System.out.println(PolicyEvaluate(policy, request));
 				return request;
 			}
 		}
@@ -2124,8 +2111,6 @@ public class PolicyX {
 							// localcollector.add(ind);
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-
-							System.out.println(PolicyEvaluate(policy, request));
 							return request;
 						}
 					}
@@ -2173,8 +2158,6 @@ public class PolicyX {
 							}
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-							System.out.println(RuleEvaluate(Rule.get(i),
-									request) + "Result");
 							return request;
 						}
 					}
@@ -2529,9 +2512,19 @@ public class PolicyX {
 	}
 
 	public int PolicyEvaluate(Policy policy, String request) {
+		RequestCtxFactory rc = new RequestCtxFactory();
+		AbstractRequestCtx ar = null;
+		try {
+			ar = rc.getRequestCtx(request);
+		} catch (ParsingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		XACML3EvaluationCtx ec;
-		ec = getEvaluationCtx(request);
-		// System.out.print(request);ReadPolicy.getPDPconfig()
+
+		ec = new XACML3EvaluationCtx(new RequestCtx(ar.getAttributesSet(),
+				ar.getDocumentRoot()), ReadPolicy.getPDPconfig());
+		// System.out.print(request);
 		return policy.evaluate(ec).getDecision();
 	}
 
