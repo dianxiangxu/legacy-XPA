@@ -4527,47 +4527,46 @@ public class PolicyX {
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 			function f = new function();
-			if(!policy.isTargetEmpty())
+			if(!policy.isTargetEmpty() || policy.isTargetEmpty())
 			{
 				Target policyTarget = (Target)policy.getTarget();
 				List<AnyOfSelection> anyOf = policyTarget.getAnyOfSelections();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				StringBuffer sb = new StringBuffer();
-				if(anyOf.size() != 0)
+				List<Rule> rules = getRuleFromPolicy(policy);
+				Rule r = rules.get(0);
+				sb.append(TruePolicyTarget(policy, collector) + "\n");
+				sb.append(TrueTarget_TrueCondition(r, collector) + "\n");
+				boolean sat = z3str(sb.toString(), nameMap, typeMap);
+				if(sat)
 				{
-					sb.append(True_Target(policyTarget, collector) + "\n");
-					boolean sat = z3str(sb.toString(), nameMap, typeMap);
-					if(sat)
+					System.out.println(nameMap.size() + " map size");
+					try
 					{
-						System.out.println(nameMap.size() + " map size");
-						try
-						{	
-							z3.getValue(collector, nameMap);
-							
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-						}
-						System.out.println(collector.size() + " collector size");
-						String request = f.print(collector);
-						try
-						{
-							String path = t.getTestOutputDestination("_MutationTests") 
-									+ File.separator + "requestPTF1.txt";
-							FileWriter fw = new FileWriter(path);
-							BufferedWriter bw = new BufferedWriter(fw);
-							bw.write(request);
-							bw.close();
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-						}
-						ptr = new PolicySpreadSheetTestRecord(PolicySpreadSheetTestSuite.TEST_KEYWORD
-								+ " PTF", "requestPTF1.txt", request, "");
-						generator.add(ptr);
+						z3.getValue(collector, nameMap);
 					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					System.out.println(collector.size() + " collection size");
+					
+					String request = f.print(collector);
+					try
+					{
+						String path = t.getTestOutputDestination("_MutationTests")
+								+ File.separator + "requestPTF1.txt";
+						BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+						bw.write(request);
+						bw.close();
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					ptr = new PolicySpreadSheetTestRecord(
+							PolicySpreadSheetTestSuite.TEST_KEYWORD + " PTF1",
+							"requestPTF1.txt", request, "");
 				}
 			}
 			return ptr;
@@ -7099,6 +7098,7 @@ public class PolicyX {
 								}
 							}
 						}
+						index++;
 					}
 					else
 					{
