@@ -65,7 +65,7 @@ public class PolicySpreadSheetMutantSuite {
 		// use absolute path. 11/17/14
 		//mutantFileName = mutantFolder.getAbsolutePath() + File.separator + mutantFileName;
 		int bugPosition;
-		try { 
+		try {
 			bugPosition = (int)Double.parseDouble(row.getCell(2).toString());
 		}
 		catch (Exception e){
