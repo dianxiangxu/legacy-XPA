@@ -830,6 +830,7 @@ public class MutationPanel2 extends JPanel {
 								{
 									valid.add(record);
 									validTests++;
+									break;
 								}
 								else
 									continue;
@@ -1238,6 +1239,8 @@ public class MutationPanel2 extends JPanel {
 							m.getNumber().indexOf(' ') + 1,
 							m.getNumber().length());
 					String mutant = mutator.getMutantFileName(mnum);
+					String req2 = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + m.getRequestFile();
 					if (validation(policy, mutant, req)
 							&& mnum.compareTo(testNum) != 0) {
 						String rem = testPanel
@@ -1251,7 +1254,22 @@ public class MutationPanel2 extends JPanel {
 						}
 						test[j] = null;
 						j--;
-					} else
+					} 
+					else if(checkResult(req, req2, mutant) && mnum.compareTo(testNum) != 0)
+					{
+						String rem = testPanel
+								.getTestOutputDestination("_MutationTests")
+								+ File.separator + m.getRequestFile();
+						Runtime run = Runtime.getRuntime();
+						try {
+							run.exec("sudo rm" + rem);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						test[j] = null;
+						j--;
+					}
+					else
 						i++;
 				} else
 					j--;
@@ -1279,6 +1297,8 @@ public class MutationPanel2 extends JPanel {
 							m.getNumber().indexOf(' ') + 1,
 							m.getNumber().length());
 					String mutant = mutator.getMutantFileName(mnum);
+					String req2 = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + m.getRequestFile();
 					if (validation(policy, mutant, req)
 							&& mnum.compareTo(testNum) != 0) {
 						String rem = testPanel
@@ -1292,7 +1312,22 @@ public class MutationPanel2 extends JPanel {
 						}
 						test[k] = null;
 						k++;
-					} else
+					} 
+					else if(checkResult(req, req2, mutant) && mnum.compareTo(testNum) != 0)
+					{
+						String rem = testPanel
+								.getTestOutputDestination("_MutationTests")
+								+ File.separator + m.getRequestFile();
+						Runtime run = Runtime.getRuntime();
+						try {
+							run.exec("sudo rm" + rem);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						test[k] = null;
+						k++;
+					}
+					else
 						l--;
 				} else
 					k++;
@@ -1318,6 +1353,8 @@ public class MutationPanel2 extends JPanel {
 							m.getNumber().indexOf(' ') + 1,
 							m.getNumber().length());
 					String mutant = mutator.getMutantFileName(mnum);
+					String req2 = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + m.getRequestFile();
 					if (validation(policy, mutant, req)
 							&& mnum.compareTo(testNum) != 0) {
 						String rem = testPanel
@@ -1331,7 +1368,22 @@ public class MutationPanel2 extends JPanel {
 						}
 						test[j] = null;
 						j++;
-					} else {
+					} 
+					else if(checkResult(req, req2, mutant) && mnum.compareTo(testNum) != 0)
+					{
+						String rem = testPanel
+								.getTestOutputDestination("_MutationTests")
+								+ File.separator + m.getRequestFile();
+						Runtime run = Runtime.getRuntime();
+						try {
+							run.exec("sudo rm" + rem);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						test[j] = null;
+						j++;
+					}
+					else {
 						i = j;
 						j = i + 1;
 						continue;
@@ -1360,6 +1412,8 @@ public class MutationPanel2 extends JPanel {
 							m.getNumber().indexOf(' ') + 1,
 							m.getNumber().length());
 					String mutant = mutator.getMutantFileName(mnum);
+					String req2 = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + m.getRequestFile();
 					if (validation(policy, mutant, req)
 							&& mnum.compareTo(testNum) != 0) {
 						String rem = testPanel
@@ -1373,171 +1427,9 @@ public class MutationPanel2 extends JPanel {
 						}
 						test[k] = null;
 						k--;
-					} else {
-						l = k;
-						k = l - 1;
-						continue;
-					}
-				} else
-					k--;
-			} else
-				l--;
-		}
-		i = 0;
-		j = test.length - 1;
-		k = i;
-		l = j;
-		
-		while (i < test.length && j >= 0) {
-			if (i == j) {
-				i++;
-				j--;
-				continue;
-			}
-			if (test[i] != null) {
-				PolicySpreadSheetTestRecord psstr = test[i];
-				String req = testPanel
-						.getTestOutputDestination("_MutationTests")
-						+ File.separator + psstr.getRequestFile();
-				String testNum = psstr.getNumber().substring(
-						psstr.getNumber().indexOf(' ') + 1,
-						psstr.getNumber().length());
-				if (test[j] != null) {
-					PolicySpreadSheetTestRecord m = test[j];
-					String mnum = m.getNumber().substring(
-							m.getNumber().indexOf(' ') + 1,
-							m.getNumber().length());
-					String mutant = mutator.getMutantFileName(mnum);
-					String req2 = testPanel.getTestOutputDestination("_MutationTests")
-							+ File.separator + m.getRequestFile();
-					if (checkResult(req, req2, mutant) && mnum.compareTo(testNum) != 0) {
-						String rem = testPanel
-								.getTestOutputDestination("_MutationTests")
-								+ File.separator + m.getRequestFile();
-						Runtime run = Runtime.getRuntime();
-						try {
-							run.exec("sudo rm" + rem);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						test[j] = null;
-						j--;
-					} else
-						i++;
-				} else
-					j--;
-			} else
-				i++;
-		}
-		
-		while (l >= 0 && k < test.length) {
-			if (k == l) {
-				k++;
-				l--;
-				continue;
-			}
-			if (test[l] != null) {
-				PolicySpreadSheetTestRecord psstr = test[l];
-				String req = testPanel
-						.getTestOutputDestination("_MutationTests")
-						+ File.separator + psstr.getRequestFile();
-				String testNum = psstr.getNumber().substring(
-						psstr.getNumber().indexOf(' ') + 1,
-						psstr.getNumber().length());
-				if (test[k] != null) {
-					PolicySpreadSheetTestRecord m = test[k];
-					String mnum = m.getNumber().substring(
-							m.getNumber().indexOf(' ') + 1,
-							m.getNumber().length());
-					String req2 = testPanel.getTestOutputDestination("_MutationTests")
-							+ File.separator + m.getRequestFile();
-					String mutant = mutator.getMutantFileName(mnum);
-					if (checkResult(req, req2, mutant) && mnum.compareTo(testNum) != 0) {
-						String rem = testPanel
-								.getTestOutputDestination("_MutationTests")
-								+ File.separator + m.getRequestFile();
-						Runtime run = Runtime.getRuntime();
-						try {
-							run.exec("sudo rm" + rem);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						test[k] = null;
-						k++;
-					} else
-						l--;
-				} else
-					k++;
-			} else
-				l--;
-		}
-		
-		i = 0;
-		j = i + 1;
-		while (j < test.length && i < test.length)// semi-iterative bottom up
-		{
-			if (test[i] != null) {
-				PolicySpreadSheetTestRecord psstr = test[i];
-				String req = testPanel
-						.getTestOutputDestination("_MutationTests")
-						+ File.separator + psstr.getRequestFile();
-				String testNum = psstr.getNumber().substring(
-						psstr.getNumber().indexOf(' ') + 1,
-						psstr.getNumber().length());
-				if (test[j] != null) {
-					PolicySpreadSheetTestRecord m = test[j];
-					String mnum = m.getNumber().substring(
-							m.getNumber().indexOf(' ') + 1,
-							m.getNumber().length());
-					String req2 = testPanel.getTestOutputDestination("_MutationTests")
-							+ File.separator + m.getRequestFile();
-					String mutant = mutator.getMutantFileName(mnum);
-					if (checkResult(req, req2, mutant)
-							&& mnum.compareTo(testNum) != 0) {
-						String rem = testPanel
-								.getTestOutputDestination("_MutationTests")
-								+ File.separator + m.getRequestFile();
-						Runtime run = Runtime.getRuntime();
-						try {
-							run.exec("sudo rm" + rem);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						test[j] = null;
-						j++;
-					} else {
-						i = j;
-						j = i + 1;
-						continue;
-					}
-				} else
-					j++;
-			} else
-				i++;
-		}
-		
-		l = test.length - 1;
-		k = l - 1;
-		while (l >= 0 && k >= 0)// semi-iterative top down
-		{
-			if (test[l] != null) {
-				PolicySpreadSheetTestRecord psstr = test[l];
-				String req = testPanel
-						.getTestOutputDestination("_MutationTests")
-						+ File.separator + psstr.getRequestFile();
-				String testNum = psstr.getNumber().substring(
-						psstr.getNumber().indexOf(' ') + 1,
-						psstr.getNumber().length());
-				if (test[k] != null) {
-					PolicySpreadSheetTestRecord m = test[k];
-					String mnum = m.getNumber().substring(
-							m.getNumber().indexOf(' ') + 1,
-							m.getNumber().length());
-					String req2 = testPanel.getTestOutputDestination("_MutationTests")
-							+ File.separator + m.getRequestFile();
-					String mutant = mutator.getMutantFileName(mnum);
-					if (checkResult(req, req2, mutant)
-							&& mnum.compareTo(testNum) != 0) {
+					} 
+					else if(checkResult(req, req2, mutant) && mnum.compareTo(testNum) != 0)
+					{
 						String rem = testPanel
 								.getTestOutputDestination("_MutationTests")
 								+ File.separator + m.getRequestFile();
@@ -1549,7 +1441,8 @@ public class MutationPanel2 extends JPanel {
 						}
 						test[k] = null;
 						k--;
-					} else {
+					}
+					else {
 						l = k;
 						k = l - 1;
 						continue;
@@ -1559,7 +1452,6 @@ public class MutationPanel2 extends JPanel {
 			} else
 				l--;
 		}
-		
 		valid = new ArrayList<PolicySpreadSheetTestRecord>();
 		for (PolicySpreadSheetTestRecord r : test)
 			if (r != null)
