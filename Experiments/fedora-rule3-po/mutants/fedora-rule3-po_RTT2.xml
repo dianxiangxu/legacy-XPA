@@ -1,0 +1,24 @@
+<Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" PolicyId="fedora" Version="1.0" RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:permit-overrides">
+<Target>
+</Target>
+<Rule RuleId="rule2" Effect="Deny"  >
+<Target>
+<AnyOf>
+<AllOf>
+<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Inactive</AttributeValue><AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource" MustBePresent="true"/>
+</Match>
+</AllOf>
+</AnyOf>
+</Target>
+<Condition>
+<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not">
+<Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-is-in">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">administrator</AttributeValue><AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id" DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject" MustBePresent="true"/>
+</Apply>
+</Apply>
+</Condition>
+</Rule>
+<Rule RuleId="rule5" Effect="Deny"  >
+</Rule>
+</Policy>
