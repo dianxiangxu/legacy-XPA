@@ -1,0 +1,17 @@
+If you receive conflicts when attempting to pull, delete the local files it says are conflicting. If that still doesn't work, go to the repo and delete the files there. You will be overwriting these files anyways when you run the program so everything should turn out fine.
+
+After an initial pull, you'll still get the /bin/ directory with the compiled .class files, but you'll also get the .gitignore file saying to ignore the /bin/ directory. You'll want to run a clean from within Eclipse and then rebuild the project so the .class files are recompiled for your machine. To do that, do the following:
+
+
+1. From Eclipse go to Project -> Clean...
+2. Select "Clean all projects"
+3. Uncheck "Build immediately"
+4. Click "Ok"
+5a. Add the required libraries again to your project
+5b. After that process has completed, go to Project -> Build all
+6. This will recompile all the code for your machine
+7. (Optional) You can now also go to Project -> Build automatically so that your code is compile on the fly when you save it.
+
+NOTE: Don't forget to change the path to Z3-str.py in Call_Z3-str to the absolute path to your copy of Z3-str.py
+
+This will remove any .class files from your /bin/ directory. You'll now have the .gitignore file too. Any future pulls or pushes should ignore your /bin/ directory and the /bin/ directory in the repo so that no .class files are pushed/pulled from the repo
