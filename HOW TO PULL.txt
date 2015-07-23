@@ -15,3 +15,5 @@ After an initial pull, you'll still get the /bin/ directory with the compiled .c
 NOTE: Don't forget to change the path to Z3-str.py in Call_Z3-str to the absolute path to your copy of Z3-str.py
 
 This will remove any .class files from your /bin/ directory. You'll now have the .gitignore file too. Any future pulls or pushes should ignore your /bin/ directory and the /bin/ directory in the repo so that no .class files are pushed/pulled from the repo
+
+Additionally, when pushing, for some reason Eclipse/Egit still wants to push the MutationPanel2.class file even though it's in the .gitignore file. When pushing from Eclipse you'll want to enter .class in the "Filter text" field of the commit window and uncheck MutationPanel2.class and any other .class files it wants to push (even though it should be ignoring them).
