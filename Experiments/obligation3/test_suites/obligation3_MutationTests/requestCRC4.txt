@@ -9,8 +9,8 @@
 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">http://server.example.com/sensitive/.*</AttributeValue>
 </Attribute>
 </Attributes>
-<Attributes Category="25870bnomx">
-<Attribute AttributeId="in62ybbepo" IncludeInResult = "false">
+<Attributes Category="19ihhr8r2f">
+<Attribute AttributeId="pkk0snekr8" IncludeInResult = "false">
 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
 </Attribute>
 </Attributes>
