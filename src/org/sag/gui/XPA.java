@@ -52,6 +52,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.pack();
 				frame.setVisible(true);
+				
 			}
 		});
 	}

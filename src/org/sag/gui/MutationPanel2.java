@@ -294,6 +294,7 @@ public class MutationPanel2 extends JPanel {
 		int result = JOptionPane.showConfirmDialog(xpa, createPanel(),
 				"Please Select Mutation Methods", JOptionPane.OK_CANCEL_OPTION);
 		String policyPath = xpa.getWorkingPolicyFilePath();
+		
 		int mlistIndex = 0;
 		int tlistIndex = 0;
 
@@ -613,6 +614,18 @@ public class MutationPanel2 extends JPanel {
 						+ totalOptimizationTime / 1000.00);
 				if (valid.size() > 0)
 					System.out.println("Optimal tests: " + valid.size());
+				
+				String dir = xpa.getWorkingPolicyFile().getParent();
+				System.err.println(dir);
+				Runtime run = Runtime.getRuntime();
+				try
+				{
+					run.exec("sudo chmod -R 777 " + dir);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 
 				try {
 					testSuite = new PolicySpreadSheetTestSuite(valid,
@@ -1248,7 +1261,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1262,7 +1275,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1306,7 +1319,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1320,7 +1333,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1362,7 +1375,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1376,7 +1389,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1421,7 +1434,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1435,7 +1448,7 @@ public class MutationPanel2 extends JPanel {
 								+ File.separator + m.getRequestFile();
 						Runtime run = Runtime.getRuntime();
 						try {
-							run.exec("sudo rm" + rem);
+							run.exec("sudo rm " + rem);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -1459,11 +1472,24 @@ public class MutationPanel2 extends JPanel {
 	}
 
 	private void removeDuplicates(ArrayList<PolicySpreadSheetTestRecord> records) {
+		Runtime run = Runtime.getRuntime();
 		for (int i = 0; i < records.size(); i++) {
 			String req = records.get(i).getRequest();
 			for (int j = i + 1; j < records.size(); j++) {
 				if (records.get(j).getRequest().compareTo(req) == 0)
+				{
+					String rem = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + records.get(j).getRequestFile();
 					records.remove(j);
+					try
+					{
+						run.exec("sudo rm " + rem);
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 	}

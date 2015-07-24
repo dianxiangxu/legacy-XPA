@@ -262,7 +262,16 @@ public class MutationPanel extends JPanel {
 				if (boxRPCE.isSelected()) {
 					policyMutator.createRemoveParallelConditionElementMutants();
 				}
-				
+				String dir = xpa.getWorkingPolicyFile().getParent();
+				Runtime run = Runtime.getRuntime();
+				try
+				{
+					run.exec("sudo chmod -R 777 " + dir);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
 				mutantSuite = policyMutator.generateMutants(); // write to spreadsheet				
 				setUpMutantPanel();
 			} catch (Exception e) {

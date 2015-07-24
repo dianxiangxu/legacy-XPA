@@ -171,6 +171,7 @@ public class TestPanel extends JPanel {
 		int result = JOptionPane.showConfirmDialog(xpa, createPanel(),
 				"Please Select Test Generation Strategy",
 				JOptionPane.OK_CANCEL_OPTION);
+		
 		if (result == JOptionPane.OK_OPTION) {
 			loadPolicy lp = new loadPolicy();
 			Policy policy = lp.getPolicy(xpa.getWorkingPolicyFilePath());
@@ -226,7 +227,18 @@ public class TestPanel extends JPanel {
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage_NoError");
 				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
-			} 
+			}
+			
+			String dir = xpa.getWorkingPolicyFile().getParent();
+			Runtime run = Runtime.getRuntime();
+			try
+			{
+				run.exec("sudo chmod -R 777 " + dir);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 
 			try {
 				testSuite = new PolicySpreadSheetTestSuite(
