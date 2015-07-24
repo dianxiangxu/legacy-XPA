@@ -5608,6 +5608,7 @@ public class PolicyX {
 			{
 				generator.add(ptr);
 				count++;
+				//updateRequestList(generator, ptr.getRequest(), count - 1);
 			}
 		}
 	}
@@ -8320,5 +8321,22 @@ public class PolicyX {
 				return true;
 		}
 		return false;
+	}
+	
+	private void updateRequestList(ArrayList<PolicySpreadSheetTestRecord> generator, String request, int stop)
+	{
+		List<Rule> rules = getRuleFromPolicy(policy);
+		Rule cur = rules.get(stop);
+		for(int i = 0; i < stop; i++)
+		{
+			Rule rule = rules.get(i);
+			if(isDefaultRule(rule))
+				continue;
+			else
+			{
+				if(RuleEvaluate(rule, request) == RuleEvaluate(cur, request))
+					generator.remove(i);
+			}
+		}
 	}
 }

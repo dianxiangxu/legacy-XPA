@@ -315,9 +315,10 @@ public class TestPanel extends JPanel {
 			for (Vector<Object> child : data) {
 				count++;
 				child.set(3, child.get(4));
+				
 				PolicySpreadSheetTestRecord record = new PolicySpreadSheetTestRecord(
-						PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + count,
-						"request" + count + ".txt", child.get(6).toString(),
+						child.get(1).toString(),
+						child.get(2).toString(), child.get(6).toString(),
 						child.get(3).toString());
 				recordList.add(record);
 			}
