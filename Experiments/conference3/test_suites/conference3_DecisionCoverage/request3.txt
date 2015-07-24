@@ -1,12 +1,12 @@
 <Request xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" CombinedDecision="false" ReturnPolicyIdList="false">
-<Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource">
-<Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" IncludeInResult = "false">
-<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">ILORUX0369cfilor</AttributeValue>
-</Attribute>
-</Attributes>
 <Attributes Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action">
 <Attribute AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" IncludeInResult = "false">
-<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">JMP</AttributeValue>
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">0</AttributeValue>
+</Attribute>
+</Attributes>
+<Attributes Category="55s21l3xia">
+<Attribute AttributeId="fusz1qhd91" IncludeInResult = "false">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
 </Attribute>
 </Attributes>
 </Request>
