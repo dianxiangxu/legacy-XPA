@@ -1,0 +1,8 @@
+DO NOT PUSH
+- .xml files
+- anything related to coverage based tests
+- Call_Z3str.java
+- Z3_input
+- Z3_output
+
+Before pushing make sure these are unchecked in the commit window. They make it almost impossible to pull/fetch & merge from the repo. 
