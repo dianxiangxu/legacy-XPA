@@ -76,6 +76,16 @@ public class PolicyX {
 	Call_Z3str z3 = new Call_Z3str();
 	public HashMap nameMap = new HashMap();
 	public HashMap typeMap = new HashMap();
+	
+	private boolean[][] rule_table;
+	private final int TRUE_TRUE = 0;
+	private final int TRUE_FALSE = 1;
+	private final int FALSE_TRUE = 2;
+	private final int FALSE_FALSE = 3;
+	private final int ALL_OF = 4;
+	private final int ANY_OF = 5;
+	private final int ELEMENT = 6;
+	
 
 	private String getName(String name) {
 		boolean has = true;
@@ -120,6 +130,7 @@ public class PolicyX {
 	public PolicyX(Policy policy) {
 		this.policy = policy;
 		this.policyName = policy.getId().toString();
+		this.rule_table = new boolean[getRuleFromPolicy(policy).size()][7];
 		// System.out.println(policyName);
 	}
 
@@ -2454,8 +2465,9 @@ public class PolicyX {
 
 		XACML3EvaluationCtx ec;
 		ec = getEvaluationCtx(request);
-
+		
 		match = target.match(ec);
+		System.err.println("We are here " + match.getResult());
 		return match.getResult();
 
 	}
@@ -2775,6 +2787,7 @@ public class PolicyX {
 	}
 
 	public boolean z3str(String input, HashMap nameMap, HashMap typeMap) {
+		System.err.println("Building z3 input");
 		z3.buildZ3Input(input, nameMap, typeMap);
 		z3.buildZ3Output();
 		if (z3.checkConflict() == true) {
@@ -4567,7 +4580,7 @@ public class PolicyX {
 	
 	//Turner Lehmbecker
 	//WIP: Generate RTT requests and z3-str input
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleTargetTrue(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleTargetTrue(TestPanel t, boolean opt)
 	{
 		//PolicySpreadSheetTestRecord ptr = null;
 		//function f = new function();
@@ -4603,14 +4616,14 @@ public class PolicyX {
 					//Step 2 of Condition 2: Generate tests for each rule and ensure reachability to each rule
 					System.out.println("Default rule exists, but tests can be generated");
 					if(allDenyRules(rules, rules.size() - 1))
-						buildRTTRequests_override(rules, generator, t, 1);
+						buildRTTRequests_override(rules, generator, t, 1, opt);
 					else
 					{
 						//Condition 2, Step 2: Mixture of rules for policy
 						//Result: Normal test generation
 						
 						//Step 1 of Condition 2: Generate requests for rules 0 -> n-1
-						buildRTTRequests_override(rules, generator, t, 0);
+						buildRTTRequests_override(rules, generator, t, 0, opt);
 						
 					}
 				}
@@ -4621,11 +4634,11 @@ public class PolicyX {
 			{
 				System.out.println("No default rule exists, generating tests as normal...");
 				if(allDenyRules(rules, rules.size()))
-					buildRTTRequests_override(rules, generator, t, 1);
+					buildRTTRequests_override(rules, generator, t, 1, opt);
 				else
 					//Condition 2 of Result 2: Policy contains a mixture of rules
 					//Result: Generate requests as normal
-					buildRTTRequests_override(rules, generator, t, 0);
+					buildRTTRequests_override(rules, generator, t, 0, opt);
 			}
 			return generator;
 		}
@@ -4652,14 +4665,14 @@ public class PolicyX {
 					System.out.println("Default rule exists, generate tests up to rule n-1");
 					//Step 2 of Condition 1: Generate requests up to n-1
 					if(allPermitRules(rules, rules.size() -1))
-						buildRTTRequests_override(rules, generator, t, 0);
+						buildRTTRequests_override(rules, generator, t, 0, opt);
 					else
 					{
 						//Condition 2, Step 2: Mixture of rules
 						//Result: Generate requests as normal
 						
 						//Step 1, Condition 2: Generate requests for rules
-						buildRTTRequests_override(rules, generator, t, 1);
+						buildRTTRequests_override(rules, generator, t, 1, opt);
 					}
 				}
 			}
@@ -4668,11 +4681,11 @@ public class PolicyX {
 				//Condition 2 of Step 1: no default rule exists
 				System.out.println("No default rule exists, test generation will continue as normal...");
 				if(f.allPermitRule(policy))
-					buildRTTRequests_override(rules, generator, t, 0);
+					buildRTTRequests_override(rules, generator, t, 0, opt);
 				else
 					//Condition 2 of Step 1, Condition 2: Policy contains a mixture of rules
 					//Result: Generate requests as normal
-					buildRTTRequests_override(rules, generator, t, 1);
+					buildRTTRequests_override(rules, generator, t, 1, opt);
 			}
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
@@ -4697,7 +4710,7 @@ public class PolicyX {
 						return generator;
 					}
 					else
-						buildRTTRequests_unless(rules, generator, t, 0);
+						buildRTTRequests_unless(rules, generator, t, 0, opt);
 				}
 			}
 			else if(f.allDenyRule(policy))
@@ -4709,7 +4722,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRTTRequests_unless(rules, generator, t, 0);
+				buildRTTRequests_unless(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
@@ -4735,7 +4748,7 @@ public class PolicyX {
 					}
 					else
 					{
-						buildRTTRequests_unless(rules, generator, t, 1);
+						buildRTTRequests_unless(rules, generator, t, 1, opt);
 					}
 				}
 			}
@@ -4748,7 +4761,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRTTRequests_unless(rules, generator, t, 1);
+				buildRTTRequests_unless(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
@@ -4760,14 +4773,14 @@ public class PolicyX {
 				//so that mutant returns that rule's effect, policy returns N/A
 				//Set all other rules with same effect as default to false
 				//Those rules with different effect, set to target true, condition false
-				build_DefaultRTTRequests_FA(rules, def, generator, t);
+				build_DefaultRTTRequests_FA(rules, def, generator, t, opt);
 			}
 			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
 			{
-				build_allOne_RequestsFalse(rules, generator, t, "RTT");
+				build_allOne_RequestsFalse(rules, generator, t, "RTT", opt);
 			}
 			else
-				buildRTTRequests_FA(rules, generator, t);
+				buildRTTRequests_FA(rules, generator, t, opt);
 			return generator;
 		}
 		else
@@ -4775,7 +4788,7 @@ public class PolicyX {
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveParallelTargetElement(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveParallelTargetElement(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -4793,11 +4806,11 @@ public class PolicyX {
 				}
 				else
 				{
-					buildRPTERequests_override(rules, generator, t);
+					buildRPTERequests_override(rules, generator, t, opt);
 				}
 			}
 			else
-				buildRPTERequests_override(rules, generator, t);
+				buildRPTERequests_override(rules, generator, t, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyOverridesRuleAlg)
@@ -4810,10 +4823,10 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRPTERequests_override(rules, generator, t);
+					buildRPTERequests_override(rules, generator, t, opt);
 			}
 			else
-				buildRPTERequests_override(rules, generator, t);
+				buildRPTERequests_override(rules, generator, t, opt);
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
 		{
@@ -4830,7 +4843,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRPTERequests_unless(rules, generator, t, 1);
+					buildRPTERequests_unless(rules, generator, t, 1, opt);
 			}
 			else if(f.allPermitRule(policy))
 			{
@@ -4838,7 +4851,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRPTERequests_unless(rules, generator, t, 1);
+				buildRPTERequests_unless(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
@@ -4856,7 +4869,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRPTERequests_unless(rules, generator, t, 0);
+					buildRPTERequests_unless(rules, generator, t, 0, opt);
 			}
 			else if(f.allDenyRule(policy))
 			{
@@ -4864,17 +4877,17 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRPTERequests_unless(rules, generator, t, 0);
+				buildRPTERequests_unless(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
 			if(def != null)
-				buildDefaultRPTERequests(rules, def, generator, t);
+				buildDefaultRPTERequests(rules, def, generator, t, opt);
 			else if(f.allPermitRule(policy) || f.allDenyRule(policy))
-				buildRPTERequests_override(rules, generator, t);
+				buildRPTERequests_override(rules, generator, t, opt);
 			else
-				buildRPTERequests_FA(rules, generator, t);
+				buildRPTERequests_FA(rules, generator, t, opt);
 		}
 		else
 			System.err.println("Combining algorithm not currently supported");
@@ -4884,7 +4897,7 @@ public class PolicyX {
 	
 	//Turner Lehmbecker
 	//WIP: Generate RTF requests and RTF z3-str input
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleTargetFalse(TestPanel t, PolicyMutator m)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleTargetFalse(TestPanel t, PolicyMutator m, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -4899,25 +4912,25 @@ public class PolicyX {
 				System.out.println("Default rule exists, but tests can be generated");
 				if(allDenyRules(rules, rules.size() - 1))
 				{
-					buildRTFRequests_override(rules, generator, t, 1);
+					buildRTFRequests_override(rules, generator, t, 1, opt);
 				}
 				//else if(allPermitRules(rules, rules.size() -1))
 					//build_OnlyOne_Request_true(rules, generator, t, 0, count, "RTF");
 				else
 				{
-					buildRTFRequests_override(rules, generator, t, 0);
+					buildRTFRequests_override(rules, generator, t, 0, opt);
 				}
 			}
 			else
 			{
 				if(allDenyRules(rules,rules.size()))
 				{
-					buildRTFRequests_override(rules, generator, t, 1);
+					buildRTFRequests_override(rules, generator, t, 1, opt);
 				}
 				//else if(f.allPermitRule(policy))
 					//build_OnlyOne_Request_false(rules, generator, t, 0, count, "RTF");
 				else
-					buildRTFRequests_override(rules, generator, t, 0);
+					buildRTFRequests_override(rules, generator, t, 0, opt);
 			}
 			return generator;
 		}
@@ -4928,23 +4941,23 @@ public class PolicyX {
 				System.out.println("Default rule exists, but tests can be generated");
 				if(allPermitRules(rules, rules.size() - 1))
 				{
-					buildRTFRequests_override(rules, generator, t, 0);
+					buildRTFRequests_override(rules, generator, t, 0, opt);
 				}
 				//else if(allDenyRules(rules, rules.size() - 1))
 					//build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTF");
 				else
 				{
-					buildRTFRequests_override(rules, generator, t, 1);
+					buildRTFRequests_override(rules, generator, t, 1, opt);
 				}
 			}
 			else
 			{
 				if(allPermitRules(rules, rules.size()))
-					buildRTFRequests_override(rules, generator, t, 0);
+					buildRTFRequests_override(rules, generator, t, 0, opt);
 				//else if(f.allDenyRule(policy))
 					//build_OnlyOne_Request_false(rules, generator, t, 1, count, "RTF");
 				else
-					buildRTFRequests_override(rules, generator, t, 1);
+					buildRTFRequests_override(rules, generator, t, 1, opt);
 			}
 			return generator;
 		}
@@ -4959,7 +4972,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRTFRequests_unless(rules, generator, t, 0);
+				buildRTFRequests_unless(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
@@ -4973,19 +4986,19 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRTFRequests_unless(rules, generator, t, 1);
+				buildRTFRequests_unless(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
 			if(def != null)
 			{
-				build_DefaultRTFRequests_FA(rules, def, generator, t);
+				build_DefaultRTFRequests_FA(rules, def, generator, t, opt);
 			}
 			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
-				build_allOne_RequestsTrue(rules, generator, t, "RTF");
+				build_allOne_RequestsTrue(rules, generator, t, "RTF", opt);
 			else
-				buildRTFRequests_FA(rules, generator, t);
+				buildRTFRequests_FA(rules, generator, t, opt);
 			return generator;
 		}
 		else
@@ -4993,7 +5006,7 @@ public class PolicyX {
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleConditionTrue(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleConditionTrue(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -5017,17 +5030,17 @@ public class PolicyX {
 				{
 					System.out.println("Default rule exists, but tests can be generated");
 					if(allDenyRules(rules, rules.size()-1))
-						buildRCTRequests_override(rules, generator, t, 1);
+						buildRCTRequests_override(rules, generator, t, 1, opt);
 					else
 					{
-						buildRCTRequests_override(rules, generator, t, 0);
+						buildRCTRequests_override(rules, generator, t, 0, opt);
 					}
 				}
 			}
 			else if(f.allDenyRule(policy))
-				buildRCTRequests_override(rules, generator, t, 1);
+				buildRCTRequests_override(rules, generator, t, 1, opt);
 			else
-				buildRCTRequests_override(rules, generator, t, 0);
+				buildRCTRequests_override(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyOverridesRuleAlg)
@@ -5040,18 +5053,18 @@ public class PolicyX {
 					return generator;
 				}
 				else if(allPermitRules(rules, rules.size() - 1))
-					buildRCTRequests_override(rules, generator, t, 0);
+					buildRCTRequests_override(rules, generator, t, 0, opt);
 				else
 				{
-					buildRCTRequests_override(rules, generator, t, 1);
+					buildRCTRequests_override(rules, generator, t, 1, opt);
 				}
 					
 			}
 			else if(f.allPermitRule(policy))
-				buildRCTRequests_override(rules, generator, t, 0);
+				buildRCTRequests_override(rules, generator, t, 0, opt);
 			else
 			{
-				buildRCTRequests_override(rules, generator, t, 1);
+				buildRCTRequests_override(rules, generator, t, 1, opt);
 			}
 			return generator;
 		}
@@ -5065,7 +5078,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRCTRequests_unless(rules, generator, t, 0);
+					buildRCTRequests_unless(rules, generator, t, 0, opt);
 			}
 			else if(f.allDenyRule(policy))
 			{
@@ -5073,7 +5086,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRCTRequests_unless(rules, generator, t, 0);
+				buildRCTRequests_unless(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
@@ -5086,7 +5099,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRCTRequests_unless(rules, generator, t, 1);
+					buildRCTRequests_unless(rules, generator, t, 1, opt);
 			}
 			else if(f.allPermitRule(policy))
 			{
@@ -5094,17 +5107,17 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRCTRequests_unless(rules, generator, t, 1);
+				buildRCTRequests_unless(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
 			if(def != null)
-				build_DefaultRCTRequests_FA(rules, def, generator, t);
+				build_DefaultRCTRequests_FA(rules, def, generator, t, opt);
 			else if(f.allPermitRule(policy) || f.allDenyRule(policy))
-				build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT");
+				build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT", opt);
 			else
-				buildRCTRequests_FA(rules, generator, t);
+				buildRCTRequests_FA(rules, generator, t, opt);
 			return generator;	
 		}
 		else
@@ -5113,7 +5126,7 @@ public class PolicyX {
 	}
 	
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleConditionFalse(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RuleConditionFalse(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -5124,20 +5137,20 @@ public class PolicyX {
 		{
 			if(f.allDenyRule(policy))
 			{
-				buildRCFRequests_override(rules, generator, t, 1);
+				buildRCFRequests_override(rules, generator, t, 1, opt);
 			}
 			else
-				buildRCFRequests_override(rules, generator, t, 0);
+				buildRCFRequests_override(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyOverridesRuleAlg)
 		{
 			if(f.allPermitRule(policy))
 			{
-				buildRCFRequests_override(rules, generator, t, 0);
+				buildRCFRequests_override(rules, generator, t, 0, opt);
 			}
 			else
-				buildRCFRequests_override(rules, generator, t, 1);
+				buildRCFRequests_override(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
@@ -5148,7 +5161,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRCFRequests_unless(rules, generator, t, 1);
+				buildRCFRequests_unless(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
@@ -5159,23 +5172,23 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRCFRequests_unless(rules, generator, t, 0);
+				buildRCFRequests_unless(rules, generator, t, 0, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
 			if(def != null)	
-				build_DefaultRCFRequests_FA(rules, def, generator, t);
+				build_DefaultRCFRequests_FA(rules, def, generator, t, opt);
 			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
-				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF");
+				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF", opt);
 			else
-				buildRCFRequests_FA(rules, generator, t);
+				buildRCFRequests_FA(rules, generator, t, opt);
 			return generator;
 		}
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveNotFunction(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveNotFunction(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -5192,14 +5205,14 @@ public class PolicyX {
 					return generator;
 				}
 				else if(f.allDenyRule(policy))
-					buildRNFRequests_override(rules, generator, t, 1);
+					buildRNFRequests_override(rules, generator, t, 1, opt);
 				else
-					buildRNFRequests_override(rules, generator, t, 0);
+					buildRNFRequests_override(rules, generator, t, 0, opt);
 			}
 			else if(f.allDenyRule(policy))
-				buildRNFRequests_override(rules, generator, t, 1);
+				buildRNFRequests_override(rules, generator, t, 1, opt);
 			else
-				buildRNFRequests_override(rules, generator, t, 0);
+				buildRNFRequests_override(rules, generator, t, 0, opt);
 		}
 		else if(cmbAlg instanceof DenyOverridesRuleAlg)
 		{
@@ -5211,15 +5224,15 @@ public class PolicyX {
 					return generator;
 				}
 				else if(f.allPermitRule(policy))
-					buildRNFRequests_override(rules, generator, t, 0);
+					buildRNFRequests_override(rules, generator, t, 0, opt);
 				else
-					buildRNFRequests_override(rules, generator, t, 1);
+					buildRNFRequests_override(rules, generator, t, 1, opt);
 			}
 			else if(f.allPermitRule(policy))
-				buildRNFRequests_override(rules, generator, t, 0);
+				buildRNFRequests_override(rules, generator, t, 0, opt);
 			else
 			{
-				buildRNFRequests_override(rules, generator, t, 1);
+				buildRNFRequests_override(rules, generator, t, 1, opt);
 			}
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
@@ -5237,7 +5250,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRNFRequests_unless(rules, generator, t, 1);
+					buildRNFRequests_unless(rules, generator, t, 1, opt);
 			}
 			else if(f.allPermitRule(policy))
 			{
@@ -5245,7 +5258,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRNFRequests_unless(rules, generator, t, 1);
+				buildRNFRequests_unless(rules, generator, t, 1, opt);
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
 		{
@@ -5262,7 +5275,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildRNFRequests_unless(rules, generator, t, 0);
+					buildRNFRequests_unless(rules, generator, t, 0, opt);
 			}
 			else if(f.allDenyRule(policy))
 			{
@@ -5270,29 +5283,32 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildRNFRequests_unless(rules, generator, t, 0);
+				buildRNFRequests_unless(rules, generator, t, 0, opt);
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
 			if(def != null)
-				buildRNFRequests_default(rules, def, generator, t);
+				buildRNFRequests_default(rules, def, generator, t, opt);
 			else if(f.allDenyRule(policy) || f.allPermitRule(policy))
-				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RNF");
+				build_AllOne_ConditionRequestsTrue(rules, generator, t, "RNF", opt);
 			else
-				buildRNFRequests_FA(rules, generator, t);
+				buildRNFRequests_FA(rules, generator, t, opt);
 		}
 		else
 			System.err.println("Combining algorithm not current supported");
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_FlipRuleEffect(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_FlipRuleEffect(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		List<Rule> rules = getRuleFromPolicy(policy);
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_TRUE] == true)
+				continue;
+			Rule r = rules.get(i);
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -5300,6 +5316,8 @@ public class PolicyX {
 			ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "CRE");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
@@ -5307,7 +5325,7 @@ public class PolicyX {
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveOneRule(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_RemoveOneRule(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		List<Rule> rules = getRuleFromPolicy(policy);
@@ -5328,9 +5346,12 @@ public class PolicyX {
 			if(!allDeny)
 				allPermit = f.allPermitRule(policy);
 		}
-		int count = 1;
-		for(Rule r : rules)
+		int count = 1, tpos = TRUE_TRUE;
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][tpos] == true)
+				continue;
+			Rule r = rules.get(i);
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
@@ -5346,7 +5367,10 @@ public class PolicyX {
 				else if(r.getEffect() == 0)
 					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
 				else
+				{
+					tpos = FALSE_TRUE;
 					buildRequest_false(rules, r, sb, collector, count, t, rules.size(), "RER");
+				}
 			}
 			else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
 			{
@@ -5360,7 +5384,10 @@ public class PolicyX {
 				else if(r.getEffect() == 1)
 					ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RER");
 				else
+				{
+					tpos = FALSE_TRUE;
 					buildRequest_false(rules, r, sb, collector, count, t, rules.size(), "RER");
+				}
 			}
 			else
 			{
@@ -5369,14 +5396,16 @@ public class PolicyX {
 			}
 			if(ptr != null)
 			{
+				//checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 				generator.add(ptr);
 				count++;
 			}
+			tpos = TRUE_TRUE;
 		}
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_AddNotFunction(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_AddNotFunction(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		List<Rule> rules = getRuleFromPolicy(policy);
@@ -5393,10 +5422,10 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildANFRequests_override(rules, generator, t);
+					buildANFRequests_override(rules, generator, t, opt);
 			}
 			else
-				buildANFRequests_override(rules, generator, t);
+				buildANFRequests_override(rules, generator, t, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyOverridesRuleAlg)
@@ -5409,10 +5438,10 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildANFRequests_override(rules, generator, t);
+					buildANFRequests_override(rules, generator, t, opt);
 			}
 			else
-				buildANFRequests_override(rules, generator, t);
+				buildANFRequests_override(rules, generator, t, opt);
 		}
 		else if(cmbAlg instanceof PermitUnlessDenyRuleAlg)
 		{
@@ -5429,7 +5458,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildANFRequests_unless(rules, generator, t, 1);
+					buildANFRequests_unless(rules, generator, t, 1, opt);
 			}
 			else if(f.allPermitRule(policy))
 			{
@@ -5437,7 +5466,7 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildANFRequests_unless(rules, generator, t, 1);
+				buildANFRequests_unless(rules, generator, t, 1, opt);
 			return generator;
 		}
 		else if(cmbAlg instanceof DenyUnlessPermitRuleAlg)
@@ -5455,7 +5484,7 @@ public class PolicyX {
 					return generator;
 				}
 				else
-					buildANFRequests_unless(rules, generator, t, 0);
+					buildANFRequests_unless(rules, generator, t, 0, opt);
 			}
 			else if(f.allDenyRule(policy))
 			{
@@ -5463,23 +5492,23 @@ public class PolicyX {
 				return generator;
 			}
 			else
-				buildANFRequests_unless(rules, generator, t, 0);
+				buildANFRequests_unless(rules, generator, t, 0, opt);
 		}
 		else if(cmbAlg instanceof FirstApplicableRuleAlg)
 		{
 			if(def != null)
-				buildANFRequests_default(rules, def, generator, t);
+				buildANFRequests_default(rules, def, generator, t, opt);
 			if(f.allDenyRule(policy) || f.allPermitRule(policy))
-				build_AllOne_ConditionRequestsFalse(rules, generator, t, "ANF");
+				build_AllOne_ConditionRequestsFalse(rules, generator, t, "ANF", opt);
 			else
-				buildANFRequests_FA(rules, generator, t);
+				buildANFRequests_FA(rules, generator, t, opt);
 		}
 		else
 			System.err.println("Combining algorithm not currently supported");
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_FirstDenyRule(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_FirstDenyRule(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -5495,15 +5524,22 @@ public class PolicyX {
 			}
 			else
 			{
-				for(Rule r : rules)
+				for(int i = 0; i < rules.size(); i++)
 				{
+					Rule r = rules.get(i);
 					StringBuffer sb = new StringBuffer();
 					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 					PolicySpreadSheetTestRecord ptr = null;
 					if(r.getEffect() == 0)
+					{
 						ptr = buildRequest_trueFA(rules, r, sb, collector, count, t, "FDR");
+						if(rule_table[i][TRUE_TRUE] == true)
+							break;
+					}
 					if(ptr != null)
 					{
+						if(opt)
+							checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 						generator.add(ptr);
 						break;
 					}
@@ -5515,7 +5551,7 @@ public class PolicyX {
 		return generator;
 	}
 	
-	public ArrayList<PolicySpreadSheetTestRecord> generate_FirstPermitRule(TestPanel t)
+	public ArrayList<PolicySpreadSheetTestRecord> generate_FirstPermitRule(TestPanel t, boolean opt)
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
@@ -5531,15 +5567,22 @@ public class PolicyX {
 			}
 			else
 			{
-				for(Rule r : rules)
+				for(int i = 0; i < rules.size(); i++)
 				{
+					Rule r = rules.get(i);
 					StringBuffer sb = new StringBuffer();
 					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 					PolicySpreadSheetTestRecord ptr = null;
 					if(r.getEffect() == 1)
+					{
 						ptr = buildRequest_trueFA(rules, r, sb, collector, count, t, "FDR");
+						if(rule_table[i][TRUE_TRUE] == true)
+							break;
+					}
 					if(ptr != null)
 					{
+						if(opt)
+							checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 						generator.add(ptr);
 						break;
 					}
@@ -5551,11 +5594,14 @@ public class PolicyX {
 		return generator;
 	}
 	
-	private void buildANFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildANFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
@@ -5564,17 +5610,22 @@ public class PolicyX {
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "ANF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRCTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRCTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
@@ -5587,102 +5638,112 @@ public class PolicyX {
 				System.err.println("Rule does not contain a condition");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRTTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRTTRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1;
-		for(Rule temp : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			System.err.println("LOOP");
+			if(rule_table[i][FALSE_TRUE] == true)
+				continue;
+			Rule temp = rules.get(i);
+			System.err.println("Grabbed rule");
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
 			if(!temp.isTargetEmpty())
 				ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTT");
+			System.err.println("Made a request");
 			if(ptr != null)
 			{
+				System.err.println("Checking for coverage");
+				String request = ptr.getRequest();
+				if(opt)
+					checkForCoverage(rules, temp, request, i, FALSE_TRUE);
 				generator.add(ptr);
 				count++;
-				//updateRequestList(generator, ptr.getRequest(), count - 1);
 			}
 		}
 	}
 	
-	private void buildRPTERequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRPTERequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+	for(Rule r : rules)
+	{
+		if(!r.isTargetEmpty())
 		{
-			if(!r.isTargetEmpty())
+			Target rt = (Target)r.getTarget();
+			List<AnyOfSelection> anyOf = rt.getAnyOfSelections();
+			if(anyOf.size() != 0)
 			{
-				Target rt = (Target)r.getTarget();
-				List<AnyOfSelection> anyOf = rt.getAnyOfSelections();
-				if(anyOf.size() != 0)
+				if(anyOf.size() > 1)
 				{
-					if(anyOf.size() > 1)
+					for(int i = 0; i < anyOf.size(); i++)
 					{
-						for(int i = 0; i < anyOf.size(); i++)
+						
+						ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+						PolicySpreadSheetTestRecord ptr = null;
+						StringBuffer sb = new StringBuffer();
+						sb.append(TruePolicyTarget(policy, collector) + "\n");
+						ptr = buildRPTERequest1(rules, r, sb, collector, count, t, i);
+						if(ptr != null)
 						{
-							
-							ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
-							PolicySpreadSheetTestRecord ptr = null;
-							StringBuffer sb = new StringBuffer();
-							sb.append(TruePolicyTarget(policy, collector) + "\n");
-							ptr = buildRPTERequest1(rules, r, sb, collector, count, t, i);
-							if(ptr != null)
-							{
-								generator.add(ptr);
-								count++;
-							}
+							generator.add(ptr);
+							count++;
 						}
 					}
-					for(int k = 0; k < anyOf.size(); k++)
+				}
+				for(int k = 0; k < anyOf.size(); k++)
+				{
+					AnyOfSelection any = anyOf.get(k);
+					List<AllOfSelection> allOf = any.getAllOfSelections();
+					if(allOf.size() != 0)
 					{
-						AnyOfSelection any = anyOf.get(k);
-						List<AllOfSelection> allOf = any.getAllOfSelections();
-						if(allOf.size() != 0)
+						if(allOf.size() > 1)
 						{
-							if(allOf.size() > 1)
+							for(int i = 0; i < allOf.size(); i++)
 							{
-								for(int i = 0; i < allOf.size(); i++)
+								ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+								PolicySpreadSheetTestRecord ptr = null;
+								StringBuffer sb = new StringBuffer();
+								sb.append(TruePolicyTarget(policy, collector) + "\n");
+								ptr = buildRPTERequest2(rules, r, sb, collector, count, t, i, k);
+								if(ptr != null)
 								{
-									ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
-									PolicySpreadSheetTestRecord ptr = null;
-									StringBuffer sb = new StringBuffer();
-									sb.append(TruePolicyTarget(policy, collector) + "\n");
-									ptr = buildRPTERequest2(rules, r, sb, collector, count, t, i, k);
-									if(ptr != null)
-									{
-										generator.add(ptr);
-										count++;
-									}
+									generator.add(ptr);
+									count++;
 								}
 							}
-							for(int j = 0; j < allOf.size(); j++)
+						}
+						for(int j = 0; j < allOf.size(); j++)
+						{
+							AllOfSelection all = allOf.get(j);
+							List<TargetMatch> matches = all.getMatches();
+							if(matches.size() != 0)
 							{
-								AllOfSelection all = allOf.get(j);
-								List<TargetMatch> matches = all.getMatches();
-								if(matches.size() != 0)
+								if(matches.size() > 1)
 								{
-									if(matches.size() > 1)
+									for(int i = 0; i < matches.size(); i++)
 									{
-										for(int i = 0; i < matches.size(); i++)
+										ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+										PolicySpreadSheetTestRecord ptr = null;
+										StringBuffer sb = new StringBuffer();
+										sb.append(TruePolicyTarget(policy, collector) + "\n");
+										ptr = buildRPTERequest3(rules, r, sb, collector, count, t, i, j);
+										if(ptr != null)
 										{
-											ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
-											PolicySpreadSheetTestRecord ptr = null;
-											StringBuffer sb = new StringBuffer();
-											sb.append(TruePolicyTarget(policy, collector) + "\n");
-											ptr = buildRPTERequest3(rules, r, sb, collector, count, t, i, j);
-											if(ptr != null)
-											{
-												generator.add(ptr);
-												count++;
-											}
+											generator.add(ptr);
+											count++;
 										}
 									}
 								}
@@ -5690,19 +5751,23 @@ public class PolicyX {
 						}
 					}
 				}
-				else
-					continue;
 			}
 			else
 				continue;
 		}
+		else
+			continue;
 	}
+}
 	
-	private void buildRTFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRTFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
-		int count = 1;
-		for(Rule temp : rules)
+		int count = 1, tpos = TRUE_TRUE;
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][tpos] == true)
+				continue;
+			Rule temp = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
@@ -5710,20 +5775,37 @@ public class PolicyX {
 			if(temp.getEffect() == effect)
 				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTF");
 			else
+			{
+				if(!temp.isTargetEmpty())
+				{
+					if(temp.isConditionEmpty())
+						tpos = TRUE_TRUE;
+					else
+						tpos = FALSE_TRUE;
+				}
+				else
+					tpos = TRUE_TRUE;
 				ptr = buildRequest_false2(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+			}
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, temp, ptr.getRequest(), i, tpos);
 				generator.add(ptr);
 				count++;
 			}
+			tpos = TRUE_TRUE; //reset table position
 		}
 	}
 	
-	private void buildRCFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRCFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
-		int count = 1;
-		for(Rule r : rules)
+		int count = 1, tpos = TRUE_TRUE;
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][tpos] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
@@ -5731,22 +5813,31 @@ public class PolicyX {
 			if(r.getEffect() == effect && !r.isConditionEmpty())
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
 			else if(r.getEffect() != effect && !r.isConditionEmpty())
+			{
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCF");
+				tpos = TRUE_FALSE;
+			}
 			else
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 				generator.add(ptr);
 				count++;
 			}
+			tpos = TRUE_TRUE; //important: reset table position to TRUE_TRUE;
 		}
 	}
 	
-	private void buildRNFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRNFRequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
-		int count = 1;
-		for(Rule r : rules)
+		int count = 1, tpos = TRUE_TRUE;
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][tpos] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
@@ -5754,36 +5845,44 @@ public class PolicyX {
 			if(r.getEffect() == effect && !r.isConditionEmpty() && containsNot(r))
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RNF");
 			else if(r.getEffect() != effect && !r.isConditionEmpty() && containsNot(r))
+			{
+				tpos = TRUE_FALSE;
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RNF");
+			}
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 				generator.add(ptr);
 				count++;
 			}
+			tpos = TRUE_TRUE;
 		}
 	}
 	
 	private PolicySpreadSheetTestRecord buildRequest_false(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
 	{
+		System.err.println("Building request");
 		PolicySpreadSheetTestRecord ptr = null;
 		function f = new function();
 		//Make current rule evaluate to false
 		sb.append(False_Target((Target)rule.getTarget(), collector) + "\n");
 		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
-		ArrayList<MyAttr> local = new ArrayList<MyAttr>();
-		
-		getTargetAttribute((Target)rule.getTarget(), local);
+		System.err.println("False target true condition");
 		//Ensure rules before and following current evaluate to false (NotApplicable)
 		for(int i = 0; i < stop; i++)
 		{
+			System.err.println("LOOP");
 			Rule temp = rules.get(i);
 			if(temp.getId().equals(rule.getId()) || isDefaultRule(temp))
 				continue;
 			else
 				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
 		}
+		System.err.println("exited loop");
 		//System.out.println("Here is the z3-str input: \n" + sb.toString());
 		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		System.err.println("Sent to z3");
 		if(sat)
 		{
 			System.out.println(nameMap.size() + " map size");
@@ -5830,9 +5929,9 @@ public class PolicyX {
 			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
 				continue;
 			else
-				sb.append(FalseTarget_FalseCondition(r, collector) + "\n");
+				sb.append(False_Condition(r.getCondition(), collector) + "\n");
 		}
-		//System.out.println("Here is the z3-str input: \n" + sb.toString());
+		System.out.println("Here is the z3-str input: \n" + sb.toString());
 		boolean sat = z3str(sb.toString(), nameMap, typeMap);
 		if(sat)
 		{
@@ -6582,7 +6681,7 @@ public class PolicyX {
 		return allDeny;
 	}
 	
-	private void build_OnlyOne_Request_false(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, int count, String type)
+	private void build_OnlyOne_Request_false(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, int count, String type, boolean opt)
 	{
 		PolicySpreadSheetTestRecord ptr = null;
 		StringBuffer sb = new StringBuffer();
@@ -6651,13 +6750,13 @@ public class PolicyX {
 		else
 		{
 			if(type.compareTo("RTT") == 0)
-				buildRTTRequests_override(rules, generator, t, effect);
+				buildRTTRequests_override(rules, generator, t, effect, opt);
 			else if(type.compareTo("RTF") == 0)
-				buildRTFRequests_override(rules, generator, t, effect);
+				buildRTFRequests_override(rules, generator, t, effect, opt);
 		}
 	}
 	
-	private void build_OnlyOne_ConditionRequest_false(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, int count, String type)
+	private void build_OnlyOne_ConditionRequest_false(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, int count, String type, boolean opt)
 	{
 		System.err.println("Generating only one test");
 		PolicySpreadSheetTestRecord ptr = null;
@@ -6722,9 +6821,9 @@ public class PolicyX {
 		else
 		{
 			if(type.compareTo("RCT") == 0)
-				buildRCTRequests_override(rules, generator, t, effect);
+				buildRCTRequests_override(rules, generator, t, effect, opt);
 			else if(type.compareTo("RCF") == 0)
-				buildRCFRequests_override(rules, generator, t, effect);
+				buildRCFRequests_override(rules, generator, t, effect, opt);
 		}
 	}
 	
@@ -7003,17 +7102,25 @@ public class PolicyX {
 		return ptr;
 	}
 	
-	private void buildRTTRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRTTRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1, index = 0;
 		for(Rule temp : rules)
 		{
+			if(rule_table[index][FALSE_TRUE] == true)
+			{
+				index++;
+				continue;
+			}
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			if(temp.getEffect() == effect  && !temp.isTargetEmpty())
 				ptr = buildRequest_unlessFalse(rules, temp, sb, t, index, count, effect, "RTT");
 			if(ptr != null)
 			{
+				String request = ptr.getRequest();
+				if(opt)
+					checkForCoverage(rules, temp, request, index, FALSE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
@@ -7021,11 +7128,17 @@ public class PolicyX {
 		}
 	}
 	
-	private void buildRPTERequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRPTERequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1, index = 0;
+		boolean[] skip = new boolean[rules.size()];
 		for(Rule r : rules)
 		{
+			if(skip[index] == true)
+			{
+				index++;
+				continue;
+			}
 			if(!r.isTargetEmpty())
 			{
 				if(r.getEffect() == effect)
@@ -7093,6 +7206,7 @@ public class PolicyX {
 							}
 						}
 						index++;
+						continue;
 					}
 					else
 					{
@@ -7114,45 +7228,59 @@ public class PolicyX {
 		}
 	}
 	
-	private void buildRCTRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRCTRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			if(r.getEffect() == effect && !r.isConditionEmpty())
 				ptr = buildConditionRequest_unlessFalse(rules, r, sb, t, count, effect, "RCT");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildANFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildANFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			if(r.getEffect() == effect && !r.isConditionEmpty())
 				ptr = buildConditionRequest_unlessFalse(rules, r, sb, t, count, effect, "ANF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRTFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRTFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
-		int count = 1;
-		for(Rule temp : rules)
+		int count = 1, tpos = TRUE_TRUE;
+		boolean[] skip = new boolean[rules.size()];
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][tpos] == true)
+				continue;
+			Rule temp = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
@@ -7160,20 +7288,29 @@ public class PolicyX {
 			if(temp.getEffect() == effect)
 				ptr = buildRequest_true(rules, temp, sb, collector, count, t, rules.size(), "RTF");
 			else
+			{
 				ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTF");
+				tpos = FALSE_TRUE;
+			}
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, temp, ptr.getRequest(), i, tpos);
 				generator.add(ptr);
 				count++;
 			}
+			tpos = TRUE_TRUE;
 		}
 	}
 	
-	private void buildRCFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRCFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_TRUE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
@@ -7182,17 +7319,22 @@ public class PolicyX {
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRNFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect)
+	private void buildRNFRequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_TRUE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
@@ -7201,6 +7343,8 @@ public class PolicyX {
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RNF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
@@ -7208,13 +7352,16 @@ public class PolicyX {
 	}
 	
 	
-	private void buildRTTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRTTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		if(rules.size() != 0)
 		{
 			int count = 1;
-			for(Rule temp : rules)
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][FALSE_TRUE] == true)
+					continue;
+				Rule temp = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7223,6 +7370,8 @@ public class PolicyX {
 					ptr = buildRequest_falseFA(rules, temp, sb, collector, count, t, "RTT");
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, temp, ptr.getRequest(), i, FALSE_TRUE);
 					generator.add(ptr);
 					count++;
 				}
@@ -7233,11 +7382,17 @@ public class PolicyX {
 			System.err.println("Must have at least rule to generate a test");
 	}
 	
-	private void buildRPTERequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRPTERequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
-		int count = 1;
+		int count = 1, index = 0;
+		boolean[] skip = new boolean[rules.size()];
 		for(Rule r : rules)
 		{
+			if(skip[index] == true)
+			{
+				index++;
+				continue;
+			}
 			if(!r.isTargetEmpty())
 			{
 				Target rt = (Target)r.getTarget();
@@ -7302,20 +7457,31 @@ public class PolicyX {
 							}
 						}
 					}
+					index++;
+					continue;
 				}
 				else
+				{
+					index++;
 					continue;
+				}
 			}
 			else
+			{
+				index++;
 				continue;
+			}
 		}
 	}
 	
-	private void buildRCTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRCTRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -7324,17 +7490,22 @@ public class PolicyX {
 				ptr = buildConditionRequest_falseFA(rules, r, sb, collector, count, t, "RCT");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildANFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildANFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -7343,36 +7514,45 @@ public class PolicyX {
 				ptr = buildConditionRequest_falseFA(rules, r, sb, collector, count, t, "ANF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRCFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRCFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_TRUE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
-			if(!r.isConditionEmpty())
-				ptr = buildConditionRequest_trueFA(rules, r, sb, collector, count, t, "RCF");
+			ptr = buildConditionRequest_trueFA(rules, r, sb, collector, count, t, "RCF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRNFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRNFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_TRUE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -7381,19 +7561,24 @@ public class PolicyX {
 				ptr = buildConditionRequest_trueFA(rules, r, sb, collector, count, t, "RNF");
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void buildRTFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRTFRequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		if(rules.size() != 0)
 		{
 			int count = 1;
-			for(Rule temp : rules)
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][TRUE_TRUE] == true)
+					continue;
+				Rule temp = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7401,6 +7586,8 @@ public class PolicyX {
 				ptr = buildRequest_trueFA(rules, temp, sb, collector, count, t, "RTF");
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, temp, ptr.getRequest(), i, TRUE_TRUE);
 					generator.add(ptr);
 					count++;
 				}
@@ -7411,7 +7598,7 @@ public class PolicyX {
 			System.err.println("Must have at least rule to generate a test");
 	}
 	
-	private void build_DefaultRTTRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void build_DefaultRTTRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		if(rules.size() != 0)
 		{
@@ -7420,13 +7607,16 @@ public class PolicyX {
 			function checker = new function();
 			if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
 			{
-				build_allOne_RequestsFalse(rules, generator, t, "RTT");
+				build_allOne_RequestsFalse(rules, generator, t, "RTT", opt);
 				checker = null;
 			}
 			else
 			{
-				for(Rule r : rules)
+				for(int i = 0; i < rules.size(); i++)
 				{
+					if(rule_table[i][FALSE_TRUE] == true)
+						continue;
+					Rule r = rules.get(i);
 					StringBuffer sb = new StringBuffer();
 					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 					PolicySpreadSheetTestRecord ptr = null;
@@ -7437,6 +7627,9 @@ public class PolicyX {
 						ptr = buildRequest_false(rules, r, sb, collector, count, t, rules.size(), "RTT");
 					if(ptr != null)
 					{
+						String request = ptr.getRequest();
+						if(opt)
+							checkForCoverage(rules, r, request, i, FALSE_TRUE);
 						generator.add(ptr);
 						count++;
 					}
@@ -7445,17 +7638,23 @@ public class PolicyX {
 		}
 	}
 	
-	private void buildDefaultRPTERequests(List<Rule> rules, Rule defRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildDefaultRPTERequests(List<Rule> rules, Rule defRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		function checker = new function();
 		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
-			buildRPTERequests_override(rules, generator, t);
+			buildRPTERequests_override(rules, generator, t, opt);
 		else
 		{
-			int count = 1;
+			int count = 1, index = 0;
 			int effect = defRule.getEffect();
+			boolean[] skip = new boolean[rules.size()];
 			for(Rule r : rules)
 			{
+				if(skip[index] == true)
+				{
+					index++;
+					continue;
+				}
 				if(!r.isTargetEmpty())
 				{
 					if(r.getEffect() == effect)
@@ -7497,6 +7696,7 @@ public class PolicyX {
 											ptr = buildRPTERequest_AllFalse2(rules, r, sb, collector, count, t, effect, j, i);
 											if(ptr != null)
 											{
+												
 												generator.add(ptr);
 												count++;
 											}
@@ -7528,9 +7728,14 @@ public class PolicyX {
 									}
 								}
 							}
+							index++;
+							continue;
 						}
 						else
+						{
+							index++;
 							continue;
+						}
 					}
 					else
 					{
@@ -7602,31 +7807,43 @@ public class PolicyX {
 									}
 								}
 							}
+							index++;
+							continue;
 						}
 						else
+						{
+							index++;
 							continue;
+						}
 					}
 				}
 				else
+				{
+					index++;
 					continue;
+				}
 			}
 		}
 	}
 
-	private void build_DefaultRCTRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void build_DefaultRCTRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
 		int effect = defaultRule.getEffect();
 		function checker = new function();
+		boolean[] skip = new boolean[rules.size()];
 		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
 		{
-			build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT");
+			build_AllOne_ConditionRequestsFalse(rules, generator, t, "RCT", opt);
 			checker = null;
 		}
 		else
 		{
-			for(Rule r : rules)
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][TRUE_FALSE] == true)
+					continue;
+				Rule r = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7637,6 +7854,8 @@ public class PolicyX {
 					ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCT");
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 					generator.add(ptr);
 					count++;
 				}
@@ -7644,16 +7863,19 @@ public class PolicyX {
 		}
 	}
 	
-	private void buildANFRequests_default(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildANFRequests_default(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		function checker = new function();
 		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
-			build_AllOne_ConditionRequestsFalse(rules, generator, t, "ANF");
+			build_AllOne_ConditionRequestsFalse(rules, generator, t, "ANF", opt);
 		else
 		{
 			int count = 1, effect = defaultRule.getEffect();
-			for(Rule r : rules)
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][TRUE_FALSE] == true)
+					continue;
+				Rule r = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7664,6 +7886,8 @@ public class PolicyX {
 					ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "ANF");
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 					generator.add(ptr);
 					count++;
 				}
@@ -7671,17 +7895,22 @@ public class PolicyX {
 		}
 	}
 	
-	private void build_DefaultRCFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void build_DefaultRCFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1;
 		int effect = defaultRule.getEffect();
 		function checker = new function();
+		boolean[] skip = new boolean[rules.size()];
 		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
-			build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF");
+			build_AllOne_ConditionRequestsTrue(rules, generator, t, "RCF", opt);
 		else
 		{
-			for(Rule r : rules)
+			int tpos = TRUE_TRUE;
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][tpos] == true)
+					continue;
+				Rule r = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7689,46 +7918,64 @@ public class PolicyX {
 				if(r.getEffect() == effect && !r.isConditionEmpty())
 					ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RCF");
 				else if(r.getEffect() != effect && !r.isConditionEmpty())
+				{
 					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
+					tpos = FALSE_TRUE;
+				}
 				else
+				{
 					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RCF", effect);
+					tpos = FALSE_TRUE;
+				}
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 					generator.add(ptr);
 					count++;
 				}
+				tpos = TRUE_TRUE;
 			}
 		}
 	}
 	
-	private void buildRNFRequests_default(List<Rule> rules, Rule defRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void buildRNFRequests_default(List<Rule> rules, Rule defRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		function checker = new function();
 		if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
-			build_AllOne_ConditionRequestsTrue(rules, generator, t, "RNF");
+			build_AllOne_ConditionRequestsTrue(rules, generator, t, "RNF", opt);
 		else
 		{
-			int count = 1;
+			int count = 1, tpos = TRUE_TRUE;
 			int effect = defRule.getEffect();
-			for(Rule r : rules)
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][tpos] == true)
+					continue;
+				Rule r = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
 				if(r.getEffect() == effect && !r.isConditionEmpty() && containsNot(r))
 					ptr = buildConditionRequest_true(rules, r, sb, collector, count, t, rules.size(), "RNF");
 				else if(r.getEffect() != effect && !r.isConditionEmpty() && containsNot(r))
+				{
+					tpos = TRUE_FALSE;
 					ptr = buildConditionRequest_AllFalse(rules, r, sb, collector, count, t, rules.size(), "RNF", effect);
+				}
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 					generator.add(ptr);
 					count++;
 				}
+				tpos = TRUE_TRUE;
 			}
 		}
 	}
 	
-	private void build_DefaultRTFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t)
+	private void build_DefaultRTFRequests_FA(List<Rule> rules, Rule defaultRule, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		if(rules.size() != 0)
 		{
@@ -7737,13 +7984,17 @@ public class PolicyX {
 			function checker = new function();
 			if(checker.allDenyRule(policy) || checker.allPermitRule(policy))
 			{
-				build_allOne_RequestsTrue(rules, generator, t, "RTF");
+				build_allOne_RequestsTrue(rules, generator, t, "RTF", opt);
 				checker = null;
 			}
 			else
 			{
-				for(Rule r : rules)
+				int tpos = TRUE_TRUE;
+				for(int i = 0; i < rules.size(); i++)
 				{
+					if(rule_table[i][tpos] == true)
+						continue;
+					Rule r = rules.get(i);
 					StringBuffer sb = new StringBuffer();
 					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 					PolicySpreadSheetTestRecord ptr = null;
@@ -7751,24 +8002,33 @@ public class PolicyX {
 					if(r.getEffect() == effect)
 						ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), "RTF");
 					else
+					{
 						ptr = buildRequest_Allfalse(rules, r, sb, collector, count, t, rules.size(), "RTF", effect);
+						tpos = FALSE_TRUE;
+					}
 					if(ptr != null)
 					{
+						if(opt)
+							checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 						generator.add(ptr);
 						count++;
 					}
+					tpos = TRUE_TRUE;
 				}
 			}
 		}
 	}
 	
-	private void build_allOne_RequestsFalse(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	private void build_allOne_RequestsFalse(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type, boolean opt)
 	{
 		if(rules.size() != 0)
 		{
 			int count = 1;
-			for(Rule r : rules)
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][FALSE_TRUE] == true)
+					continue;
+				Rule r = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7777,6 +8037,9 @@ public class PolicyX {
 					ptr = buildRequest_false(rules, r, sb, collector, count, t, rules.size(), type);
 				if(ptr != null)
 				{
+					String request = ptr.getRequest();
+					if(opt)
+						checkForCoverage(rules, r, request, i, FALSE_TRUE);
 					generator.add(ptr);
 					count++;
 				}
@@ -7784,11 +8047,15 @@ public class PolicyX {
 		}
 	}
 	
-	private void build_AllOne_ConditionRequestsFalse(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	private void build_AllOne_ConditionRequestsFalse(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_FALSE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -7797,17 +8064,23 @@ public class PolicyX {
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), type);
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_FALSE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void build_AllOne_ConditionRequestsTrue(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	private void build_AllOne_ConditionRequestsTrue(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type, boolean opt)
 	{
 		int count = 1;
-		for(Rule r : rules)
+		boolean[] skip = new boolean[rules.size()];
+		for(int i = 0; i < rules.size(); i++)
 		{
+			if(rule_table[i][TRUE_TRUE] == true)
+				continue;
+			Rule r = rules.get(i);
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -7823,19 +8096,25 @@ public class PolicyX {
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
 			if(ptr != null)
 			{
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 				generator.add(ptr);
 				count++;
 			}
 		}
 	}
 	
-	private void build_allOne_RequestsTrue(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type)
+	private void build_allOne_RequestsTrue(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, String type, boolean opt)
 	{
 		if(rules.size() != 0)
 		{
 			int count = 1;
-			for(Rule r : rules)
+			boolean[] skip = new boolean[rules.size()];
+			for(int i = 0; i < rules.size(); i++)
 			{
+				if(rule_table[i][TRUE_TRUE] == true)
+					continue;
+				Rule r = rules.get(i);
 				StringBuffer sb = new StringBuffer();
 				ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 				PolicySpreadSheetTestRecord ptr = null;
@@ -7843,6 +8122,8 @@ public class PolicyX {
 				ptr = buildRequest_true(rules, r, sb, collector, count, t, rules.size(), type);
 				if(ptr != null)
 				{
+					if(opt)
+						checkForCoverage(rules, r, ptr.getRequest(), i, TRUE_TRUE);
 					generator.add(ptr);
 					count++;
 				}
@@ -8337,6 +8618,191 @@ public class PolicyX {
 				if(RuleEvaluate(rule, request) == RuleEvaluate(cur, request))
 					generator.remove(i);
 			}
+		}
+	}
+	
+	private void checkForCoverage(List<Rule> rules, Rule rule, String request, int start, int table_pos)
+	{
+		int rt = -1;
+		int rc = -1;
+		if(rule.getTarget() != null)
+			rt = TargetEvaluate((Target)rule.getTarget(), request);
+		if(rule.getCondition() != null)
+			rc = ConditionEvaluate(rule.getCondition(), request);
+		
+		if(rt >= 0 || rc >= 0)
+			rule_table[start][table_pos] = true;
+		for(int i = start + 1; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			int tres = -1;
+			int cres = -1;
+			if(r.getTarget() != null)
+				tres = TargetEvaluate((Target)r.getTarget(), request);
+			if(r.getCondition() != null)
+				cres = ConditionEvaluate(r.getCondition(), request);
+			
+			if(tres == rt && rc == cres)
+				rule_table[i][table_pos] = true;
+		}
+	}
+	
+	private void checkAnyOfCoverage_override(List<Rule> rules, List<AnyOfSelection> anyOf, Rule rule, String request, int start, boolean[] skip)
+	{
+		int rt = -1;//assume no target
+		int rc = -1;//assume no condition
+		if(rule.getTarget() != null)
+			rt = TargetEvaluate((Target)rule.getTarget(), request);
+		if(rule.getCondition() != null)
+			rc = ConditionEvaluate(rule.getCondition(), request);
+		for(int i = start + 1; i < anyOf.size(); i++)
+		{
+			function f = new function();
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> local = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, local) + "\n");
+			sb.append(getTargetAnyOf_NegateValues((Target)rule.getTarget(), i, local) + "\n");
+			sb.append(True_Condition(rule.getCondition(), local) + "\n");
+			for(Rule r : rules)
+			{
+				if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+					continue;
+				else
+					sb.append(False_Condition(r.getCondition(), local) + "\n");
+			}
+			boolean sat = z3str(sb.toString(), nameMap, typeMap);
+			if(sat)
+			{
+				try
+				{
+					z3.getValue(local, nameMap);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				String request2 = f.print(local);
+				int tres = -1;
+				int cres = -1;
+				if(rule.getTarget() != null)
+					tres = TargetEvaluate((Target)rule.getTarget(), request2);
+				if(rule.getCondition() != null)
+					cres = ConditionEvaluate(rule.getCondition(), request2);
+				if(tres >= 0)
+					if(tres == rt && cres == rc)
+						skip[i] = true;
+			}
+		}
+	}
+	
+	private void checkAllOfCoverage_override(List<Rule> rules, List<AllOfSelection> allOf, Rule rule, String request, int anyindex, int index, boolean[] skip)
+	{
+		int rt = -1;
+		int rc = -1;
+		if(rule.getTarget() != null)
+			rt = TargetEvaluate((Target)rule.getTarget(), request);
+		if(rule.getCondition() != null)
+			rc = ConditionEvaluate(rule.getCondition(), request);
+		for(int i = index + 1; i < allOf.size(); i++)
+		{
+			function f = new function();
+			StringBuffer sb = new StringBuffer();
+			ArrayList<MyAttr> local = new ArrayList<MyAttr>();
+			sb.append(TruePolicyTarget(policy, local) + "\n");
+			sb.append(getTargetAllOf_NegateValues((Target)rule.getTarget(), anyindex, i, local) + "\n");
+			sb.append(True_Condition(rule.getCondition(), local) + "\n");
+			for(Rule r : rules)
+			{
+				if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+					continue;
+				else
+					sb.append(False_Condition(r.getCondition(), local) + "\n");
+			}
+			boolean sat = z3str(sb.toString(), nameMap, typeMap);
+			if(sat)
+			{
+				try
+				{
+					z3.getValue(local, nameMap);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				String request2 = f.print(local);
+				int tres = -1;
+				int cres = -1;
+				if(rule.getTarget() != null)
+					tres = TargetEvaluate((Target)rule.getTarget(), request2);
+				if(rule.getCondition() != null)
+					cres = ConditionEvaluate(rule.getCondition(), request2);
+				if(tres >= 0)
+					if(tres == rt && cres == rc)
+						skip[i] = true;
+			}
+		}
+	}
+	
+	private void checkElementCoverage_override(List<Rule> rules, List<TargetMatch> matches, Rule rule, String request, int allindex, int index, boolean[] skip)
+	{
+		int rt = -1;
+		int rc = -1;
+		if(rule.getTarget() != null)
+			rt = TargetEvaluate((Target)rule.getTarget(), request);
+		if(rule.getCondition() != null)
+			rc = ConditionEvaluate(rule.getCondition(), request);
+		for(int i = index + 1; i < matches.size(); i++)
+		{
+			function f = new function();
+			ArrayList<MyAttr> local = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			sb.append(TruePolicyTarget(policy, local) + "\n");
+			sb.append(getTargetAttribute_NegateValue((Target)rule.getTarget(), allindex, i, local) + "\n");
+			sb.append(True_Condition(rule.getCondition(), local) + "\n");
+			for(Rule r : rules)
+			{
+				if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+					continue;
+				else
+					sb.append(FalseTarget_FalseCondition(r, local) + "\n");
+			}
+			boolean sat = z3str(sb.toString(), nameMap, typeMap);
+			if(sat)
+			{
+				try
+				{
+					z3.getValue(local, nameMap);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				String request2 = f.print(local);
+				int tres = -1;
+				int cres = -1;
+				if(rule.getTarget() != null)
+					tres = TargetEvaluate((Target)rule.getTarget(), request2);
+				if(rule.getCondition() != null)
+					cres = ConditionEvaluate(rule.getCondition(), request2);
+				if(tres >= 0)
+					if(tres == rt && cres == rc)
+						skip[i] = true;
+			}
+		}
+	}
+	
+	private void checkTargetCoverage(List<Rule> rules, Rule rule, String request, int start, int table_pos)
+	{
+		ArrayList<Integer> rtresult = new ArrayList<Integer>();
+		int rc = -1;
+		if(rule.getTarget() != null)
+			rtresult = MatchOfTarget((Target)rule.getTarget(), request);
+		if(rule.getCondition() != null)
+			rc = ConditionEvaluate(rule.getCondition(), request);
+		for(int i = start + 1; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			ArrayList<Integer> result = new ArrayList<Integer>();
 		}
 	}
 }

@@ -231,14 +231,6 @@ public class TestPanel extends JPanel {
 			
 			String dir = xpa.getWorkingPolicyFile().getParent();
 			Runtime run = Runtime.getRuntime();
-			try
-			{
-				run.exec("sudo chmod -R 777 " + dir);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
 
 			try {
 				testSuite = new PolicySpreadSheetTestSuite(

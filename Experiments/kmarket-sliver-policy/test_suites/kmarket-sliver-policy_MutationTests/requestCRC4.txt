@@ -4,8 +4,8 @@
 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">silver</AttributeValue>
 </Attribute>
 </Attributes>
-<Attributes Category="15hk0rqaz7">
-<Attribute AttributeId="6redjgtktg" IncludeInResult = "false">
+<Attributes Category="lhzrfmhdqx">
+<Attribute AttributeId="j7n5sz5j27" IncludeInResult = "false">
 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
 </Attribute>
 </Attributes>

@@ -4,8 +4,8 @@
 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">gold</AttributeValue>
 </Attribute>
 </Attributes>
-<Attributes Category="jfuxfz6chg">
-<Attribute AttributeId="iqu5wqgqbw" IncludeInResult = "false">
+<Attributes Category="d31b2yzgd9">
+<Attribute AttributeId="ydi7q4niiy" IncludeInResult = "false">
 <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
 </Attribute>
 </Attributes>
