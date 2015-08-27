@@ -8,6 +8,7 @@ import javax.swing.event.ListSelectionEvent;
 
 public class AlgorithmTablePanel extends GeneralTablePanel {
 	private JPanel requestPanel;
+	// test change here
 	
 	public AlgorithmTablePanel(Vector<Vector<Object>> data, String[] columnNames,
 			int totalColumnCount, JPanel requestPanel) {

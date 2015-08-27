@@ -21,7 +21,7 @@ public class AnalysisPanel extends JPanel{
 	public AnalysisPanel(XPA xpa) {
 		this.xpa = xpa;
 		setLayout(new BorderLayout());
-
+		//
 	}
 	
 	public void mutateCombiningAlgorithms(){
