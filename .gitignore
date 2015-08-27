@@ -1,2 +1,5 @@
 /bin/
 /Experiments/
+.classpath
+Z3_input
+Z3_output
