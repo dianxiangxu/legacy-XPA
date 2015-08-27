@@ -5303,6 +5303,54 @@ public class PolicyX {
 	{
 		ArrayList<PolicySpreadSheetTestRecord> generator = new ArrayList<PolicySpreadSheetTestRecord>();
 		List<Rule> rules = getRuleFromPolicy(policy);
+		CombiningAlgorithm cmbAlg = policy.getCombiningAlg();
+		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
+		if(cmbAlg instanceof PermitOverridesRuleAlg || cmbAlg instanceof DenyUnlessPermitRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 0)
+				{
+					if(rule_table[rule_table.length - 1][TRUE_TRUE] == true)
+						return generator;
+					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+					StringBuffer sb = new StringBuffer();
+					PolicySpreadSheetTestRecord ptr = null;
+					sb.append(TruePolicyTarget(policy, collector) + "\n");
+					ptr = buildRequest_true(rules, def, sb, collector, 1, t, rules.size(), "CRE");
+					if(ptr != null)
+					{
+						if(opt)
+							checkForCoverage(rules, def, ptr.getRequest(), rules.size() - 1, TRUE_TRUE);
+						generator.add(ptr);
+					}
+					return generator;
+				}
+			}
+		}
+		if(cmbAlg instanceof DenyOverridesRuleAlg || cmbAlg instanceof PermitUnlessDenyRuleAlg)
+		{
+			if(def != null)
+			{
+				if(def.getEffect() == 1)
+				{
+					if(rule_table[rule_table.length - 1][TRUE_TRUE] == true)
+						return generator;
+					ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+					StringBuffer sb = new StringBuffer();
+					PolicySpreadSheetTestRecord ptr = null;
+					sb.append(TruePolicyTarget(policy, collector) + "\n");
+					ptr = buildRequest_true(rules, def, sb, collector, 1, t, rules.size() - 1, "CRE");
+					if(ptr != null)
+					{
+						if(opt)
+							checkForCoverage(rules, def, ptr.getRequest(), rules.size() - 1, TRUE_TRUE);
+						generator.add(ptr);
+					}
+					return generator;
+				}
+			}
+		}
 		int count = 1;
 		for(int i = 0; i < rules.size(); i++)
 		{
@@ -8645,6 +8693,18 @@ public class PolicyX {
 			if(tres == rt && rc == cres)
 				rule_table[i][table_pos] = true;
 		}
+		for(int i = 0; i < start; i++)
+		{
+			Rule r = rules.get(i);
+			int tres = -1;
+			int cres = -1;
+			if(r.getTarget() != null)
+				tres = TargetEvaluate((Target)r.getTarget(), request);
+			if(r.getCondition() != null)
+				cres = ConditionEvaluate(r.getCondition(), request);
+			if(tres == rt && rc == cres)
+				rule_table[i][table_pos] = true;
+		}
 	}
 	
 	private void checkAnyOfCoverage_override(List<Rule> rules, List<AnyOfSelection> anyOf, Rule rule, String request, int start, boolean[] skip)
@@ -8791,18 +8851,139 @@ public class PolicyX {
 		}
 	}
 	
-	private void checkTargetCoverage(List<Rule> rules, Rule rule, String request, int start, int table_pos)
+	private void checkAnyOfCoverage_over(List<Rule> rules, Rule rule, String request, int start, boolean[][] skip)
 	{
-		ArrayList<Integer> rtresult = new ArrayList<Integer>();
-		int rc = -1;
-		if(rule.getTarget() != null)
-			rtresult = MatchOfTarget((Target)rule.getTarget(), request);
-		if(rule.getCondition() != null)
-			rc = ConditionEvaluate(rule.getCondition(), request);
+		ArrayList<Integer> result = new ArrayList<Integer>();
 		for(int i = start + 1; i < rules.size(); i++)
 		{
-			Rule r = rules.get(i);
-			ArrayList<Integer> result = new ArrayList<Integer>();
+			Rule rule2 = rules.get(i);
+			if(rule2.getTarget() != null)
+			{
+				Target rt = (Target)rule.getTarget();
+				List<AnyOfSelection> anyOf = rt.getAnyOfSelections();
+				if(anyOf.size() != 0)
+				{
+					if(anyOf.size() > 1)
+					{
+						for(int j = 0; j < anyOf.size(); j++)
+						{
+							function f = new function();
+							StringBuffer sb = new StringBuffer();
+							ArrayList<MyAttr> local = new ArrayList<MyAttr>();
+							sb.append(TruePolicyTarget(policy, local) + "\n");
+							sb.append(getTargetAnyOf_NegateValues(rt, j, local) + "\n");
+							sb.append(True_Condition(rule2.getCondition(), local) + "\n");
+							for(Rule r : rules)
+							{
+								if(r.getId().equals(rule2.getId()) || isDefaultRule(r))
+									continue;
+								else
+									sb.append(False_Condition(r.getCondition(), local) + "\n");
+							}
+							boolean sat = z3str(sb.toString(), nameMap, typeMap);
+							if(sat)
+							{
+								try
+								{
+									z3.getValue(local, nameMap);
+								}
+								catch(Exception e)
+								{
+									e.printStackTrace();
+								}
+								String request2 = f.print(local);
+								ArrayList<Integer> result2 = new ArrayList<Integer>();
+								int cres = -1;
+								int rc = -1;
+								result = MatchOfTarget(rt, request);
+								result2 = MatchOfTarget(rt, request2);
+								if(rule2.getCondition() != null)
+								{
+									rc = ConditionEvaluate(rule2.getCondition(), request);
+									cres = ConditionEvaluate(rule2.getCondition(), request2);
+								}
+								if(arrayMatch(result, result2) && rc == cres)
+									skip[i][j] = true;
+							}
+						}
+					}
+					else
+						continue;
+				}
+				else
+					continue;
+			}
+			else
+				continue;
 		}
+	}
+	
+	private boolean[][] buildAnyOfTable(List<Rule> rules)
+	{
+		boolean[][] any_skip = new boolean[rules.size()][0];
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getTarget() != null)
+			{
+				Target rt = (Target)r.getTarget();
+				any_skip[i] = new boolean[rt.getAnyOfSelections().size()];
+			}
+			else
+				any_skip[i] = new boolean[0];
+		}
+		return any_skip;
+	}
+	
+	private boolean[][] buildAllOfTable(List<Rule> rules)
+	{
+		boolean[][] all_skip = new boolean[rules.size()][0];
+		int allOf = 0;
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getTarget() != null)
+			{
+				Target rt = (Target)r.getTarget();
+				List<AnyOfSelection> anyOf = rt.getAnyOfSelections();
+				for(AnyOfSelection any : anyOf)
+				{
+					allOf += any.getAllOfSelections().size();
+				}
+				all_skip[i] = new boolean[allOf];
+			}
+			else
+				all_skip[i] = new boolean[0];
+		}
+		return all_skip;
+	}
+	
+	private boolean[][] buildMatchTable(List<Rule> rules)
+	{
+		boolean[][] match_skip = new boolean[rules.size()][];
+		int matches = 0;
+		for(int i = 0; i < rules.size(); i++)
+		{
+			Rule r = rules.get(i);
+			if(r.getTarget() != null)
+			{
+				Target rt = (Target)r.getTarget();
+				List<AnyOfSelection> anyOf = rt.getAnyOfSelections();
+				for(AnyOfSelection any : anyOf)
+				{
+					List<AllOfSelection> allOf = any.getAllOfSelections();
+					for(AllOfSelection all : allOf)
+					{
+						List<TargetMatch> match = all.getMatches();
+						for(TargetMatch m : match)
+							matches++;
+					}
+				}
+				match_skip[i] = new boolean[matches];
+			}
+			else
+				match_skip[i] = new boolean[0];
+		}
+		return match_skip;
 	}
 }
