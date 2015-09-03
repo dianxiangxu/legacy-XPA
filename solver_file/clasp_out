@@ -1,0 +1,13 @@
+c clasp version 2.0.6
+c Reading from ...ome/nshen/xpa/XPA/solver_file/clasp_in
+c Solving...
+o 3
+c Answer: 1
+v x1 x2 x3 x4 x5
+s OPTIMUM FOUND
+
+c Models        : 1     
+c   Optimum     : yes
+c Optimization  : 3
+c Time          : 0.000s (Solving: 0.00s 1st Model: 0.00s Unsat: 0.00s)
+c CPU Time      : 0.000s

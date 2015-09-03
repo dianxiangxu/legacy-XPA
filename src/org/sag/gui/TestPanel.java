@@ -133,6 +133,7 @@ public class TestPanel extends JPanel {
 	private JRadioButton MCDCRadio_NoError = new JRadioButton("MC\\DC_NoError");
 	private JRadioButton DecisionCoverageRadio_NoError = new JRadioButton(
 			"Decision coverage_NoError");
+	private JRadioButton Unique_MCDC = new JRadioButton("Unique_case MC\\DC");
 
 	private JPanel createPanel() {
 		JPanel myPanel = new JPanel();
@@ -147,6 +148,7 @@ public class TestPanel extends JPanel {
 		group.add(MCDCRadio);
 		group.add(MCDCRadio_NoError);
 		group.add(DecisionCoverageRadio_NoError);
+		group.add(Unique_MCDC);
 
 		myPanel.setLayout(new GridLayout(4, 2));
 		//myPanel.add(basicRuleCoverageRadio);
@@ -157,6 +159,7 @@ public class TestPanel extends JPanel {
 		myPanel.add(rulePairCoverageRadio);
 		myPanel.add(MCDCRadio);
 		myPanel.add(MCDCRadio_NoError);
+		myPanel.add(Unique_MCDC);
 
 		myPanel.setBorder(new TitledBorder(new EtchedBorder(), ""));
 
@@ -206,7 +209,7 @@ public class TestPanel extends JPanel {
 				MCDC_converter2 converter = new MCDC_converter2();
 				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
 						policyx.generate_MCDCCoverage(this,
-								policyx.buildMCDC_Table(policy, converter),
+								policyx.buildMCDC_Table(policy, converter, false),
 								"_MCDCCoverage", converter),
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage");
@@ -226,6 +229,15 @@ public class TestPanel extends JPanel {
 								"_MCDCCoverage_NoError", converter),
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage_NoError");
+				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
+			} else if (Unique_MCDC.isSelected()) {
+				MCDC_converter2 converter = new MCDC_converter2();
+				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
+						policyx.generate_MCDCCoverage(this,
+								policyx.buildMCDC_Table(policy, converter, true),
+								"Unique_Case_MCDCCoverage", converter),
+						xpa.getWorkingPolicyFilePath());
+				workingTestSuiteFileName = getTestsuiteXLSfileName("Unique_Case_MCDCCoverage");
 				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
 			}
 			

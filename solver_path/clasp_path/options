@@ -1,0 +1,183 @@
+clasp 2.0.6
+
+usage: clasp [number] [options] [file]
+
+Clasp - General Options:
+
+  --enum-mode=<arg>       : Configure enumeration algorithm
+      Default: auto
+      Valid:   auto, bt, record, brave, cautious
+        auto    : bt for (projected) enumeration, record for optimization
+        bt      : Backtrack decision literals from solutions
+        record  : Add nogoods for computed solutions
+        brave   : Compute brave consequences (union of all models)
+        cautious: Compute cautious consequences (intersection of all models)
+  --number,-n <n>         : Compute at most <n> models (0 for all)
+      Default: 1 / 0 when optimizing/computing consequences
+  --restart-on-model      : Restart after each model
+  --project               : Project models to named atoms in enumeration mode
+
+  --opt-ignore            : Ignore optimize statements
+  --opt-hierarch[=<arg>]  : Hierarchical opt. and {1=fixed, 2=inc, 3=dec} step
+  --opt-all=<opt>         : Compute only models <= <opt>
+  --opt-value=<arg>       : Initialize objective function(s)
+      Valid:   <n1[,n2,n3,...]>
+
+  --sat-prepro[=<arg>]    : Run SatELite-like preprocessing
+      Valid: <n1[,n2,n3,n4,n5]> / Implicit: -1
+        <n1>: Run for at most <n1> iterations           (-1=run to fixpoint)
+        <n2>: Run variable elimination with cutoff <n2> (-1=no cutoff)
+        <n3>: Run for at most <n3> seconds              (-1=no time limit)
+        <n4>: Disable if <n4>% of vars are frozen       (-1=no limit)
+        <n5>: Run blocked clause elimination (0=no,1=limited,2=full)
+
+Clasp - ASP Options:
+
+  --pre                   : Run ASP preprocessor and exit
+  --supp-models           : Compute supported models (no unfounded set check)
+
+  --eq=<n>                : Configure equivalence preprocessing
+        <n> : Run for at most <n> iterations (-1=run to fixpoint/0=disable)
+  --backprop              : Enable backpropagation in ASP-preprocessing
+  --trans-ext=<arg>       : Configure handling of Lparse-like extended rules
+      Valid:   all, choice, card, weight, integ, dynamic, no
+        all    : Transform all extended rules to basic rules
+        choice : Transform choice rules, but keep cardinality and weight rules
+        card   : Transform cardinality rules, but keep choice and weight rules
+        weight : Transform cardinality and weight rules, but keep choice rules
+        integ  : Transform cardinality integrity constraints
+        dynamic: Transform "simple" extended rules, but keep more complex ones
+        no     : Do not transform extended rules
+
+
+Clasp - Search Options:
+
+  --no-lookback           : Disable all lookback strategies
+
+  --lookahead[=<arg>]     : Configure failed-literal detection
+      Default: no (atom, if --nolookback)
+      Valid:   atom, body, hybrid, no / Implicit: atom
+        atom  : Apply failed-literal detection to atoms
+        body  : Apply failed-literal detection to bodies
+        hybrid: Apply Nomore++-like failed-literal detection
+        no    : Do not apply failed-literal detection
+  --initial-lookahead=<n> : Restrict failed-literal detection to <n> decisions
+
+  --heuristic=<arg>       : Configure decision heuristic
+      Default: Berkmin (Unit, if --no-lookback)
+      Valid:   Berkmin, Vmtf, Vsids, Unit, None
+        Berkmin: Apply BerkMin-like heuristic
+        Vmtf   : Apply Siege-like heuristic
+        Vsids  : Apply Chaff-like heuristic
+        Unit   : Apply Smodels-like heuristic
+        None   : Select the first free variable
+  --opt-heuristic[=<n>]   : Configure optimize heuristic
+      Valid: 0 <= <n> <= 3 / Implicit: 1 
+         1: Apply sign heuristic
+         2: Apply model heuristic
+         3: Apply sign and model heuristic
+  --rand-freq=<p>         : Make random decisions with probability <p>
+      Valid:   [0.0...1.0]
+
+  --rand-prob[=<n1,n2>]   : Configure random probing
+      Valid:   no (0), <n1,n2> (<n1> >= 0, <n2> > 0) / Implicit: 50,20
+        no     : Do not run random probing
+        <n1,n2>: Run <n1> random passes up to at most <n2> conflicts each
+
+  --rand-watches[=<arg>]  : Configure watched literal initialization
+      Default: true / Implicit: true
+      Valid:   true (yes, 1), false (no, 0)
+        true : Randomly determine watched literals
+        false: Watch least watched literals in a nogood
+  --seed=<n>              : Set random number generator's seed to <n>
+
+  --search-limit=<n,m>    : Stop search after <n> conflicts or <m> restarts
+
+
+Clasp - Lookback Options:
+
+  --restarts,-r <arg>     : Configure restart policy
+      Default: 100,1.5
+      Valid:   [type,]<n1[,n2,n3]> (<n1> >= 0, <n2>,<n3> > 0), no
+      [L,]<n1>          : Run Luby et al.'s sequence with unit length <n1>
+      [*,]<n1>,<n2>     : Run geometric sequence of <n1>*(<n2>^i) conflicts
+      +,<n1>,<n2>       : Run arithmetic sequence of <n1>+(<n2>*i) conflicts
+      [+,]<n1>,<n2>,<n3>: Run Biere's inner-outer sequence (<n3>=outer)
+          <n1> = 0, no  : Disable restarts
+  --local-restarts        : Enable Ryvchin et al.'s local restarts
+  --bounded-restarts      : Enable (bounded) restarts during model enumeration
+  --reset-restarts        : Reset restart strategy during model enumeration
+  --save-progress[=<n>]   : Enable RSat-like progress saving on backjumps > <n>
+  --shuffle,-s <n1,n2>    : Configure shuffling after restarts
+      Valid:   <n1,n2> (<n1> >= 0, <n2> >= 0)
+        <n1> > 0: Shuffle problem after <n1> and re-shuffle every <n2> restarts
+        <n1> = 0: Do not shuffle problem after restarts
+        <n2> = 0: Do not re-shuffle problem
+
+  --deletion,-d <arg>     : Configure size of learnt nogood database
+      Default: 3.0,1.1,3.0
+      Valid:   <n1[,n2,n3]> (<n3> >= <n1> >= 0, <n2> >= 1.0), no
+        <n1,n2,n3>: Store at most min(P/<n1>*(<n2>^i),P*<n3>) learnt nogoods,
+                    P and i being initial problem size and number of restarts
+        no        : Do not restrict learnt db size
+  --estimate              : Use estimated problem complexity to init learnt db
+  --dinit=<min,max>       : Limit initial learnt db size to range [min,max]
+  --dsched=<arg>          : Configure secondary deletion policy (see restarts)
+  --dglue=<arg>           : Don't delete nogoods with lbd <= x
+  --update-lbd[=<arg>]    : Update lbds of learnt nogoods (1=yes,2=strict)
+  --reduce-on-restart     : Delete some learnt nogoods after every restart
+
+  --strengthen=<arg>      : Configure conflict nogood strengthening
+      Default: all
+      Valid:   bin, tern, all, no
+        bin : Check only binary antecedents for self-subsumption
+        tern: Check binary and ternary antecedents for self-subsumption
+        all : Check all antecedents for self-subsumption
+        no  : Do not check antecedents for self-subsumption
+  --recursive-str         : Enable MiniSAT-like conflict nogood strengthening
+  --otfs[=<arg>]          : Enable on-the-fly subsumption (1=partial, 2=full)
+  --reverse-arcs[=<arg>]  : Enable ManySAT-like inverse-arc learning
+
+  --loops=<arg>           : Configure representation/learning of loop formulas
+      Default: common
+      Valid:   common, distinct, shared, no
+        common  : Create loop nogoods for atoms in an unfounded set
+        distinct: Create distinct loop nogood for each atom in an unfounded set
+        shared  : Create loop formula for a whole unfounded set
+        no      : Do not learn loop formulas
+  --loops-in-heu=<arg>    : Consider loop nogoods in heuristics
+
+  --contraction=<n>       : Configure temporary contraction of learnt nogoods
+      Default: 250
+      Valid:
+        0  : Do not contract learnt nogoods
+        > 0: Contract learnt nogoods containing more than <n> literals
+
+
+Basic Options:
+
+  --help[=<arg>],-h       : Print help information and exit (2=extended help)
+  --version,-v            : Print version information and exit
+  --verbose[=<n>],-V      : Verbosity level
+  --stats[=<arg>]         : Print statistics (2=extended stats)
+  --quiet[=<m,o>],-q      : Configure printing of models and optimize values
+      <m>: print models          (0=all, 1=best/last, 2=no)
+      <o>: print optimize values (0=all, 1=best, 2=no)
+  --opt-sat               : Compute MaxSAT (requires DIMACS input)
+  --outf=<arg>            : Output format (0=default, 1=competition, 2=JSON)
+  --time-limit=<n>        : Set time limit to <n> seconds
+  --lemma-out=<file>      : Write learnt lemmas to <file> on exit
+  --lemma-in=<file>       : Read additional clauses from <file>
+
+
+usage: clasp [number] [options] [file]
+Default commandline:
+clasp --enum-mode=auto --heuristic=Berkmin --rand-watches=true --restarts=100,1.5 
+      --deletion=3.0,1.1,3.0 --strengthen=all --loops=common --contraction=250 
+      --verbose=1 
+[asp] --eq=5
+[cnf] --sat-prepro=20,25,120
+[opb] --sat-prepro=20,25,120
+
+clasp is part of Potassco: http://potassco.sourceforge.net/#clasp
+Get help/report bugs via : http://sourceforge.net/projects/potassco/support

@@ -40,27 +40,27 @@ public class MCDC_converter2 {
 		}
 	}
 
-	public static void main(String args[]) {
-		String input = "(or (and (= sd  sd) (or (= sd \"127.0.0.1\") (= bb 12312))))";
-		System.out.println(input);
-		MCDC_converter2 mcdc = new MCDC_converter2();
-		System.out.println("result: " + mcdc.convert(input));
-
-		MCDCConditionSet mcset = new MCDCConditionSet(mcdc.convert(input));
-		// System.out.println(mcset.getConditionSet().size() + "result set");
-		// System.out.println(mcset.getConditionSet().get(0).toString());
-		System.out.println("positives     "
-				+ mcset.getConditionSet().get(0).toString());
-		System.out.println("positives     "
-				+ mcset.getConditionSet().get(1).toString());
-
-		input = "!bb && !ks && sd";
-		System.out
-				.println(mcdc
-						.reverseConvert(input,
-								"(or (and (= sd  sd) (or (= ks \"127.0.0.1\") (= bb 12312))))"));
-
-	}
+//	public static void main(String args[]) {
+//		String input = "(or (and (= sd  sd) (or (= sd \"127.0.0.1\") (= bb 12312))))";
+//		System.out.println(input);
+//		MCDC_converter2 mcdc = new MCDC_converter2();
+//		System.out.println("result: " + mcdc.convert(input));
+//
+//		MCDCConditionSet mcset = new MCDCConditionSet(mcdc.convert(input));
+//		// System.out.println(mcset.getConditionSet().size() + "result set");
+//		// System.out.println(mcset.getConditionSet().get(0).toString());
+//		System.out.println("positives     "
+//				+ mcset.getConditionSet().get(0).toString());
+//		System.out.println("positives     "
+//				+ mcset.getConditionSet().get(1).toString());
+//
+//		input = "!bb && !ks && sd";
+//		System.out
+//				.println(mcdc
+//						.reverseConvert(input,
+//								"(or (and (= sd  sd) (or (= ks \"127.0.0.1\") (= bb 12312))))"));
+//
+//	}
 
 	public String convert(String input) {
 		String[] inputArray = input.split(" ");

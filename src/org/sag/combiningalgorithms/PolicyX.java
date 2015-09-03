@@ -2911,7 +2911,7 @@ public class PolicyX {
 				sb.append("(and ");
 				for (int i = 0; i < tokens.size(); i++) {
 					System.out.println(getTokens().get(i).toString());
-					if (getArray().get(i).equals(1)) {
+					if (getArray().size() > 0 && getArray().get(i).equals(1)) {
 						sb.append("(not ");
 						sb.append(converter.getMap().get(getTokens().get(i))
 								.toString()
@@ -3620,7 +3620,7 @@ public class PolicyX {
 		}
 	}
 
-	public PolicyTable buildMCDC_Table(Policy policy, MCDC_converter2 converter) {
+	public PolicyTable buildMCDC_Table(Policy policy, MCDC_converter2 converter, boolean isUnique) {
 		PolicyTable policytable = new PolicyTable();
 		List<Rule> rules = getRuleFromPolicy(policy);
 		// Target target = (Target) policy.getTarget();
@@ -3642,7 +3642,7 @@ public class PolicyX {
 			}
 
 			if (!mcdc_input.trim().equals("")) {
-				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input);
+				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input, isUnique);
 				ArrayList<String> positives = mcdcset.getPositiveConditions();
 				ArrayList<String> negatives = mcdcset.getNegativeConditions();
 				for (String result : negatives) {
@@ -3684,7 +3684,7 @@ public class PolicyX {
 						order.add(s[p]);
 				}
 				System.out.println(printArray(order, 1));
-				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input);
+				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input, isUnique);
 				ArrayList<String> positives = mcdcset.getPositiveConditions();
 				ArrayList<String> negatives = mcdcset.getNegativeConditions();
 				for (String result : negatives) {
@@ -3747,7 +3747,7 @@ public class PolicyX {
 			}
 
 			if (!mcdc_input.trim().equals("")) {
-				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input);
+				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input, false);
 				ArrayList<String> positives = mcdcset.getPositiveConditions();
 				ArrayList<String> negatives = mcdcset.getNegativeConditions();
 				for (String result : negatives) {
@@ -3789,7 +3789,7 @@ public class PolicyX {
 						order.add(s[p]);
 				}
 				System.out.println(printArray(order, 1));
-				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input);
+				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input, false);
 				ArrayList<String> positives = mcdcset.getPositiveConditions();
 				ArrayList<String> negatives = mcdcset.getNegativeConditions();
 				for (String result : negatives) {

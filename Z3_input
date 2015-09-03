@@ -1,5 +1,5 @@
-(declare-variable gvpfz String)
-(declare-variable twdkw String)
-(assert (and  (or  (and (= gvpfz "review") (not (= twdkw "write"))))))
+(declare-variable hkptr String)
+(declare-variable hfkzy String)
+(assert (and (= hkptr "author") (= hfkzy "read") ))
 (check-sat)
 (get-model)

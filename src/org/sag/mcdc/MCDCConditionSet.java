@@ -1,8 +1,13 @@
 package org.sag.mcdc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.table.DefaultTableModel;
+
+import e2ed.SAdaptor;
 
 public class MCDCConditionSet {
 
@@ -14,8 +19,23 @@ public class MCDCConditionSet {
 	
 	private ArrayList<MCDCCondition> conditionSet;
 // NING , 11/17
-	public MCDCConditionSet(String expression) {
-		generateConditionSet(expression);
+	public MCDCConditionSet(String expression, boolean UniqueCaseMCDC) {
+		if(UniqueCaseMCDC)
+		{
+			SAdaptor adp = new SAdaptor(expression);
+	        HashMap<String, Boolean> testcases = adp.genTestCases();
+	        this.conditionSet = new ArrayList<MCDCCondition>();
+	        Iterator it = testcases.entrySet().iterator();
+	        while(it.hasNext()) {
+	            Map.Entry e = (Map.Entry) it.next();
+	            String s = (String) e.getKey();
+	            Boolean b = (Boolean) e.getValue();
+	            MCDCCondition mc = new MCDCCondition(s, b);
+	            this.conditionSet.add(mc);
+	        }
+		}else{
+			generateConditionSet(expression);
+		}
 	}
 	
 
@@ -159,7 +179,7 @@ public class MCDCConditionSet {
 		//MCDCConditionSet set = new MCDCConditionSet("(amt>=0 || b_1>0) && (amt>=0 || B_1<=0)");				
 		//MCDCConditionSet set = new MCDCConditionSet("!(amt>=0 && getBalance()-amt>=0) && !(amt>=0 && getBalance()-amt<0) && !(amt>=0 && getBalance()-amt<0)");
 
-		MCDCConditionSet set = new MCDCConditionSet("( ( ( rhfqd && lfnao && senrn )))");
+		MCDCConditionSet set = new MCDCConditionSet("( ( ( rhfqd && lfnao && senrn )))",false);
 		set.printConditions();
 		
 		
