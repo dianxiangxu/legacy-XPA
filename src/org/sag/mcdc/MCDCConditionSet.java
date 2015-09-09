@@ -18,9 +18,9 @@ public class MCDCConditionSet {
 	
 	
 	private ArrayList<MCDCCondition> conditionSet;
-// NING , 11/17
+
 	public MCDCConditionSet(String expression, boolean UniqueCaseMCDC) {
-		if(UniqueCaseMCDC)
+		if(UniqueCaseMCDC) // from Jian Zhang's group at Chinese Academy of Science
 		{
 			SAdaptor adp = new SAdaptor(expression);
 	        HashMap<String, Boolean> testcases = adp.genTestCases();
@@ -33,7 +33,7 @@ public class MCDCConditionSet {
 	            MCDCCondition mc = new MCDCCondition(s, b);
 	            this.conditionSet.add(mc);
 	        }
-		}else{
+		}else{ 	// from Xu's group at NDSU (Rajendar Gangannagari)
 			generateConditionSet(expression);
 		}
 	}
