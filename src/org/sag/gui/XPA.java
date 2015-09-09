@@ -10,7 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-//try push
+
 public class XPA extends JFrame implements ItemListener, ActionListener {
 	
 	public int totalWidth;

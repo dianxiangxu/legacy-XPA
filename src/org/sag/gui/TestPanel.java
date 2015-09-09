@@ -134,6 +134,7 @@ public class TestPanel extends JPanel {
 	private JRadioButton DecisionCoverageRadio_NoError = new JRadioButton(
 			"Decision coverage_NoError");
 	private JRadioButton Unique_MCDC = new JRadioButton("Unique_case MC\\DC");
+	private JRadioButton Unique_MCDC_NoError = new JRadioButton("Unique_case MC\\DC_NoError");
 
 	private JPanel createPanel() {
 		JPanel myPanel = new JPanel();
@@ -150,7 +151,7 @@ public class TestPanel extends JPanel {
 		group.add(DecisionCoverageRadio_NoError);
 		group.add(Unique_MCDC);
 
-		myPanel.setLayout(new GridLayout(4, 2));
+		myPanel.setLayout(new GridLayout(3, 3));
 		//myPanel.add(basicRuleCoverageRadio);
 		myPanel.add(exclusiveRuleCoverageRadio);
 		myPanel.add(DecisionCoverageRadio);
@@ -160,7 +161,7 @@ public class TestPanel extends JPanel {
 		myPanel.add(MCDCRadio);
 		myPanel.add(MCDCRadio_NoError);
 		myPanel.add(Unique_MCDC);
-
+		myPanel.add(Unique_MCDC_NoError);
 		myPanel.setBorder(new TitledBorder(new EtchedBorder(), ""));
 
 		return myPanel;
@@ -205,6 +206,13 @@ public class TestPanel extends JPanel {
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_Pair");
 				ByTwo.writeToExcelFile(workingTestSuiteFileName);
+			} else if (DecisionCoverageRadio_NoError.isSelected()) {
+				PolicySpreadSheetTestSuite decisionCoverage = new PolicySpreadSheetTestSuite(
+						policyx.generate_DecisionCoverage(this,
+								policyx.buildDecisionCoverage_NoId(policy), "_DecisionCoverage_NoError"),
+						xpa.getWorkingPolicyFilePath());
+				workingTestSuiteFileName = getTestsuiteXLSfileName("_DecisionCoverage_NoError");
+				decisionCoverage.writeToExcelFile(workingTestSuiteFileName);
 			} else if (MCDCRadio.isSelected()) {
 				MCDC_converter2 converter = new MCDC_converter2();
 				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
@@ -214,18 +222,11 @@ public class TestPanel extends JPanel {
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage");
 				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
-			} else if (DecisionCoverageRadio_NoError.isSelected()) {
-				PolicySpreadSheetTestSuite decisionCoverage = new PolicySpreadSheetTestSuite(
-						policyx.generate_DecisionCoverage(this,
-								policyx.buildDecisionCoverage_NoId(policy), "_DecisionCoverage_NoError"),
-						xpa.getWorkingPolicyFilePath());
-				workingTestSuiteFileName = getTestsuiteXLSfileName("_DecisionCoverage_NoError");
-				decisionCoverage.writeToExcelFile(workingTestSuiteFileName);
 			} else if (MCDCRadio_NoError.isSelected()) {
 				MCDC_converter2 converter = new MCDC_converter2();
 				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
 						policyx.generate_MCDCCoverage(this,
-								policyx.buildMCDC_Table_NoId(policy, converter),
+								policyx.buildMCDC_Table_NoId(policy, converter, false),
 								"_MCDCCoverage_NoError", converter),
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("_MCDCCoverage_NoError");
@@ -236,6 +237,15 @@ public class TestPanel extends JPanel {
 						policyx.generate_MCDCCoverage(this,
 								policyx.buildMCDC_Table(policy, converter, true),
 								"Unique_Case_MCDCCoverage", converter),
+						xpa.getWorkingPolicyFilePath());
+				workingTestSuiteFileName = getTestsuiteXLSfileName("Unique_Case_MCDCCoverage");
+				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
+			} else if (Unique_MCDC_NoError.isSelected()) {
+				MCDC_converter2 converter = new MCDC_converter2();
+				PolicySpreadSheetTestSuite mcdcTestSuite = new PolicySpreadSheetTestSuite(
+						policyx.generate_MCDCCoverage(this,
+								policyx.buildMCDC_Table_NoId(policy, converter, true),
+								"Unique_Case_MCDCCoverage_NoError", converter),
 						xpa.getWorkingPolicyFilePath());
 				workingTestSuiteFileName = getTestsuiteXLSfileName("Unique_Case_MCDCCoverage");
 				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);

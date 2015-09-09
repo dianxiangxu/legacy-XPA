@@ -2467,7 +2467,7 @@ public class PolicyX {
 		ec = getEvaluationCtx(request);
 		
 		match = target.match(ec);
-		System.err.println("We are here " + match.getResult());
+		System.err.println("Target match result: " + match.getResult());
 		return match.getResult();
 
 	}
@@ -3725,7 +3725,7 @@ public class PolicyX {
 	}
 	
 	
-	public PolicyTable buildMCDC_Table_NoId(Policy policy, MCDC_converter2 converter) {
+	public PolicyTable buildMCDC_Table_NoId(Policy policy, MCDC_converter2 converter, boolean isUnique) {
 		PolicyTable policytable = new PolicyTable();
 		List<Rule> rules = getRuleFromPolicy(policy);
 		// Target target = (Target) policy.getTarget();
@@ -3747,7 +3747,7 @@ public class PolicyX {
 			}
 
 			if (!mcdc_input.trim().equals("")) {
-				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input, false);
+				MCDCConditionSet mcdcset = new MCDCConditionSet(mcdc_input, isUnique);
 				ArrayList<String> positives = mcdcset.getPositiveConditions();
 				ArrayList<String> negatives = mcdcset.getNegativeConditions();
 				for (String result : negatives) {

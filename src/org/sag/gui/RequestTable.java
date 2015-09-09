@@ -36,7 +36,7 @@ public class RequestTable {
 			totalWidth = (int) (screenSize.getWidth() * 0.8);
 		}
 
-		System.out.println(totalWidth + "totalWidth");
+//		System.out.println(totalWidth + "totalWidth");
 		if (totalWidth > 0) {
 			columnModel.getColumn(0).setPreferredWidth(10);
 			columnModel.getColumn(1).setPreferredWidth(
