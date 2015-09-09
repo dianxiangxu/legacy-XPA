@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.swing.table.DefaultTableModel;
 
-import e2ed.SAdaptor;
+import tcg.SAdaptor;
 
 public class MCDCConditionSet {
 
