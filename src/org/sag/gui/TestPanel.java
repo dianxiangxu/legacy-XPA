@@ -247,7 +247,7 @@ public class TestPanel extends JPanel {
 								policyx.buildMCDC_Table_NoId(policy, converter, true),
 								"Unique_Case_MCDCCoverage_NoError", converter),
 						xpa.getWorkingPolicyFilePath());
-				workingTestSuiteFileName = getTestsuiteXLSfileName("Unique_Case_MCDCCoverage");
+				workingTestSuiteFileName = getTestsuiteXLSfileName("Unique_Case_MCDCCoverage_NoError");
 				mcdcTestSuite.writeToExcelFile(workingTestSuiteFileName);
 			}
 			
