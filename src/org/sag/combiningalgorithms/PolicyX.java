@@ -667,7 +667,7 @@ public class PolicyX {
 		}
 
 		long endTime = System.currentTimeMillis();
-		System.out.println("System runtime ： " + (endTime - startTime) + "ms");
+		System.out.println("Test generation time ： " + (endTime - startTime) + "ms");
 		return generator;
 	}
 
@@ -740,7 +740,7 @@ public class PolicyX {
 
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println("程序运行时间： " + (endTime - startTime) + "ms");
+		System.out.println("Test generation time： " + (endTime - startTime) + "ms");
 		return generator;
 	}
 
@@ -806,7 +806,7 @@ public class PolicyX {
 			}
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println("程序运行时间： " + (endTime - startTime) + "ms");
+		System.out.println("Test generation time： " + (endTime - startTime) + "ms");
 		return generator;
 	}
 
@@ -2507,7 +2507,7 @@ public class PolicyX {
 		ec = getEvaluationCtx(request);
 		
 		match = target.match(ec);
-		System.err.println("We are here " + match.getResult());
+		System.err.println("Target match result: " + match.getResult());
 		return match.getResult();
 
 	}
@@ -3483,7 +3483,7 @@ public class PolicyX {
 			}
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println("程序运行时间： " + (endTime - startTime) + "ms");
+		System.out.println("Test generation time： " + (endTime - startTime) + "ms");
 
 		for (TarRecord ttrecord : policytable.getTarget()) {
 			if (ttrecord.covered == 0) {
@@ -4313,7 +4313,7 @@ public class PolicyX {
 		}
 
 		long endTime = System.currentTimeMillis();
-		System.out.println("程序运行时间： " + (endTime - startTime) + "ms");
+		System.out.println("Test generation time： " + (endTime - startTime) + "ms");
 		//checkMcdcTable(policytable);
 		return generator;
 	}
