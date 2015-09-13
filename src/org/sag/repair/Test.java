@@ -12,7 +12,6 @@ public class Test {
 	
 	static void simpleRepair() throws Exception {
 		String PolicyFilePath = "Experiments//conference3//conference3.xml";
-		//PolicyMutator policyMutator = new PolicyMutator(xpa.getWorkingPolicyFilePath());
 		PolicyMutator policyMutator = new PolicyMutator(PolicyFilePath);
 		policyMutator.createPolicyTargetTrueMutants();
 		policyMutator.createPolicyTargetFalseMutants();
@@ -35,8 +34,8 @@ public class Test {
 		
 		PolicySpreadSheetMutantSuite mutantSuite = policyMutator.generateMutants(); // write to spreadsheet
 		
-		String outputFileName = "Experiments//conference3//test_suites//conference3_MCDCCoverage//MutationTestingResults.xls";
-		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
+		String outputFileName = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//MutationTestingResults.xls";
+		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteSpreadSheetFile,
 				PolicyFilePath);
 		mutantSuite.runAndWriteDetectionInfoToExcelFile(outputFileName, testSuite);
