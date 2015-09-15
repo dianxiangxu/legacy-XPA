@@ -7,10 +7,10 @@ import org.sag.mutation.PolicySpreadSheetMutantSuite;
 public class Test {
 
 	public static void main(String[] args) throws Exception {
-		simpleRepair();
+		batchRun();
 	}
 	
-	static void simpleRepair() throws Exception {
+	static void batchRun() throws Exception {
 		String PolicyFilePath = "Experiments//conference3//conference3.xml";
 		PolicyMutator policyMutator = new PolicyMutator(PolicyFilePath);
 		policyMutator.createPolicyTargetTrueMutants();
