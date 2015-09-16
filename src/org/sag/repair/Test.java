@@ -7,14 +7,25 @@ import org.sag.mutation.PolicySpreadSheetMutantSuite;
 public class Test {
 
 	public static void main(String[] args) throws Exception {
+		testRepair();
+		//batchRun();
+	}
+	
+	static void testRepair() throws Exception {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
-		repairer.repair(policyFileToRepair);
+		String repairedFile = repairer.repair(policyFileToRepair);
+		if(repairedFile != null) {
+			System.out.format("repaired file: %s\n",repairedFile);
+		} else {
+			System.out.println("cannot repair\n");
+		}
 	}
 	
 	static void batchRun() throws Exception {
-		String PolicyFilePath = "Experiments//conference3//conference3.xml";
+		//String PolicyFilePath = "Experiments//conference3//conference3.xml";
+		String PolicyFilePath = "Experiments//conference3//mutants//conference3_ANR1.xml";
 		PolicyMutator policyMutator = new PolicyMutator(PolicyFilePath);
 		policyMutator.createPolicyTargetTrueMutants();
 		policyMutator.createPolicyTargetFalseMutants();
