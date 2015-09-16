@@ -1,6 +1,9 @@
 package org.sag.repair;
 
+import java.util.ArrayList;
+
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 
 public class PolicyRepairer {
@@ -9,27 +12,13 @@ public class PolicyRepairer {
 	public PolicyRepairer(String testSuiteFile) {
 		this.testSuiteFile = testSuiteFile;
 	}
-	public String repair(String policyFileToRepair) {
+	public String repair(String policyFileToRepair) throws Exception {
 		PolicyMutator policyMutator = new PolicyMutator(policyFileToRepair);
-		policyMutator.createPolicyTargetTrueMutants();
-		policyMutator.createPolicyTargetFalseMutants();
-		policyMutator.createCombiningAlgorithmMutants();
-		policyMutator.createRuleEffectFlippingMutants();
-		policyMutator.createRemoveRuleMutants();
-		policyMutator.createAddNewRuleMutants();
-		policyMutator.createRuleTargetTrueMutants();
-		policyMutator.createRuleTargetFalseMutants();
-		policyMutator.createRuleConditionTrueMutants();
-		policyMutator.createRuleConditionFalseMutants();
-		policyMutator.createFirstPermitRuleMutants();
-		policyMutator.createFirstDenyRuleMutants();
-		policyMutator.createRuleTypeReplacedMutants();
-		policyMutator.createFlipComparisonFunctionMutants();
-		policyMutator.createAddNotFunctionMutants();
-		policyMutator.createRemoveNotFunctionMutants();
-		policyMutator.createRemoveParallelTargetElementMutants();
-		policyMutator.createRemoveParallelConditionElementMutants();
-		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant);
+		policyMutator.createAllMutants();
+		ArrayList<PolicyMutant> mutants = policyMutator.getMutantList();
+		System.out.println(policyMutator.getMutantFileNameBase());
+		//PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant);
+		return "";
 	}
 
 }

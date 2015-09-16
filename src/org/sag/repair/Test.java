@@ -7,7 +7,10 @@ import org.sag.mutation.PolicySpreadSheetMutantSuite;
 public class Test {
 
 	public static void main(String[] args) throws Exception {
-		batchRun();
+		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
+		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
+		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
+		repairer.repair(policyFileToRepair);
 	}
 	
 	static void batchRun() throws Exception {
