@@ -31,7 +31,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	protected TestPanel testPanel;
 	protected MutationPanel mutationPanel;
-	protected AnalysisPanel analysisPanel;
+//	protected AnalysisPanel analysisPanel;
 	protected DebugPanel debugPanel;	
 
 	public static void main(String[] args) {
@@ -479,7 +479,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 			testPanel.saveActualResponsesAsOracleValues();
 		}
 	}
-
+/*
 	public class CompareCombiningAlgorithms extends AbstractAction {
 		public CompareCombiningAlgorithms(String text, ImageIcon icon, String desc,
 				Integer mnemonic) {
@@ -505,7 +505,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 			analysisPanel.mutateRules();
 		}
 	}
-
+*/
 	public class LocalizeFaultAction extends AbstractAction {
 		public LocalizeFaultAction(String text, ImageIcon icon, String desc,
 				Integer mnemonic) {
@@ -543,7 +543,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 		testPanel = new TestPanel(this);
 		mutationPanel = new MutationPanel(this);
-		analysisPanel = new AnalysisPanel(this);
+//		analysisPanel = new AnalysisPanel(this);
 		debugPanel = new DebugPanel(this);
 		
 		mainTabbedPane = new JTabbedPane();
@@ -552,12 +552,12 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 //				createNavigationIcon("images/policy.gif"), policyPanel);
 		mainTabbedPane.addTab("Policy",
 				createNavigationIcon("images/policy.gif"), editorPanel);
-		mainTabbedPane.addTab("Test", createNavigationIcon("images/test.gif"),
+		mainTabbedPane.addTab("Tests", createNavigationIcon("images/test.gif"),
 				testPanel);
 		mainTabbedPane.addTab("Mutants",
 				createNavigationIcon("images/mutation.gif"), mutationPanel);
-		mainTabbedPane.addTab("Analysis",
-				createNavigationIcon("images/mutation.gif"), analysisPanel);
+		mainTabbedPane.addTab("Debugging",
+				createNavigationIcon("images/mutation.gif"), debugPanel);
 		// mainTabbedPane.addChangeListener(this);
 		mainTabbedPane.setSelectedComponent(editorPanel);
 	}
