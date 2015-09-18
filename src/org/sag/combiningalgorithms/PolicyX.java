@@ -1049,6 +1049,8 @@ public class PolicyX {
 						if(match.getEval() instanceof AttributeDesignator)
 						{
 							AttributeDesignator attr = (AttributeDesignator)match.getEval();
+							String rand_id = randomAttribute();
+							String rand_cat = randomAttribute();
 							if(k == atindex)
 							{
 								allBuilder.append(" ("
@@ -1083,9 +1085,7 @@ public class PolicyX {
 							}
 							getType(getName(attr.getId().toString()),
 									attr.getType().toString());
-							MyAttr myattr = new MyAttr(attr.getId()
-									.toString(), attr.getCategory()
-									.toString(), attr.getType().toString());
+							MyAttr myattr = new MyAttr(attr.getId().toString(), attr.getCategory().toString(), attr.getType().toString());
 							if (isExist(collector, myattr) == false) 
 								collector.add(myattr);
 						}
@@ -3652,57 +3652,30 @@ public class PolicyX {
 		}
 	}
 	
-	private void updateFaultTable_RPTE(List<Rule> rules, boolean[][] fault_table, String request, int start)
+	private void updateFaultTable_RPTE(List<Rule> rules, String request, int start)
 	{
-		//fault_table[X][0] -> target coverage
-		//fault_table[X][1] -> condition coverage
+		
 		Rule starting = rules.get(start);
 		ArrayList<Integer> t1 = new ArrayList<Integer>();
-		int t2 = -1;
 		int c = -1;
 		if(starting.getTarget() != null)
-		{
 			t1 = MatchOfTarget((Target)starting.getTarget(), request);
-			t2 = TargetEvaluate((Target)starting.getTarget(), request);
-		}
 		if(starting.getCondition() != null)
 			c = ConditionEvaluate(starting.getCondition(), request);
-		fault_table[start][0] = true;
-		fault_table[start][1] = true;
+		if((t1 != null && t1.size() != 0) || c >= 0)
+			rule_table[start][FALSE_TRUE] = true;
+		
 		for(int i = start + 1; i < rules.size(); i++)
 		{
-			Rule rule = rules.get(i);
-			if(isDefaultRule(rule))
-				continue;
-			ArrayList<Integer> tresult1 = new ArrayList<Integer>();
-			int tresult2 = -1;
-			int cresult = -1;
-			if(rule.getTarget() != null)
-			{
-				tresult1 = MatchOfTarget((Target)rule.getTarget(), request);
-				tresult2 = TargetEvaluate((Target)rule.getTarget(), request);
-			}
-			if(rule.getCondition() != null)
-				cresult = ConditionEvaluate(rule.getCondition(), request);
-			if(rule.getTarget() == null)
-			{
-				if(cresult == c && !fault_table[i][1])
-					fault_table[i][1] = true;
-			}
-			else
-			{
-				if(fault_table[i][0])
-				{
-					if(cresult == c && !fault_table[i][1])
-						fault_table[i][1] = true;
-					else
-						continue;
-				}
-				if(tresult2 == t2 && arrayMatch(tresult1, t1) && !fault_table[i][0])
-					fault_table[i][0] = true;
-				if(cresult == c && !fault_table[i][1])
-					fault_table[i][1] = true;
-			}
+			Rule r = rules.get(i);
+			ArrayList<Integer> t2 = new ArrayList<Integer>();
+			int c2 = -1;
+			if(r.getTarget() != null)
+				t2 = MatchOfTarget((Target)starting.getTarget(), request);
+			if(r.getCondition() != null)
+				c2 = ConditionEvaluate(r.getCondition(), request);
+			if(arrayMatch(t1, t2) && c2 == c)
+				rule_table[i][FALSE_TRUE] = true;
 		}
 	}
 	
@@ -5503,6 +5476,8 @@ public class PolicyX {
 			if(rule_table[i][TRUE_TRUE] == true)
 				continue;
 			Rule r = rules.get(i);
+			if(isDefaultRule(r))
+				continue;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
 			PolicySpreadSheetTestRecord ptr = null;
@@ -5590,7 +5565,8 @@ public class PolicyX {
 			}
 			if(ptr != null)
 			{
-				//checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
+				if(opt)
+					checkForCoverage(rules, r, ptr.getRequest(), i, tpos);
 				generator.add(ptr);
 				count++;
 			}
@@ -5889,7 +5865,7 @@ public class PolicyX {
 				{
 					for(int i = 0; i < anyOf.size(); i++)
 					{
-						if(alls[index][i] == true)
+						if(anys[index][i] == true)
 							continue;
 						ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 						PolicySpreadSheetTestRecord ptr = null;
@@ -5899,7 +5875,7 @@ public class PolicyX {
 						if(ptr != null)
 						{
 							//if(opt)
-								//updateFaultTable_RPTE(rules, this.fault_table, ptr.getRequest(), index);
+								//updateFaultTable_RPTE(rules, ptr.getRequest(), index);
 							generator.add(ptr);
 							count++;
 						}
@@ -5915,7 +5891,7 @@ public class PolicyX {
 						{
 							for(int i = 0; i < allOf.size(); i++)
 							{
-								if(anys[index][i] == true)
+								if(alls[index][i] == true)
 									continue;
 								ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 								PolicySpreadSheetTestRecord ptr = null;
@@ -5925,7 +5901,7 @@ public class PolicyX {
 								if(ptr != null)
 								{
 									//if(opt)
-										//updateFaultTable_RPTE(rules, this.fault_table, ptr.getRequest(), index);
+										//updateFaultTable_RPTE(rules, ptr.getRequest(), index);
 									generator.add(ptr);
 									count++;
 								}
@@ -5951,7 +5927,7 @@ public class PolicyX {
 										if(ptr != null)
 										{
 											//if(opt)
-												//updateFaultTable_RPTE(rules, this.fault_table, ptr.getRequest(), index);
+												//updateFaultTable_RPTE(rules, ptr.getRequest(), index);
 											generator.add(ptr);
 											count++;
 										}
@@ -6821,6 +6797,8 @@ public class PolicyX {
 			{
 				e.printStackTrace();
 			}
+			if(collector.size() == 0)
+				return ptr;
 			System.out.println(collector.size() + " collection size");
 			String request = f.print(collector);
 			//System.out.println(request);
@@ -7362,8 +7340,8 @@ public class PolicyX {
 								ptr = buildRPTERequest_unless1(rules, r, sb, t, index, count, effect, i);
 								if(ptr != null)
 								{
-									if(opt)
-										checkAnyOfCoverage_unless(rules, ptr.getRequest(), index, i, effect, anys);
+									//if(opt)
+										//checkAnyOfCoverage_unless(rules, ptr.getRequest(), index, i, effect, anys);
 									generator.add(ptr);
 									count++;
 								}
@@ -7386,8 +7364,8 @@ public class PolicyX {
 										ptr = buildRPTERequest_unless2(rules, r, sb, t, index, count, effect, i, k);
 										if(ptr != null)
 										{
-											if(opt)
-												checkAllOfCoverage_unless(rules, ptr.getRequest(), index, i, effect, mats);
+											//if(opt)
+												//checkAllOfCoverage_unless(rules, ptr.getRequest(), index, i, effect, mats);
 											generator.add(ptr);
 											count++;
 										}
@@ -7410,8 +7388,8 @@ public class PolicyX {
 												ptr = buildRPTERequest_unless3(rules, r, sb, t, index, count, effect, i, j);
 												if(ptr != null)
 												{
-													if(opt)
-														checkMatchCoverage_unless(rules, ptr.getRequest(), index, i, effect, mats);
+													//if(opt)
+														//checkMatchCoverage_unless(rules, ptr.getRequest(), index, i, effect, mats);
 													generator.add(ptr);
 													count++;
 												}
@@ -7625,8 +7603,8 @@ public class PolicyX {
 							ptr = buildRPTERequest_FA1(rules, r, sb, collector, count, t, i);
 							if(ptr != null)
 							{
-								if(opt)
-									checkAnyOfCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), anys);
+								//if(opt)
+									//checkAnyOfCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), anys);
 								generator.add(ptr);
 								count++;
 							}
@@ -7651,8 +7629,8 @@ public class PolicyX {
 									ptr = buildRPTERequest_FA2(rules, r, sb, collector, count, t, i, k);
 									if(ptr != null)
 									{
-										if(opt)
-											checkAllOfCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), alls);
+										//if(opt)
+											//checkAllOfCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), alls);
 										generator.add(ptr);
 										count++;
 									}
@@ -7673,8 +7651,8 @@ public class PolicyX {
 									ptr = buildRPTERequest_FA3(rules, r, sb, collector, count, t, i, j);
 									if(ptr != null)
 									{
-										if(opt)
-											checkMatchCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), mats);
+										//if(opt)
+											//checkMatchCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), mats);
 										generator.add(ptr);
 										count++;
 									}
@@ -7898,8 +7876,8 @@ public class PolicyX {
 									ptr = buildRPTERequest_AllFalse1(rules, r, sb, collector, count, t, effect, i);
 									if(ptr != null)
 									{
-										if(opt)
-											checkAnyOfCoverage_fa(rules, ptr.getRequest(), index, i, effect, anys);
+										//if(opt)
+											//checkAnyOfCoverage_fa(rules, ptr.getRequest(), index, i, effect, anys);
 										generator.add(ptr);
 										count++;
 									}
@@ -7924,8 +7902,8 @@ public class PolicyX {
 											ptr = buildRPTERequest_AllFalse2(rules, r, sb, collector, count, t, effect, j, i);
 											if(ptr != null)
 											{
-												if(opt)
-													checkAllOfCoverage_fa(rules, ptr.getRequest(), index, j, effect, alls);
+												//if(opt)
+													//checkAllOfCoverage_fa(rules, ptr.getRequest(), index, j, effect, alls);
 												generator.add(ptr);
 												count++;
 											}
@@ -7950,8 +7928,8 @@ public class PolicyX {
 													ptr = buildRPTERequest_AllFalse3(rules, r, sb, collector, count, t, effect, k, j);
 													if(ptr != null)
 													{
-														if(opt)
-															checkMatchCoverage_fa(rules, ptr.getRequest(), index, k, effect, mats);
+														//if(opt)
+															//checkMatchCoverage_fa(rules, ptr.getRequest(), index, k, effect, mats);
 														generator.add(ptr);
 														count++;
 													}
@@ -7989,8 +7967,8 @@ public class PolicyX {
 									ptr = buildRPTERequest1(rules, r, sb, collector, count, t, i);
 									if(ptr != null)
 									{
-										if(opt)
-											checkAnyOfCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), anys);
+										//if(opt)
+											//checkAnyOfCoverage_fa(rules, ptr.getRequest(), index, i, r.getEffect(), anys);
 										generator.add(ptr);
 										count++;
 									}
@@ -8015,8 +7993,8 @@ public class PolicyX {
 											ptr = buildRPTERequest2(rules, r, sb, collector, count, t, j, i);
 											if(ptr != null)
 											{
-												if(opt)
-													checkAllOfCoverage_fa(rules, ptr.getRequest(), index, j, r.getEffect(), alls);
+												//if(opt)
+													//checkAllOfCoverage_fa(rules, ptr.getRequest(), index, j, r.getEffect(), alls);
 												generator.add(ptr);
 												count++;
 											}
@@ -8041,8 +8019,8 @@ public class PolicyX {
 													ptr = buildRPTERequest3(rules, r, sb, collector, count, t, k, j);
 													if(ptr != null)
 													{
-														if(opt)
-															checkMatchCoverage_fa(rules, ptr.getRequest(), index, k, r.getEffect(), mats);
+														//if(opt)
+															//checkMatchCoverage_fa(rules, ptr.getRequest(), index, k, r.getEffect(), mats);
 														generator.add(ptr);
 														count++;
 													}
@@ -8326,6 +8304,8 @@ public class PolicyX {
 			if(rule_table[i][TRUE_TRUE] == true)
 				continue;
 			Rule r = rules.get(i);
+			if(isDefaultRule(r))
+				continue;
 			StringBuffer sb = new StringBuffer();
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			PolicySpreadSheetTestRecord ptr = null;

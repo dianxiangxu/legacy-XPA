@@ -23,6 +23,15 @@ public class loadPolicy {
 
 		Policy policy = null;
 		InputStream stream = null;
+		
+		try
+		{
+			stream = new FileInputStream(policyFile);
+		}
+		catch(Exception e)
+		{
+			return policy;
+		}
 
 		try {
 			// create the factory
@@ -36,7 +45,6 @@ public class loadPolicy {
 			DocumentBuilder db = factory.newDocumentBuilder();
 			// Test
 				//System.out.println(policyFile);
-			stream = new FileInputStream(policyFile);
 			Document doc = db.parse(stream);
 
 			// handle the policy, if it's a known type
@@ -47,7 +55,7 @@ public class loadPolicy {
 				policy = Policy.getInstance(root);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		} finally {
 			if (stream != null) {
 				try {
