@@ -16,10 +16,10 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	public int totalWidth;
 	public int totalheight;
 
-	protected Action newAction, openAction, saveAction, saveAsAction,
-			checkSchemaAction;
+	protected Action newAction, openAction, saveAction, saveAsAction, checkSchemaAction;
 	protected Action openTestsAction, generateCoverageTestsAction, generateMutationTestsAction, runTestsAction;
 	protected Action openMutantsAction, generateMutantsAction, testMutantsAction;
+	protected Action localizeFaultAction, fixFaultAction;
 	protected JCheckBoxMenuItem[] items;
 	protected Action saveOracleValuesAction;
 
@@ -32,8 +32,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	protected TestPanel testPanel;
 	protected MutationPanel mutationPanel;
 	protected AnalysisPanel analysisPanel;
-	
-	
+	protected DebugPanel debugPanel;	
 
 	public static void main(String[] args) {
 		//
@@ -159,7 +158,15 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 		saveOracleValuesAction = new SaveOraclesAction("Save as Oracles",
 				createNavigationIcon(""), "SaveResults", new Integer(
-						KeyEvent.VK_U));
+						KeyEvent.VK_A));
+
+		localizeFaultAction = new LocalizeFaultAction("Localize Fault",
+				createNavigationIcon(""), "LocalizeFault", new Integer(
+						KeyEvent.VK_L));
+
+		fixFaultAction = new FixFaultAction("Fix Fault",
+				createNavigationIcon(""), "FixFault", new Integer(
+						KeyEvent.VK_F));
 
 	}
 
@@ -267,8 +274,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	protected JMenu createDebuggingMenu() {
 		JMenu debuggingMenu = new JMenu("Debug");
-		// TODO
-		Action[] actions = { };
+		Action[] actions = {localizeFaultAction, fixFaultAction};
 		for (int i = 0; i < actions.length; i++) {
 			JMenuItem menuItem = new JMenuItem(actions[i]);
 			menuItem.setIcon(null);
@@ -500,6 +506,32 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 	}
 
+	public class LocalizeFaultAction extends AbstractAction {
+		public LocalizeFaultAction(String text, ImageIcon icon, String desc,
+				Integer mnemonic) {
+			super(text, icon);
+			putValue(SHORT_DESCRIPTION, desc);
+			putValue(MNEMONIC_KEY, mnemonic);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			debugPanel.localizeFault();
+		}
+	}
+
+	public class FixFaultAction extends AbstractAction {
+		public FixFaultAction(String text, ImageIcon icon, String desc,
+				Integer mnemonic) {
+			super(text, icon);
+			putValue(SHORT_DESCRIPTION, desc);
+			putValue(MNEMONIC_KEY, mnemonic);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			debugPanel.fixFault();
+		}
+	}
+
 	public void updateMainTabbedPane(){
 		mainTabbedPane.validate();
 		mainTabbedPane.updateUI();
@@ -512,6 +544,8 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		testPanel = new TestPanel(this);
 		mutationPanel = new MutationPanel(this);
 		analysisPanel = new AnalysisPanel(this);
+		debugPanel = new DebugPanel(this);
+		
 		mainTabbedPane = new JTabbedPane();
 		mainTabbedPane.setBorder(BorderFactory.createEtchedBorder(0));
 //		mainTabbedPane.addTab("Policy",
@@ -598,6 +632,10 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	public boolean hasTests(){
 		return testPanel.hasTests();
+	}
+	
+	public boolean hasTestFailure(){
+		return testPanel.hasTestFailure();
 	}
 	
 	public void actionPerformed(ActionEvent e) {
