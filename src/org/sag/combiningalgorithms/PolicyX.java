@@ -1604,7 +1604,7 @@ public class PolicyX {
 					if (sat == true) {
 						z3.getValue(localcollector, nameMap);
 						String request = f.print(localcollector);
-//						System.out.println(request);
+//						//System.out.println(request);
 //						System.out.println(PolicyEvaluate(policy, request));
 						return request;
 					}
@@ -1818,7 +1818,7 @@ public class PolicyX {
 							// localcollector.add(ind);
 							z3.getValue(localcollector, nameMap);
 							String request = f.print(localcollector);
-							System.out.println(request);
+							//System.out.println(request);
 							return request;
 						}
 					}
@@ -2507,7 +2507,7 @@ public class PolicyX {
 		ec = getEvaluationCtx(request);
 		
 		match = target.match(ec);
-		System.err.println("Target match result: " + match.getResult());
+		//System.err.println("Target match result: " + match.getResult());
 		return match.getResult();
 
 	}
@@ -2827,7 +2827,7 @@ public class PolicyX {
 	}
 
 	public boolean z3str(String input, HashMap nameMap, HashMap typeMap) {
-		System.err.println("Building z3 input");
+		//System.err.println("Building z3 input");
 		z3.buildZ3Input(input, nameMap, typeMap);
 		z3.buildZ3Output();
 		if (z3.checkConflict() == true) {
@@ -3151,7 +3151,7 @@ public class PolicyX {
 					}
 					ptarget.setCovered(1);
 					String request = f.print(collector);
-					System.out.println(request);
+					//System.out.println(request);
 					try {
 						String path = testPanel
 								.getTestOutputDestination(fileName)
@@ -3190,7 +3190,7 @@ public class PolicyX {
 					ptarget.setCovered(1);
 					System.out.println("I am here");
 					String request = f.print(collector);
-					System.out.println(request);
+					//System.out.println(request);
 					try {
 						String path = testPanel
 								.getTestOutputDestination(fileName)
@@ -3268,7 +3268,7 @@ public class PolicyX {
 								String request = f.print(collector);
 								updateDecisionTable(policy, policytable,
 										request, i);
-								System.out.println(request);
+								//System.out.println(request);
 								try {
 									String path = testPanel
 											.getTestOutputDestination(fileName)
@@ -3314,7 +3314,7 @@ public class PolicyX {
 									}
 									rtarget.setCovered(1);
 									String request = f.print(collector);
-									System.out.println(request);
+									//System.out.println(request);
 									System.out.println(i);
 									updateDecisionTable(policy, policytable,
 											request, i);
@@ -6045,7 +6045,7 @@ public class PolicyX {
 	
 	private PolicySpreadSheetTestRecord buildRequest_false(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int stop, String type)
 	{
-		System.err.println("Building request");
+		//System.err.println("Building request");
 		PolicySpreadSheetTestRecord ptr = null;
 		function f = new function();
 		//Make current rule evaluate to false
@@ -6055,17 +6055,17 @@ public class PolicyX {
 		//Ensure rules before and following current evaluate to false (NotApplicable)
 		for(int i = 0; i < stop; i++)
 		{
-			System.err.println("LOOP");
+			//System.err.println("LOOP");
 			Rule temp = rules.get(i);
 			if(temp.getId().equals(rule.getId()) || isDefaultRule(temp))
 				continue;
 			else
 				sb.append(FalseTarget_FalseCondition(temp, collector) + "\n");
 		}
-		System.err.println("exited loop");
+		//System.err.println("exited loop");
 		//System.out.println("Here is the z3-str input: \n" + sb.toString());
 		boolean sat = z3str(sb.toString(), nameMap, typeMap);
-		System.err.println("Sent to z3");
+		//System.err.println("Sent to z3");
 		if(sat)
 		{
 			System.out.println(nameMap.size() + " map size");
@@ -6079,7 +6079,7 @@ public class PolicyX {
 			}
 			System.out.println(collector.size() + " collection size");
 			String request = f.print(collector);
-			System.out.println(request);
+			//System.out.println(request);
 			try
 			{
 				String path = t.getTestOutputDestination("_MutationTests")
@@ -6114,7 +6114,7 @@ public class PolicyX {
 			else
 				sb.append(False_Condition(r.getCondition(), collector) + "\n");
 		}
-		System.out.println("Here is the z3-str input: \n" + sb.toString());
+		//System.out.println("Here is the z3-str input: \n" + sb.toString());
 		boolean sat = z3str(sb.toString(), nameMap, typeMap);
 		if(sat)
 		{
@@ -6290,7 +6290,7 @@ public class PolicyX {
 			}
 			System.out.println(collector.size() + " collection size");
 			String request = f.print(collector);
-			System.out.println(request);
+			//System.out.println(request);
 			try
 			{
 				String path = t.getTestOutputDestination("_MutationTests")
@@ -6470,7 +6470,7 @@ public class PolicyX {
 			}
 			System.out.println(collector.size() + " collection size");
 			String request = f.print(collector);
-			System.out.println(request);
+			//System.out.println(request);
 			try
 			{
 				String path = t.getTestOutputDestination("_MutationTests")
@@ -6801,7 +6801,7 @@ public class PolicyX {
 				return ptr;
 			System.out.println(collector.size() + " collection size");
 			String request = f.print(collector);
-			//System.out.println(request);
+			////System.out.println(request);
 			try
 			{
 				String path = t.getTestOutputDestination("_MutationTests")
