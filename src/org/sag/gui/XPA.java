@@ -286,7 +286,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			editorPanel.saveFile();
+//			editorPanel.saveFile();
 		}
 	}
 
@@ -299,7 +299,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			editorPanel.saveAsFile();
+//			editorPanel.saveAsFile();
 		}
 	}
 
