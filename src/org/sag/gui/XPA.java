@@ -33,53 +33,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	protected TestPanel testPanel;
 	protected MutationPanel mutationPanel;
 	protected DebugPanel debugPanel;	
-
-	public static void main(String[] args) {
-		//
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					// turn off bold fonts
-					// UIManager.put("swing.boldMetal", Boolean.FALSE);
-
-					// re-install the Metal Look and Feel
-					// UIManager.setLookAndFeel(new
-					// javax.swing.plaf.metal.MetalLookAndFeel());
-				} catch (Exception exception) {
-					exception.printStackTrace();
-				}
-				XPA frame = new XPA();
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.pack();
-				frame.setVisible(true);
-				
-			}
-		});
-	}
-
-/*	public XPA(String fileName) throws SAXException, IOException {
-		try {
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			init();
-			if (new File(fileName).exists()) {
-				vm.getPrintStream().println("Analyzing file:" + fileName);
-				policyPanel.setPolicyTreeModel(fileName);
-			} else {
-				policyPanel.newFile();
-			}
-			policyPanel.setWorkingPolicyFile(new File(fileName));
-			setTitle("UMU-XACML-Editor - " + getWorkingPolicyFile().getName());
-		} catch (SAXException exc) {
-			JOptionPane.showMessageDialog(this, exc.toString());
-			throw exc;
-		} catch (IOException exc) {
-			JOptionPane.showMessageDialog(this, exc.toString());
-			throw exc;
-		} catch (Exception exception) {
-			exception.printStackTrace();
-		}
-	}
-*/
 	
 	public XPA() {
 		try {
@@ -605,6 +558,30 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	public void windowClosing() {
 //		editorPanel.windowClosing();
 		this.dispose();
+	}
+	
+	
+	public static void main(String[] args) {
+		//
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					// turn off bold fonts
+					// UIManager.put("swing.boldMetal", Boolean.FALSE);
+
+					// re-install the Metal Look and Feel
+					// UIManager.setLookAndFeel(new
+					// javax.swing.plaf.metal.MetalLookAndFeel());
+				} catch (Exception exception) {
+					exception.printStackTrace();
+				}
+				XPA frame = new XPA();
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.pack();
+				frame.setVisible(true);
+				
+			}
+		});
 	}
 
 }
