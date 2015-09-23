@@ -32,7 +32,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	protected TestPanel testPanel;
 	protected MutationPanel mutationPanel;
-//	protected AnalysisPanel analysisPanel;
 	protected DebugPanel debugPanel;	
 
 	public static void main(String[] args) {
@@ -86,7 +85,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		try {
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
 			init();
-//			policyPanel.newFile();
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
@@ -284,17 +282,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		return debuggingMenu;
 	}
 
-	/*
-	protected JMenu createAnalyzeMenu() {
-		JMenu analyzeMenu = new JMenu("Analyze Mutants");
-		JMenuItem combiningAlgorithmsItem = new JMenuItem(analyzeCombiningAlgorithmsAction);
-		combiningAlgorithmsItem.setIcon(null);
-		analyzeMenu.add(combiningAlgorithmsItem);
-		JMenuItem rulesItem = new JMenuItem(analyzeRulesAction);
-		rulesItem.setIcon(null);
-		analyzeMenu.add(rulesItem);
-		return analyzeMenu;
-	}*/
 
 	protected JMenu createHelpMenu() {
 		JMenu caMenu = new JMenu("Help");
@@ -372,7 +359,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.checkSchema();
+//			editorPanel.checkSchema();
 		}
 	}
 
@@ -479,33 +466,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 			testPanel.saveActualResponsesAsOracleValues();
 		}
 	}
-/*
-	public class CompareCombiningAlgorithms extends AbstractAction {
-		public CompareCombiningAlgorithms(String text, ImageIcon icon, String desc,
-				Integer mnemonic) {
-			super(text, icon);
-			putValue(SHORT_DESCRIPTION, desc);
-			putValue(MNEMONIC_KEY, mnemonic);
-		}
 
-		public void actionPerformed(ActionEvent e) {
-			analysisPanel.mutateCombiningAlgorithms();
-		}
-	}
-
-	public class RuleMutation extends AbstractAction {
-		public RuleMutation(String text, ImageIcon icon, String desc,
-				Integer mnemonic) {
-			super(text, icon);
-			putValue(SHORT_DESCRIPTION, desc);
-			putValue(MNEMONIC_KEY, mnemonic);
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			analysisPanel.mutateRules();
-		}
-	}
-*/
 	public class LocalizeFaultAction extends AbstractAction {
 		public LocalizeFaultAction(String text, ImageIcon icon, String desc,
 				Integer mnemonic) {
@@ -543,13 +504,10 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 		testPanel = new TestPanel(this);
 		mutationPanel = new MutationPanel(this);
-//		analysisPanel = new AnalysisPanel(this);
 		debugPanel = new DebugPanel(this);
 		
 		mainTabbedPane = new JTabbedPane();
 		mainTabbedPane.setBorder(BorderFactory.createEtchedBorder(0));
-//		mainTabbedPane.addTab("Policy",
-//				createNavigationIcon("images/policy.gif"), policyPanel);
 		mainTabbedPane.addTab("Policy",
 				createNavigationIcon("images/policy.gif"), editorPanel);
 		mainTabbedPane.addTab("Tests", createNavigationIcon("images/test.gif"),
@@ -645,7 +603,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	}
 
 	public void windowClosing() {
-//		policyPanel.windowClosing();
+//		editorPanel.windowClosing();
 		this.dispose();
 	}
 
