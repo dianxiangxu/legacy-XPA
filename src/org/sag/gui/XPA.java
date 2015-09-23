@@ -2,6 +2,7 @@ package org.sag.gui;
 
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.umu.editor.VentanaMensajes;
+import org.umu.editorXacml3.PolicyEditorPanel;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	boolean showVersionWarning = true;
 
 	protected JTabbedPane mainTabbedPane;
-	protected EditorPanel editorPanel;
+	protected AbstractPolicyEditor editorPanel;
 
 	protected TestPanel testPanel;
 	protected MutationPanel mutationPanel;
@@ -319,7 +320,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.newFile();
+			editorPanel.newFile();
 		}
 	}
 
@@ -332,7 +333,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.openFile();
 			editorPanel.openFile();
 		}
 	}
@@ -346,7 +346,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.saveFile();
+			editorPanel.saveFile();
 		}
 	}
 
@@ -359,7 +359,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.saveAsFile();
+			editorPanel.saveAsFile();
 		}
 	}
 
@@ -538,8 +538,8 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	}
 	
 	private void createMainTabbedPane() {
-//		policyPanel = new PolicyPanel(this);
-		editorPanel = new EditorPanel(this);
+		editorPanel = new PolicyEditorPanel();
+//		editorPanel = new EditorPanel(this);
 
 		testPanel = new TestPanel(this);
 		mutationPanel = new MutationPanel(this);

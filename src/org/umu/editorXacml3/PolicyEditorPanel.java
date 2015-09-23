@@ -20,6 +20,7 @@
  */
 package org.umu.editorXacml3;
 
+import org.sag.gui.AbstractPolicyEditor;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
@@ -28,6 +29,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.ByteArrayOutputStream;
@@ -42,7 +44,7 @@ import java.util.Hashtable;
  * 
  * @author Jie Ren
  */
-public class PolicyEditorPanel extends JPanel {
+public class PolicyEditorPanel extends AbstractPolicyEditor {
 	// Store the policy for editing
 	protected 	String 		policy;
 	
@@ -281,131 +283,151 @@ public class PolicyEditorPanel extends JPanel {
 		///this.setJMenuBar(menuBar);
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == mnuItNuevo) {
-			saveChanged();
-			DefaultMutableTreeNode raiz = new DefaultMutableTreeNode(
-					new String("Policy Document"));
-			DefaultTreeModel auxdtm = new DefaultTreeModel(raiz);
-			miDTM = auxdtm;
-			// JR
-			mcm = new ModelChangeMonitor(miDTM);
-			arbolPoliticas.setModel(miDTM);
-			archivoActual = null;
-			// JR English
-			// setTitle("UMU-XACML-Editor - Sin nombre");
-			///setTitle("UMU-XACML-Editor - New Document");
 
-		} else if (e.getSource() == mnuItAbrir) {
-			saveChanged();
-			JFileChooser cuadroAbrir = new JFileChooser();
-			cuadroAbrir.setMultiSelectionEnabled(false);
-			cuadroAbrir.setCurrentDirectory(CurrentPath.getInstancia()
-					.getCurrdir());
-			cuadroAbrir.setFileFilter(new XMLFileFilter("xml"));
-			if (cuadroAbrir.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				File temporal = cuadroAbrir.getSelectedFile();
-				AnalizadorSAX asax = new AnalizadorSAX();
-				try {
-					if (!temporal.toString().endsWith(".xml")) {
-						JOptionPane.showMessageDialog(this,
-								"The open File is not a Policy *.xml",
-								"Error of Selection",
+	public File getWorkingPolicyFile() {
+		return archivoActual;
+	}
+	
+	public void newFile(){
+		saveChanged();
+		DefaultMutableTreeNode raiz = new DefaultMutableTreeNode(
+				new String("Policy Document"));
+		DefaultTreeModel auxdtm = new DefaultTreeModel(raiz);
+		miDTM = auxdtm;
+		// JR
+		mcm = new ModelChangeMonitor(miDTM);
+		arbolPoliticas.setModel(miDTM);
+		archivoActual = null;
+		// JR English
+		// setTitle("UMU-XACML-Editor - Sin nombre");
+		///setTitle("UMU-XACML-Editor - New Document");
+	}
+	
+	public void openFile(){
+		saveChanged();
+		JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setMultiSelectionEnabled(false);
+		fileChooser.setCurrentDirectory(getCurrentDirectory());
+		fileChooser.setFileFilter(new XMLFileFilter("xml"));
+		if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File temporal = fileChooser.getSelectedFile();
+			AnalizadorSAX asax = new AnalizadorSAX();
+			try {
+				if (!temporal.toString().endsWith(".xml")) {
+					JOptionPane.showMessageDialog(this,
+							"The open File is not a Policy *.xml",
+							"Error of Selection",
+							JOptionPane.WARNING_MESSAGE);
+				} else {
+
+					CurrentPath.getInstancia().setCurrdir(
+							temporal.getParentFile());
+					// JR English
+					//vm.getPrintStream().println("Analizando fichero:" +
+					//                            temporal.getAbsolutePath());
+					vm.getPrintStream().println(
+							"Analyze file: " + temporal.getAbsolutePath());
+					miDTM = (DefaultTreeModel) asax.analizeFile(temporal
+							.getAbsolutePath());
+					if (!asax.getErrorHandler().equalsIgnoreCase("")) {
+						JOptionPane.showMessageDialog(this, asax
+								.getErrorHandler(),
+								"Errors produced in the parser",
 								JOptionPane.WARNING_MESSAGE);
-					} else {
+						vm.getPrintStream().println(asax.getErrorHandler());
+					}
+					archivoActual = temporal;
+					///setTitle("UMU-XACML-Editor - "
+					///		+ inputFile.getName());
 
-						CurrentPath.getInstancia().setCurrdir(
-								temporal.getParentFile());
-						// JR English
-						//vm.getPrintStream().println("Analizando fichero:" +
-						//                            temporal.getAbsolutePath());
-						vm.getPrintStream().println(
-								"Analyze file: " + temporal.getAbsolutePath());
-						miDTM = (DefaultTreeModel) asax.analizeFile(temporal
-								.getAbsolutePath());
-						if (!asax.getErrorHandler().equalsIgnoreCase("")) {
-							JOptionPane.showMessageDialog(this, asax
-									.getErrorHandler(),
-									"Errors produced in the parser",
-									JOptionPane.WARNING_MESSAGE);
-							vm.getPrintStream().println(asax.getErrorHandler());
-						}
+					arbolPoliticas.setModel(miDTM);
+					// JR
+					mcm = new ModelChangeMonitor(miDTM);
+				}
+			} catch (SAXException exc) {
+				(new JOptionPane()).showMessageDialog(this, exc.toString());
+				vm.getPrintStream().println(exc.toString());
+			} catch (IOException exc) {
+				(new JOptionPane()).showMessageDialog(this, exc.toString());
+				vm.getPrintStream().println(exc.toString());
+			}
+		}
+	}
+	
+	public void saveFile(){
+		AnalizadorSAX asax = new AnalizadorSAX();
+		if (archivoActual == null) {
+//			actionPerformed(new ActionEvent(mnuItGuardarC, 0, "mnuFiles_SaveAs"));
+			saveAsFile();
+		} else {
+			vm.getPrintStream().println(
+					"Process file:" + archivoActual.getAbsolutePath());
+			asax.saveToXacml((DefaultMutableTreeNode) miDTM.getRoot(),
+					archivoActual.getAbsolutePath());
+		}
+	}
+	
+	public void saveAsFile(){
+		JFileChooser cuadroGuardar = new JFileChooser();
+		cuadroGuardar.setCurrentDirectory(CurrentPath.getInstancia()
+				.getCurrdir());
+		cuadroGuardar.setFileFilter(new XMLFileFilter("xml"));
+		cuadroGuardar.setMultiSelectionEnabled(false);
+
+		if (cuadroGuardar.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File temporal = cuadroGuardar.getSelectedFile();
+			if (temporal.exists()) {
+				if ((new XMLFileFilter("xml")).accept(temporal)) {
+					int resp = JOptionPane
+							.showConfirmDialog(
+									this,
+									"The File already exists. Do you wish to change (overwrite) it?",
+									"Saving...", JOptionPane.YES_NO_OPTION,
+									JOptionPane.QUESTION_MESSAGE);
+					if (resp == JOptionPane.YES_OPTION) {
+						AnalizadorSAX asax = new AnalizadorSAX();
 						archivoActual = temporal;
+						vm.getPrintStream().println(
+								"Process file:"
+										+ archivoActual.getAbsolutePath());
+						asax
+								.saveToXacml(
+										(DefaultMutableTreeNode) miDTM
+												.getRoot(), archivoActual
+												.getAbsolutePath());
 						///setTitle("UMU-XACML-Editor - "
 						///		+ inputFile.getName());
-
-						arbolPoliticas.setModel(miDTM);
-						// JR
-						mcm = new ModelChangeMonitor(miDTM);
 					}
-				} catch (SAXException exc) {
-					(new JOptionPane()).showMessageDialog(this, exc.toString());
-					vm.getPrintStream().println(exc.toString());
-				} catch (IOException exc) {
-					(new JOptionPane()).showMessageDialog(this, exc.toString());
-					vm.getPrintStream().println(exc.toString());
 				}
-			}
-		} else if (e.getSource() == mnuItGuardar) {
-			AnalizadorSAX asax = new AnalizadorSAX();
-			if (archivoActual == null) {
-				actionPerformed(new ActionEvent(mnuItGuardarC, 0,
-						"mnuFiles_SaveAs"));
 			} else {
+				if (temporal.getAbsolutePath().endsWith(".xml")) {
+					archivoActual = temporal;
+				} else {
+					archivoActual = new File(temporal.getAbsolutePath()
+							+ ".xml");
+				}
+				AnalizadorSAX asax = new AnalizadorSAX();
 				vm.getPrintStream().println(
 						"Process file:" + archivoActual.getAbsolutePath());
-				asax.saveToXacml((DefaultMutableTreeNode) miDTM.getRoot(),
+				asax.saveToXacml(
+						(DefaultMutableTreeNode) miDTM.getRoot(),
 						archivoActual.getAbsolutePath());
+				///setTitle("UMU-XACML-Editor - " + inputFile.getName());
 			}
+
+		}
+
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == mnuItNuevo) {
+			newFile();
+		} else if (e.getSource() == mnuItAbrir) {
+			openFile();
+		} else if (e.getSource() == mnuItGuardar) {
+			saveFile();
 		} else if (e.getSource() == mnuItGuardarC) {
-			JFileChooser cuadroGuardar = new JFileChooser();
-			cuadroGuardar.setCurrentDirectory(CurrentPath.getInstancia()
-					.getCurrdir());
-			cuadroGuardar.setFileFilter(new XMLFileFilter("xml"));
-			cuadroGuardar.setMultiSelectionEnabled(false);
-
-			if (cuadroGuardar.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-				File temporal = cuadroGuardar.getSelectedFile();
-				if (temporal.exists()) {
-					if ((new XMLFileFilter("xml")).accept(temporal)) {
-						int resp = JOptionPane
-								.showConfirmDialog(
-										this,
-										"The File already exists. Do you wish to change (overwrite) it?",
-										"Saving...", JOptionPane.YES_NO_OPTION,
-										JOptionPane.QUESTION_MESSAGE);
-						if (resp == JOptionPane.YES_OPTION) {
-							AnalizadorSAX asax = new AnalizadorSAX();
-							archivoActual = temporal;
-							vm.getPrintStream().println(
-									"Process file:"
-											+ archivoActual.getAbsolutePath());
-							asax
-									.saveToXacml(
-											(DefaultMutableTreeNode) miDTM
-													.getRoot(), archivoActual
-													.getAbsolutePath());
-							///setTitle("UMU-XACML-Editor - "
-							///		+ inputFile.getName());
-						}
-					}
-				} else {
-					if (temporal.getAbsolutePath().endsWith(".xml")) {
-						archivoActual = temporal;
-					} else {
-						archivoActual = new File(temporal.getAbsolutePath()
-								+ ".xml");
-					}
-					AnalizadorSAX asax = new AnalizadorSAX();
-					vm.getPrintStream().println(
-							"Process file:" + archivoActual.getAbsolutePath());
-					asax.saveToXacml(
-							(DefaultMutableTreeNode) miDTM.getRoot(),
-							archivoActual.getAbsolutePath());
-					///setTitle("UMU-XACML-Editor - " + inputFile.getName());
-				}
-
-			}
+			saveAsFile();
 		} else if (e.getSource() == mnuItSalir) {
 			saveChanged();
 			///this.dispose();
@@ -743,4 +765,6 @@ public class PolicyEditorPanel extends JPanel {
 		frame.pack();
 		frame.setVisible(true);
 	}
+
+
 }
