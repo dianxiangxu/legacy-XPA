@@ -76,6 +76,7 @@ public class PolicyX {
 	Call_Z3str z3 = new Call_Z3str();
 	public HashMap nameMap = new HashMap();
 	public HashMap typeMap = new HashMap();
+	public HashMap valueMap = new HashMap();
 	
 	private boolean[][] rule_table;
 	private final int TRUE_TRUE = 0;
@@ -2994,6 +2995,21 @@ public class PolicyX {
 			return this.condition;
 		}
 	}
+	
+	public class MatchRecord
+	{
+		
+	}
+	
+	public class AnyOfRecord
+	{
+		
+	}
+	
+	public class AllOfRecord
+	{
+		
+	}
 
 	public class PolicyTable {
 		private ArrayList<TarRecord> target;
@@ -3019,6 +3035,21 @@ public class PolicyX {
 		public ArrayList<RuleRecord> getRules() {
 			return this.ruleRecord;
 		}
+	}
+	
+	private class MatchTable
+	{
+		private ArrayList<MatchRecord> expressions;
+	}
+	
+	private class AnyOfTable
+	{
+		
+	}
+	
+	private class AllOfTable
+	{
+		
 	}
 
 	public PolicyTable buildDecisionCoverage(Policy policy) {
@@ -4723,9 +4754,9 @@ public class PolicyX {
 				
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated for given policy");
-					System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
-							+ " combining algorithm");
+					//System.err.println("Test cannot be generated for given policy");
+					//System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
+							//+ " combining algorithm");
 					return generator;
 				}
 				//Condition 2: Default rule exists but effect is "Deny"
@@ -4772,9 +4803,9 @@ public class PolicyX {
 				{
 					//Result 1 of Condition 1, Step 1: default rule effect is "Deny"
 					//Effect: test cannot be generated
-					System.err.println("Test cannot be generated for given policy");
-					System.err.print("Policy contains a default \"Deny\" rule with deny-overrides"
-							+ " combining algorithm");
+					//System.err.println("Test cannot be generated for given policy");
+					//System.err.print("Policy contains a default \"Deny\" rule with deny-overrides"
+							//+ " combining algorithm");
 					return generator;
 				}
 				else
@@ -4813,19 +4844,19 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated for given policy");
-					System.err.println("Policy contains a default \"Permit\" rule with" +
-					" deny-unless-permit combining algorithm");
+					//System.err.println("Test cannot be generated for given policy");
+					//System.err.println("Policy contains a default \"Permit\" rule with" +
+					//" deny-unless-permit combining algorithm");
 					return generator;
 				}
 				else
 				{
 					if(f.allDenyRule(policy))
 					{
-						System.err.println("Test cannot be generated for given policy");
-						System.err.println("Policy contains nothing but \"Deny\" rules " +
-						"with deny-unless-permit combining algorithm");
-						System.err.println("Please consider writing a better policy and using a different combining algorithm");
+						//System.err.println("Test cannot be generated for given policy");
+						//System.err.println("Policy contains nothing but \"Deny\" rules " +
+						//with deny-unless-permit combining algorithm");
+						//System.err.println("Please consider writing a better policy and using a different combining algorithm");
 						return generator;
 					}
 					else
@@ -4834,10 +4865,10 @@ public class PolicyX {
 			}
 			else if(f.allDenyRule(policy))
 			{
-				System.err.println("Test cannot be generated for given policy");
-				System.err.println("Policy contains nothing but \"Deny\" rules " +
-				"with deny-unless-permit combining algorithm");
-				System.err.println("Please consider writing a better policy and using a different combining algorithm");
+				//System.err.println("Test cannot be generated for given policy");
+				//System.err.println("Policy contains nothing but \"Deny\" rules " +
+				//"with deny-unless-permit combining algorithm");
+				//System.err.println("Please consider writing a better policy and using a different combining algorithm");
 				return generator;
 			}
 			else
@@ -4850,19 +4881,19 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 1)
 				{
-					System.err.println("Test cannot be generated for given policy");
-					System.err.println("Policy contains a default \"Deny\" rule with" +
-					" permit-unless-deny combining algorithm");
+					//System.err.println("Test cannot be generated for given policy");
+					//System.err.println("Policy contains a default \"Deny\" rule with" +
+					//" permit-unless-deny combining algorithm");
 					return generator;
 				}
 				else
 				{
 					if(f.allPermitRule(policy))
 					{
-						System.err.println("Test cannot be generated for given policy");
-						System.err.println("Policy contains nothing but \"Permit\" rules " +
-						"with permit-unless-deny combining algorithm");
-						System.err.println("Please consider writing a better policy and using a different combining algorithm");
+						//System.err.println("Test cannot be generated for given policy");
+						//System.err.println("Policy contains nothing but \"Permit\" rules " +
+						//"with permit-unless-deny combining algorithm");
+						//System.err.println("Please consider writing a better policy and using a different combining algorithm");
 						return generator;
 					}
 					else
@@ -4873,10 +4904,10 @@ public class PolicyX {
 			}
 			else if(f.allPermitRule(policy))
 			{
-				System.err.println("Test cannot be generated for given policy");
-				System.err.println("Policy contains nothing but \"Permit\" rules " +
-				"with permit-unless-deny combining algorithm");
-				System.err.println("Please consider writing a better policy and using a different combining algorithm");
+				//System.err.println("Test cannot be generated for given policy");
+				//System.err.println("Policy contains nothing but \"Permit\" rules " +
+				//"with permit-unless-deny combining algorithm");
+				//System.err.println("Please consider writing a better policy and using a different combining algorithm");
 				return generator;
 			}
 			else
@@ -4902,8 +4933,8 @@ public class PolicyX {
 				buildRTTRequests_FA(rules, generator, t, opt);
 			return generator;
 		}
-		else
-			System.err.println("Given policy's combining algorithm not currently supported.");
+		//else
+			//System.err.println("Given policy's combining algorithm not currently supported.");
 		return generator;
 	}
 	
@@ -4920,7 +4951,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else
@@ -4938,7 +4969,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 1)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else
@@ -4953,12 +4984,12 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 1)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else if(f.allPermitRule(policy))
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else
@@ -4966,7 +4997,7 @@ public class PolicyX {
 			}
 			else if(f.allPermitRule(policy))
 			{
-				System.err.println("Test cannot be generated");
+				//System.err.println("Test cannot be generated");
 				return generator;
 			}
 			else
@@ -4979,12 +5010,12 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be gnerated");
+					//System.err.println("Test cannot be gnerated");
 					return generator;
 				}
 				else if(f.allDenyRule(policy))
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else
@@ -4992,7 +5023,7 @@ public class PolicyX {
 			}
 			else if(f.allDenyRule(policy))
 			{
-				System.err.println("Test cannot be generated");
+				//System.err.println("Test cannot be generated");
 				return generator;
 			}
 			else
@@ -5008,8 +5039,8 @@ public class PolicyX {
 			else
 				buildRPTERequests_FA(rules, generator, t, opt);
 		}
-		else
-			System.err.println("Combining algorithm not currently supported");
+		//else
+			//System.err.println("Combining algorithm not currently supported");
 		
 		return generator;
 	}
@@ -5084,10 +5115,10 @@ public class PolicyX {
 		{
 			if(f.allDenyRule(policy))
 			{
-				System.err.println("Test cannot be generated for given policy");
-				System.err.println("Policy contains nothing but \"Deny\" rules " +
-				"with deny-unless-permit combining algorithm");
-				System.err.println("Please consider writing a better policy and using a different combining algorithm");
+				//System.err.println("Test cannot be generated for given policy");
+				//System.err.println("Policy contains nothing but \"Deny\" rules " +
+				//"with deny-unless-permit combining algorithm");
+				//System.err.println("Please consider writing a better policy and using a different combining algorithm");
 				return generator;
 			}
 			else
@@ -5098,10 +5129,10 @@ public class PolicyX {
 		{
 			if(f.allPermitRule(policy))
 			{
-				System.err.println("Test cannot be generated for given policy");
-				System.err.println("Policy contains nothing but \"Permit\" rules " +
-				"with permit-unless-deny combining algorithm");
-				System.err.println("Please consider writing a better policy and using a different combining algorithm");
+				//System.err.println("Test cannot be generated for given policy");
+				//System.err.println("Policy contains nothing but \"Permit\" rules " +
+				//"with permit-unless-deny combining algorithm");
+				//System.err.println("Please consider writing a better policy and using a different combining algorithm");
 				return generator;
 			}
 			else
@@ -5140,9 +5171,9 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated for given policy");
-					System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
-							+ " combining algorithm");
+					//System.err.println("Test cannot be generated for given policy");
+					//System.err.println("The policy contains a default \"Permit\" rule with permit-overrides"
+							//+ " combining algorithm");
 					return generator;
 				}
 				else
@@ -5168,7 +5199,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 1)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else if(allPermitRules(rules, rules.size() - 1))
@@ -5193,7 +5224,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else
@@ -5201,7 +5232,7 @@ public class PolicyX {
 			}
 			else if(f.allDenyRule(policy))
 			{
-				System.err.println("Test cannot be generated");
+				//System.err.println("Test cannot be generated");
 				return generator;
 			}
 			else
@@ -5214,7 +5245,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else
@@ -5222,7 +5253,7 @@ public class PolicyX {
 			}
 			else if(f.allPermitRule(policy))
 			{
-				System.err.println("Test cannot be generated");
+				//System.err.println("Test cannot be generated");
 				return generator;
 			}
 			else
@@ -5240,7 +5271,7 @@ public class PolicyX {
 			return generator;	
 		}
 		else
-			System.err.println("Combining algorithm not currently supported");
+			//System.err.println("Combining algorithm not currently supported");
 		return generator;
 	}
 	
@@ -5276,7 +5307,7 @@ public class PolicyX {
 		{
 			if(f.allPermitRule(policy))
 			{
-				System.err.println("Test cannot be generated");
+				//System.err.println("Test cannot be generated");
 				return generator;
 			}
 			else
@@ -5287,7 +5318,7 @@ public class PolicyX {
 		{
 			if(f.allDenyRule(policy))
 			{
-				System.err.println("Test cannot be generated");
+				//System.err.println("Test cannot be generated");
 				return generator;
 			}
 			else
@@ -5320,7 +5351,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 0)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else if(f.allDenyRule(policy))
@@ -5339,7 +5370,7 @@ public class PolicyX {
 			{
 				if(def.getEffect() == 1)
 				{
-					System.err.println("Test cannot be generated");
+					//System.err.println("Test cannot be generated");
 					return generator;
 				}
 				else if(f.allPermitRule(policy))
@@ -5804,8 +5835,8 @@ public class PolicyX {
 			{
 				ptr = buildConditionRequest_false(rules, r, sb, collector, count, t, rules.size(), "RCT");
 			}
-			else
-				System.err.println("Rule does not contain a condition");
+			//else
+				//System.err.println( does not contain a condition");
 			if(ptr != null)
 			{
 				if(opt)
@@ -5821,21 +5852,21 @@ public class PolicyX {
 		int count = 1;
 		for(int i = 0; i < rules.size(); i++)
 		{
-			System.err.println("LOOP");
+			//System.err.println("LOOP");
 			if(rule_table[i][FALSE_TRUE] == true)
 				continue;
 			Rule temp = rules.get(i);
-			System.err.println("Grabbed rule");
+			//System.err.println("Grabbed rule");
 			PolicySpreadSheetTestRecord ptr = null;
 			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 			StringBuffer sb = new StringBuffer();
 			sb.append(TruePolicyTarget(policy, collector) + "\n");
 			if(!temp.isTargetEmpty())
 				ptr = buildRequest_false(rules, temp, sb, collector, count, t, rules.size(), "RTT");
-			System.err.println("Made a request");
+			//System.err.println("Made a request");
 			if(ptr != null)
 			{
-				System.err.println("Checking for coverage");
+				//System.err.println("Checking for coverage");
 				String request = ptr.getRequest();
 				if(opt)
 					checkForCoverage(rules, temp, request, i, FALSE_TRUE);
@@ -5849,9 +5880,9 @@ public class PolicyX {
 	{
 		int count = 1;
 		int index = 0;
-		boolean[][] alls = buildAllOfTable(rules);
-		boolean[][] anys = buildAnyOfTable(rules);
-		boolean[][] mats = buildMatchTable(rules);
+		//boolean[][] alls = buildAllOfTable(rules);
+		//boolean[][] anys = buildAnyOfTable(rules);
+		//boolean[][] mats = buildMatchTable(rules);
 	for(Rule r : rules)
 	{
 		
@@ -5865,8 +5896,8 @@ public class PolicyX {
 				{
 					for(int i = 0; i < anyOf.size(); i++)
 					{
-						if(anys[index][i] == true)
-							continue;
+						//if(anys[index][i] == true)
+							//continue;
 						ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 						PolicySpreadSheetTestRecord ptr = null;
 						StringBuffer sb = new StringBuffer();
@@ -5891,8 +5922,8 @@ public class PolicyX {
 						{
 							for(int i = 0; i < allOf.size(); i++)
 							{
-								if(alls[index][i] == true)
-									continue;
+								//if(alls[index][i] == true)
+									//continue;
 								ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 								PolicySpreadSheetTestRecord ptr = null;
 								StringBuffer sb = new StringBuffer();
@@ -5917,8 +5948,8 @@ public class PolicyX {
 								{
 									for(int i = 0; i < matches.size(); i++)
 									{
-										if(mats[index][i] == true)
-											continue;
+										//if(mats[index][i] == true)
+											//continue;
 										ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 										PolicySpreadSheetTestRecord ptr = null;
 										StringBuffer sb = new StringBuffer();
@@ -7316,9 +7347,6 @@ public class PolicyX {
 	private void buildRPTERequests_unless(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, int effect, boolean opt)
 	{
 		int count = 1, index = 0;
-		boolean[][] alls = buildAllOfTable(rules);
-		boolean[][] anys = buildAnyOfTable(rules);
-		boolean[][] mats = buildMatchTable(rules);
 		for(Rule r : rules)
 		{
 			if(!r.isTargetEmpty())
@@ -7333,8 +7361,8 @@ public class PolicyX {
 						{
 							for(int i = 0; i < anyOf.size(); i++)
 							{
-								if(anys[index][i] == true)
-									continue;
+								//if(anys[index][i] == true)
+									//continue;
 								StringBuffer sb = new StringBuffer();
 								PolicySpreadSheetTestRecord ptr = null;
 								ptr = buildRPTERequest_unless1(rules, r, sb, t, index, count, effect, i);
@@ -7357,8 +7385,8 @@ public class PolicyX {
 								{
 									for(int i = 0; i < allOf.size(); i++)
 									{
-										if(alls[index][i] == true)
-											continue;
+										//if(alls[index][i] == true)
+											//continue;
 										StringBuffer sb = new StringBuffer();
 										PolicySpreadSheetTestRecord ptr = null;
 										ptr = buildRPTERequest_unless2(rules, r, sb, t, index, count, effect, i, k);
@@ -7381,8 +7409,8 @@ public class PolicyX {
 										{
 											for(int i = 0; i < matches.size(); i++)
 											{
-												if(mats[index][i] == true)
-													continue;
+												//if(mats[index][i] == true)
+													//continue;
 												StringBuffer sb = new StringBuffer();
 												PolicySpreadSheetTestRecord ptr = null;
 												ptr = buildRPTERequest_unless3(rules, r, sb, t, index, count, effect, i, j);
@@ -7579,9 +7607,7 @@ public class PolicyX {
 	private void buildRPTERequests_FA(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
 		int count = 1, index = 0;
-		boolean[][] anys = buildAnyOfTable(rules);
-		boolean[][] alls = buildAllOfTable(rules);
-		boolean[][] mats = buildMatchTable(rules);
+		
 		for(Rule r : rules)
 		{
 			if(!r.isTargetEmpty())
@@ -7594,8 +7620,8 @@ public class PolicyX {
 					{
 						for(int i = 0; i < anyOf.size(); i++)
 						{
-							if(anys[index][i] == true)
-								continue;
+							//if(anys[index][i] == true)
+								//continue;
 							ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 							PolicySpreadSheetTestRecord ptr = null;
 							StringBuffer sb = new StringBuffer();
@@ -7620,8 +7646,8 @@ public class PolicyX {
 							{
 								for(int i = 0; i < allOf.size(); i++)
 								{
-									if(alls[index][i] == true)
-										continue;
+									//if(alls[index][i] == true)
+										//continue;
 									ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 									PolicySpreadSheetTestRecord ptr = null;
 									StringBuffer sb = new StringBuffer();
@@ -7642,8 +7668,8 @@ public class PolicyX {
 								List<TargetMatch> matches = all.getMatches();
 								for(int i = 0; i < matches.size(); i++)
 								{
-									if(mats[index][i] == true)
-										continue;
+									//if(mats[index][i] == true)
+										//continue;
 									ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 									PolicySpreadSheetTestRecord ptr = null;
 									StringBuffer sb = new StringBuffer();
@@ -7850,9 +7876,6 @@ public class PolicyX {
 		{
 			int count = 1, index = 0;
 			int effect = defRule.getEffect();
-			boolean[][] anys = buildAnyOfTable(rules);
-			boolean[][] alls = buildAllOfTable(rules);
-			boolean[][] mats = buildMatchTable(rules);
 			for(Rule r : rules)
 			{
 				if(!r.isTargetEmpty())
@@ -7867,8 +7890,8 @@ public class PolicyX {
 							{
 								for(int i = 0; i < anyOf.size(); i++)
 								{
-									if(anys[index][i] == true)
-										continue;
+									//if(anys[index][i] == true)
+										//continue;
 									ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 									PolicySpreadSheetTestRecord ptr = null;
 									StringBuffer sb = new StringBuffer();
@@ -7893,8 +7916,8 @@ public class PolicyX {
 									{
 										for(int j = 0; j < allOf.size(); j++)
 										{
-											if(alls[index][j] == true)
-												continue;
+											//if(alls[index][j] == true)
+												//continue;
 											ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 											PolicySpreadSheetTestRecord ptr = null;
 											StringBuffer sb = new StringBuffer();
@@ -7919,8 +7942,8 @@ public class PolicyX {
 											{
 												for(int k = 0; k < matches.size(); k++)
 												{
-													if(mats[index][k] == true)
-														continue;
+													//if(mats[index][k] == true)
+														//continue;
 													ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 													PolicySpreadSheetTestRecord ptr = null;
 													StringBuffer sb = new StringBuffer();
@@ -7958,8 +7981,8 @@ public class PolicyX {
 							{
 								for(int i = 0; i < anyOf.size(); i++)
 								{
-									if(anys[index][i] == true)
-										continue;
+									//if(anys[index][i] == true)
+										//continue;
 									ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 									PolicySpreadSheetTestRecord ptr = null;
 									StringBuffer sb = new StringBuffer();
@@ -7984,8 +8007,8 @@ public class PolicyX {
 									{
 										for(int j = 0; j < allOf.size(); j++)
 										{
-											if(alls[index][j] == true)
-												continue;
+											//if(alls[index][j] == true)
+												//continue;
 											ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 											PolicySpreadSheetTestRecord ptr = null;
 											StringBuffer sb = new StringBuffer();
@@ -8010,8 +8033,8 @@ public class PolicyX {
 											{
 												for(int k = 0; k < matches.size(); k++)
 												{
-													if(mats[index][k] == true)
-														continue;
+													//if(mats[index][k] == true)
+														//continue;
 													ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
 													PolicySpreadSheetTestRecord ptr = null;
 													StringBuffer sb = new StringBuffer();
@@ -8867,18 +8890,6 @@ public class PolicyX {
 			if(r.getCondition() != null)
 				cres = ConditionEvaluate(r.getCondition(), request);
 			
-			if(tres == rt && rc == cres)
-				rule_table[i][table_pos] = true;
-		}
-		for(int i = 0; i < start; i++)
-		{
-			Rule r = rules.get(i);
-			int tres = -1;
-			int cres = -1;
-			if(r.getTarget() != null)
-				tres = TargetEvaluate((Target)r.getTarget(), request);
-			if(r.getCondition() != null)
-				cres = ConditionEvaluate(r.getCondition(), request);
 			if(tres == rt && rc == cres)
 				rule_table[i][table_pos] = true;
 		}
@@ -9800,5 +9811,22 @@ public class PolicyX {
 			}
 		}
 		return match_skip;
+	}
+	
+	private HashSet<String> mostUnique(List<Rule> rules)
+	{
+		HashSet<String> subject = new HashSet<String>();
+		HashSet<String> resource = new HashSet<String>();
+		HashSet<String> action = new HashSet<String>();
+		HashSet<String> place = new HashSet<String>();
+		
+		if(subject.size() > resource.size() && subject.size() > action.size() && subject.size() > place.size())
+			return subject;
+		else if(resource.size() > subject.size() && resource.size() > action.size() && resource.size() > place.size())
+			return resource;
+		else if(action.size() > subject.size() && action.size() > resource.size() && action.size() > place.size())
+			return action;
+		else
+			return place;
 	}
 }
