@@ -2,6 +2,7 @@ package org.sag.gui;
 
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.umu.editor.VentanaMensajes;
+import org.umu.editorXacml3.PolicyEditorPanel;
 import org.xml.sax.SAXException;
 
 import javax.swing.*;
@@ -16,10 +17,10 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	public int totalWidth;
 	public int totalheight;
 
-	protected Action newAction, openAction, saveAction, saveAsAction,
-			checkSchemaAction;
+	protected Action newAction, openAction, saveAction, saveAsAction, checkSchemaAction;
 	protected Action openTestsAction, generateCoverageTestsAction, generateMutationTestsAction, runTestsAction;
 	protected Action openMutantsAction, generateMutantsAction, testMutantsAction;
+	protected Action localizeFaultAction, fixFaultAction;
 	protected JCheckBoxMenuItem[] items;
 	protected Action saveOracleValuesAction;
 
@@ -27,66 +28,16 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	boolean showVersionWarning = true;
 
 	protected JTabbedPane mainTabbedPane;
-	protected EditorPanel editorPanel;
+	protected AbstractPolicyEditor editorPanel;
 
 	protected TestPanel testPanel;
 	protected MutationPanel mutationPanel;
-	protected AnalysisPanel analysisPanel;
-	
-	
-
-	public static void main(String[] args) {
-		//
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					// turn off bold fonts
-					// UIManager.put("swing.boldMetal", Boolean.FALSE);
-
-					// re-install the Metal Look and Feel
-					// UIManager.setLookAndFeel(new
-					// javax.swing.plaf.metal.MetalLookAndFeel());
-				} catch (Exception exception) {
-					exception.printStackTrace();
-				}
-				XPA frame = new XPA();
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.pack();
-				frame.setVisible(true);
-				
-			}
-		});
-	}
-
-/*	public XPA(String fileName) throws SAXException, IOException {
-		try {
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			init();
-			if (new File(fileName).exists()) {
-				vm.getPrintStream().println("Analyzing file:" + fileName);
-				policyPanel.setPolicyTreeModel(fileName);
-			} else {
-				policyPanel.newFile();
-			}
-			policyPanel.setWorkingPolicyFile(new File(fileName));
-			setTitle("UMU-XACML-Editor - " + getWorkingPolicyFile().getName());
-		} catch (SAXException exc) {
-			JOptionPane.showMessageDialog(this, exc.toString());
-			throw exc;
-		} catch (IOException exc) {
-			JOptionPane.showMessageDialog(this, exc.toString());
-			throw exc;
-		} catch (Exception exception) {
-			exception.printStackTrace();
-		}
-	}
-*/
+	protected DebugPanel debugPanel;	
 	
 	public XPA() {
 		try {
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
 			init();
-//			policyPanel.newFile();
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
@@ -159,7 +110,15 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 		saveOracleValuesAction = new SaveOraclesAction("Save as Oracles",
 				createNavigationIcon(""), "SaveResults", new Integer(
-						KeyEvent.VK_U));
+						KeyEvent.VK_A));
+
+		localizeFaultAction = new LocalizeFaultAction("Localize Fault",
+				createNavigationIcon(""), "LocalizeFault", new Integer(
+						KeyEvent.VK_L));
+
+		fixFaultAction = new FixFaultAction("Fix Fault",
+				createNavigationIcon(""), "FixFault", new Integer(
+						KeyEvent.VK_F));
 
 	}
 
@@ -267,8 +226,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 
 	protected JMenu createDebuggingMenu() {
 		JMenu debuggingMenu = new JMenu("Debug");
-		// TODO
-		Action[] actions = { };
+		Action[] actions = {localizeFaultAction, fixFaultAction};
 		for (int i = 0; i < actions.length; i++) {
 			JMenuItem menuItem = new JMenuItem(actions[i]);
 			menuItem.setIcon(null);
@@ -277,17 +235,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		return debuggingMenu;
 	}
 
-	/*
-	protected JMenu createAnalyzeMenu() {
-		JMenu analyzeMenu = new JMenu("Analyze Mutants");
-		JMenuItem combiningAlgorithmsItem = new JMenuItem(analyzeCombiningAlgorithmsAction);
-		combiningAlgorithmsItem.setIcon(null);
-		analyzeMenu.add(combiningAlgorithmsItem);
-		JMenuItem rulesItem = new JMenuItem(analyzeRulesAction);
-		rulesItem.setIcon(null);
-		analyzeMenu.add(rulesItem);
-		return analyzeMenu;
-	}*/
 
 	protected JMenu createHelpMenu() {
 		JMenu caMenu = new JMenu("Help");
@@ -313,7 +260,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.newFile();
+			editorPanel.newFile();
 		}
 	}
 
@@ -326,7 +273,6 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.openFile();
 			editorPanel.openFile();
 		}
 	}
@@ -340,7 +286,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.saveFile();
+//			editorPanel.saveFile();
 		}
 	}
 
@@ -353,7 +299,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.saveAsFile();
+//			editorPanel.saveAsFile();
 		}
 	}
 
@@ -366,7 +312,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-//			policyPanel.checkSchema();
+//			editorPanel.checkSchema();
 		}
 	}
 
@@ -474,8 +420,8 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 	}
 
-	public class CompareCombiningAlgorithms extends AbstractAction {
-		public CompareCombiningAlgorithms(String text, ImageIcon icon, String desc,
+	public class LocalizeFaultAction extends AbstractAction {
+		public LocalizeFaultAction(String text, ImageIcon icon, String desc,
 				Integer mnemonic) {
 			super(text, icon);
 			putValue(SHORT_DESCRIPTION, desc);
@@ -483,12 +429,12 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			analysisPanel.mutateCombiningAlgorithms();
+			debugPanel.localizeFault();
 		}
 	}
 
-	public class RuleMutation extends AbstractAction {
-		public RuleMutation(String text, ImageIcon icon, String desc,
+	public class FixFaultAction extends AbstractAction {
+		public FixFaultAction(String text, ImageIcon icon, String desc,
 				Integer mnemonic) {
 			super(text, icon);
 			putValue(SHORT_DESCRIPTION, desc);
@@ -496,7 +442,7 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			analysisPanel.mutateRules();
+			debugPanel.fixFault();
 		}
 	}
 
@@ -506,24 +452,23 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	}
 	
 	private void createMainTabbedPane() {
-//		policyPanel = new PolicyPanel(this);
-		editorPanel = new EditorPanel(this);
+		editorPanel = new PolicyEditorPanel();
+//		editorPanel = new EditorPanel(this);
 
 		testPanel = new TestPanel(this);
 		mutationPanel = new MutationPanel(this);
-		analysisPanel = new AnalysisPanel(this);
+		debugPanel = new DebugPanel(this);
+		
 		mainTabbedPane = new JTabbedPane();
 		mainTabbedPane.setBorder(BorderFactory.createEtchedBorder(0));
-//		mainTabbedPane.addTab("Policy",
-//				createNavigationIcon("images/policy.gif"), policyPanel);
 		mainTabbedPane.addTab("Policy",
 				createNavigationIcon("images/policy.gif"), editorPanel);
-		mainTabbedPane.addTab("Test", createNavigationIcon("images/test.gif"),
+		mainTabbedPane.addTab("Tests", createNavigationIcon("images/test.gif"),
 				testPanel);
 		mainTabbedPane.addTab("Mutants",
 				createNavigationIcon("images/mutation.gif"), mutationPanel);
-		mainTabbedPane.addTab("Analysis",
-				createNavigationIcon("images/mutation.gif"), analysisPanel);
+		mainTabbedPane.addTab("Debugging",
+				createNavigationIcon("images/mutation.gif"), debugPanel);
 		// mainTabbedPane.addChangeListener(this);
 		mainTabbedPane.setSelectedComponent(editorPanel);
 	}
@@ -600,6 +545,10 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 		return testPanel.hasTests();
 	}
 	
+	public boolean hasTestFailure(){
+		return testPanel.hasTestFailure();
+	}
+	
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand().equalsIgnoreCase("Exit")) {
 			windowClosing();
@@ -607,8 +556,32 @@ public class XPA extends JFrame implements ItemListener, ActionListener {
 	}
 
 	public void windowClosing() {
-//		policyPanel.windowClosing();
+//		editorPanel.windowClosing();
 		this.dispose();
+	}
+	
+	
+	public static void main(String[] args) {
+		//
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					// turn off bold fonts
+					// UIManager.put("swing.boldMetal", Boolean.FALSE);
+
+					// re-install the Metal Look and Feel
+					// UIManager.setLookAndFeel(new
+					// javax.swing.plaf.metal.MetalLookAndFeel());
+				} catch (Exception exception) {
+					exception.printStackTrace();
+				}
+				XPA frame = new XPA();
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.pack();
+				frame.setVisible(true);
+				
+			}
+		});
 	}
 
 }

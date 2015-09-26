@@ -35,6 +35,8 @@ public class TestPanel extends JPanel {
 	private TestTablePanel requestTablePanel;
 	private JPanel requestPanel;
 
+	private boolean hasFailure;
+	
 	public TestPanel(XPA xpa) {
 		this.xpa = xpa;
 	}
@@ -276,6 +278,7 @@ public class TestPanel extends JPanel {
 	}
 	
 	public void runTests() {
+		hasFailure = false; 
 		if (!xpa.hasWorkingPolicy()) {
 			JOptionPane.showMessageDialog(xpa, "There is no policy!");
 			return;
@@ -298,8 +301,10 @@ public class TestPanel extends JPanel {
 					String expectedResponse = child.get(3).toString();
 					if (actualResponse.equals(expectedResponse))
 						child.set(5, "pass");
-					else
+					else {
 						child.set(5, "fail");
+						hasFailure = true;
+					}
 				}
 				xpa.setToTestPane();
 			}
@@ -375,5 +380,9 @@ public class TestPanel extends JPanel {
 
 	public boolean hasTests() {
 		return data != null && data.size() > 0;
+	}
+	
+	public boolean hasTestFailure(){
+		return hasFailure;
 	}
 }

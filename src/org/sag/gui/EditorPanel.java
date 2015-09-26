@@ -15,11 +15,10 @@ import javax.swing.JTextArea;
 import org.umu.editor.CurrentPath;
 import org.umu.editor.XMLFileFilter;
 
-public class EditorPanel extends JPanel {
+public class EditorPanel extends AbstractPolicyEditor {
 	private XPA xpa;
 	
 	private File workingPolicyFile;
-	
 
 	private JTextArea textArea = new JTextArea();
 	
@@ -89,16 +88,5 @@ public class EditorPanel extends JPanel {
 		return text;
 	}
 
-	public static File getCurrentDirectory() {
-		File resultFile = null;
-		File dir1 = new File(".");
-		try {
-			resultFile = new File(dir1.getCanonicalPath());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return resultFile;
-	}
-
-
+	
 }
