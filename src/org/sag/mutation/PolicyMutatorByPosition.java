@@ -522,14 +522,16 @@ public class PolicyMutatorByPosition {
 	// FDR use i/o. create a signle mutant, bugposition=0.
 	/**
 	 * It moves in each policy the rules having a Deny effect before those ones having a Permit effect.
+	 * @return 
 	 */
-	public void createFirstDenyRuleMutants() {
+	public List<PolicyMutant> createFirstDenyRuleMutants() {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
 //		// Do not create equivalent mutant: when combiningAlgorithm = permit-overrides
 //		if (policy.getCombiningAlg().getIdentifier().equals((new PermitOverridesRuleAlg()).getIdentifier()))
 //			return;
 		if(!(policy.getCombiningAlg() instanceof FirstApplicableRuleAlg))
-			return;
+			return mutants;
 		final int MUTANTINDEX=1; // fixed
 		
 		StringBuilder builder = new StringBuilder();
@@ -605,9 +607,12 @@ public class PolicyMutatorByPosition {
 		// Fixed 02/17/15: Export exactly 1 mutant, if applicable.
 		if (applicable) {
 			String mutantFileName = getMutantFileName("FDR"+MUTANTINDEX);
-			mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FDR"+MUTANTINDEX, mutantFileName, 0));
+			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FDR"+MUTANTINDEX, mutantFileName, 0);
+			mutantList.add(mutant);
+			mutants.add(mutant);
 			saveStringToTextFile(builder.toString(), mutantFileName);
 		}
+		return mutants;
 	}
 	
 	// RTT
@@ -622,26 +627,33 @@ public class PolicyMutatorByPosition {
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				if(!myrule.isTargetEmpty()) {
-					AbstractTarget target = myrule.getTarget();
-					// Analyze AnyOf... The target might still be empty.
-					List<AnyOfSelection> listAnyOf = ((Target)target).getAnyOfSelections();
-					//System.out.println("Size = " + listAnyOf.size());
-					if (listAnyOf.size()!=0) {
-						myrule.setTargetEmpty();									
-						StringBuilder builder = new StringBuilder();
-						policy.encode(builder);
-						String mutantFileName = getMutantFileName("RTT"+mutantIndex);
-						mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTT"+mutantIndex, mutantFileName, ruleIndex));
-						saveStringToTextFile(builder.toString(), mutantFileName);
-		
-						myrule.setTarget(target);
-						mutantIndex++;
-					}
+					createRuleTargetTrueMutants(myrule, mutantIndex, ruleIndex);
 				}
 				ruleIndex++;
 			}
 		}
 
+	}
+	
+	public List<PolicyMutant> createRuleTargetTrueMutants(Rule myrule, int mutantIndex, int ruleIndex) {	
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
+		AbstractTarget target = myrule.getTarget();
+		// Analyze AnyOf... The target might still be empty.
+		List<AnyOfSelection> listAnyOf = ((Target)target).getAnyOfSelections();
+		//System.out.println("Size = " + listAnyOf.size());
+		if (listAnyOf.size()!=0) {
+			myrule.setTargetEmpty();									
+			StringBuilder builder = new StringBuilder();
+			policy.encode(builder);
+			String mutantFileName = getMutantFileName("RTT"+mutantIndex);
+			mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTT"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex));
+			saveStringToTextFile(builder.toString(), mutantFileName);
+
+			myrule.setTarget(target);
+			mutantIndex++;
+		}
+		return mutants;
 	}
 	
 	// RTF
