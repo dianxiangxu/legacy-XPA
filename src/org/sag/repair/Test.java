@@ -8,15 +8,23 @@ import org.sag.mutation.PolicySpreadSheetMutantSuite;
 public class Test {
 
 	public static void main(String[] args) throws Exception {
-		testRepair();
+		//testRepair();
 		//batchRun();
+		compareByPosition();
+	}
+	
+	static void compareByPosition() throws Exception {
+		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
+		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
+		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
+		repairer.testByPosition(policyFileToRepair);
 	}
 	
 	static void testRepair() throws Exception {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
-		PolicyMutant correctedPolicy = repairer.repairOneByOne(policyFileToRepair);
+		PolicyMutant correctedPolicy = repairer.repair(policyFileToRepair);
 		if(correctedPolicy != null) {
 			System.out.format("repaired file: %s\n",correctedPolicy.getMutantFilePath());
 		} else {
