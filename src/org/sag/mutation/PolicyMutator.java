@@ -1161,7 +1161,7 @@ public class PolicyMutator {
 	 * @param policy
 	 * @return
 	 */
-	private ArrayList<MyAttr> collectAttributes(Policy policy) {
+	protected ArrayList<MyAttr> collectAttributes(Policy policy) {
 		PolicyX x = new PolicyX(policy);
 		ArrayList<MyAttr> attr = new ArrayList<MyAttr>();
 		for (CombinerElement rule : policy.getChildElements()) {
@@ -1188,7 +1188,7 @@ public class PolicyMutator {
 	 * @return
 	 * @throws Exception
 	 */
-	private String buildFalseTarget(ArrayList<MyAttr> attr) throws Exception {
+	protected String buildFalseTarget(ArrayList<MyAttr> attr) throws Exception {
 		String function = "";
 		String value1 = "";
 		String value2 = "";
