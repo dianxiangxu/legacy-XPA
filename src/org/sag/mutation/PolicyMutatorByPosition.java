@@ -660,46 +660,56 @@ public class PolicyMutatorByPosition {
 	/**
 	 * Make an always false target whether or not the target exists. 
 	*/
+	//moved the build false target operation to function createRuleTargetFalseMutants(Rule myrule, int mutantIndex)
 	public void createRuleTargetFalseMutants() throws Exception {
 		int mutantIndex=1;
+		// create mutation for each rule
+		for (CombinerElement rule : policy.getChildElements()) {
+			PolicyTreeElement tree = rule.getElement();
+			if (tree instanceof Rule) {
+				Rule myrule = (Rule) tree;
+				createRuleTargetFalseMutants(myrule, mutantIndex);
+				mutantIndex++;
+				
+			}
+		}
+	}
+	
+	public List<PolicyMutant> createRuleTargetFalseMutants(Rule myrule, int mutantIndex) throws Exception {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
 		// Collect attributes from targets and conditions.
 		ArrayList<MyAttr> attr = collectAttributes(policy);
 		
 		if(attr.size()<1) {
 			throw new Exception("No attribute collected");
-		} else {
-			// build up a false target
-			String falseTarget = buildFalseTarget(attr);
-			// create mutation for each rule
-			for (CombinerElement rule : policy.getChildElements()) {
-				PolicyTreeElement tree = rule.getElement();
-				if (tree instanceof Rule) {
-					Rule myrule = (Rule) tree;
-					String id = myrule.getId().toString();
-					int effect = myrule.getEffect();
-					
-					StringBuilder builder = new StringBuilder();
-					policy.encode(builder);
-					
-					// find the corresponding rule.
-					int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
-					// default target starting/ending index.
-					int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
-					int targetEndingIndex = targetStartingIndex;
-					// if there exists a target, update the targetEndingIndex; otherwise, use default.
-					if(!myrule.isTargetEmpty()) {
-						targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
-					} 
-					
-					builder.replace(targetStartingIndex, targetEndingIndex, falseTarget);
-					String mutantFileName = getMutantFileName("RTF"+mutantIndex);
-					mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+mutantIndex, mutantFileName, mutantIndex));					
-					saveStringToTextFile(builder.toString(), mutantFileName);
-					mutantIndex++;
-					
-				}
-			}
-		}
+		} 
+		// build up a false target
+		String falseTarget = buildFalseTarget(attr);
+		
+		String id = myrule.getId().toString();
+		int effect = myrule.getEffect();
+		
+		StringBuilder builder = new StringBuilder();
+		policy.encode(builder);
+		
+		// find the corresponding rule.
+		int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
+		// default target starting/ending index.
+		int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
+		int targetEndingIndex = targetStartingIndex;
+		// if there exists a target, update the targetEndingIndex; otherwise, use default.
+		if(!myrule.isTargetEmpty()) {
+			targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
+		} 
+		
+		builder.replace(targetStartingIndex, targetEndingIndex, falseTarget);
+		String mutantFileName = getMutantFileName("RTF"+mutantIndex);
+		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+mutantIndex, mutantFileName, mutantIndex);
+		mutantList.add(mutant);
+		mutants.add(mutant);
+		saveStringToTextFile(builder.toString(), mutantFileName);
+		return mutants;
 	}
 
 	// RCT
