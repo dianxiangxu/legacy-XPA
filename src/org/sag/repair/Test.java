@@ -1,6 +1,7 @@
 package org.sag.repair;
 
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
 
@@ -15,9 +16,9 @@ public class Test {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
-		String repairedFile = repairer.repair(policyFileToRepair);
-		if(repairedFile != null) {
-			System.out.format("repaired file: %s\n",repairedFile);
+		PolicyMutant correctedPolicy = repairer.repairOneByOne(policyFileToRepair);
+		if(correctedPolicy != null) {
+			System.out.format("repaired file: %s\n",correctedPolicy.getMutantFilePath());
 		} else {
 			System.out.println("cannot repair\n");
 		}

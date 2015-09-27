@@ -23,7 +23,6 @@ import org.wso2.balana.xacml3.Target;
  *
  */
 public class PolicyMutatorByPosition extends PolicyMutator {
-	private int position;
 	private List<CombinerElement> rule_list;
 
 	/**
@@ -56,7 +55,11 @@ public class PolicyMutatorByPosition extends PolicyMutator {
 				StringBuilder builder = new StringBuilder();
 				getPolicy().encode(builder);
 				String mutantFileName = getMutantFileName("PTT"+mutantIndex);
-				getMutantList().add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTT"+mutantIndex, mutantFileName, bugPosition));
+				
+				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTT"+mutantIndex, mutantFileName, bugPosition);
+				getMutantList().add(mutant);
+				mutantList.add(mutant);
+				
 				saveStringToTextFile(builder.toString(), mutantFileName);
 				getPolicy().setTarget(target);
 			}
@@ -98,12 +101,11 @@ public class PolicyMutatorByPosition extends PolicyMutator {
 			String mutantFileName = getMutantFileName("PTF"+mutantIndex);
 			
 			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTF"+mutantIndex, mutantFileName, bugPosition);
+			mutantList.add(mutant);
+			getMutantList().add(mutant);
 			
-			getMutantList().add(mutant);					
 			saveStringToTextFile(builder.toString(), mutantFileName);				
 		}
-		
-		mutantList.add(mutant);
 		return mutantList;
 	}
 
@@ -124,12 +126,11 @@ public class PolicyMutatorByPosition extends PolicyMutator {
 				
 				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CRC"+mutantIndex, mutantFileName, -1);
 				getMutantList().add(mutant);
+				mutantList.add(mutant);
 				
 				saveStringToTextFile(builder.toString(), mutantFileName);
 				getPolicy().setCombiningAlg(originalAlgorithm);				
 				mutantIndex++;
-				
-				mutantList.add(mutant);
 			}
 		}
 		return mutantList;
