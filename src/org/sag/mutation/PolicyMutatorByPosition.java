@@ -723,27 +723,34 @@ public class PolicyMutatorByPosition {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				if(!myrule.isConditionEmpty()) {
-					Condition condition = myrule.getCondition();	
-					// Check if Condition is still empty like <Condition/> valid but not properly implemented in balana.
-					// Sysmtem.out.println("Condition children size = " + condition.getChildren().size());
-					if (condition.getChildren().size() != 0) {
-						myrule.setConditionEmpty();				
-						StringBuilder builder = new StringBuilder();
-						policy.encode(builder);
-						String mutantFileName = getMutantFileName("RCT"+mutantIndex);
-						mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCT"+mutantIndex, mutantFileName, ruleIndex));
-						saveStringToTextFile(builder.toString(), mutantFileName);
-		
-						myrule.setCondition(condition);
-						mutantIndex++;
-					}
-				}
+				createRuleConditionTrueMutants(myrule, mutantIndex, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
+	public List<PolicyMutant> createRuleConditionTrueMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
+		if(!myrule.isConditionEmpty()) {
+			Condition condition = myrule.getCondition();	
+			// Check if Condition is still empty like <Condition/> valid but not properly implemented in balana.
+			// Sysmtem.out.println("Condition children size = " + condition.getChildren().size());
+			if (condition.getChildren().size() != 0) {
+				myrule.setConditionEmpty();				
+				StringBuilder builder = new StringBuilder();
+				policy.encode(builder);
+				String mutantFileName = getMutantFileName("RCT"+mutantIndex);
+				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCT"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
+				mutantList.add(mutant);
+				saveStringToTextFile(builder.toString(), mutantFileName);
+
+				myrule.setCondition(condition);
+				mutantIndex++;
+			}
+		}
+		return mutants;
+	}
 	// RCF use i/o  
 	/**
 	 * Manipulates the Condition values or the Condition functions 
