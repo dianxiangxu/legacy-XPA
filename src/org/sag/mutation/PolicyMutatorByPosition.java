@@ -647,7 +647,9 @@ public class PolicyMutatorByPosition {
 			StringBuilder builder = new StringBuilder();
 			policy.encode(builder);
 			String mutantFileName = getMutantFileName("RTT"+mutantIndex);
-			mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTT"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex));
+			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTT"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
+			mutantList.add(mutant);
+			mutants.add(mutant);
 			saveStringToTextFile(builder.toString(), mutantFileName);
 
 			myrule.setTarget(target);
@@ -743,6 +745,7 @@ public class PolicyMutatorByPosition {
 				String mutantFileName = getMutantFileName("RCT"+mutantIndex);
 				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCT"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
 				mutantList.add(mutant);
+				mutants.add(mutant);
 				saveStringToTextFile(builder.toString(), mutantFileName);
 
 				myrule.setCondition(condition);
@@ -757,6 +760,7 @@ public class PolicyMutatorByPosition {
 	 * ensuring that the Condition always evaluates to False.
 	 * @throws Exception - Unsupported datatype
 	 */
+	//move build false condition operation to createRuleConditionFalseMutants(Rule myrule, int mutantIndex)
 	public void createRuleConditionFalseMutants() throws Exception {
 		int mutantIndex=1;
 
@@ -766,45 +770,57 @@ public class PolicyMutatorByPosition {
 		if(attr.size()<1) {
 			throw new Exception("No attribute collected");
 		} else {
-			// build up a false condition
-			String falseCondition = buildFalseCondition(attr);
+
 			// create mutation for each rule
 			for (CombinerElement rule : policy.getChildElements()) {
 				PolicyTreeElement tree = rule.getElement();
 				if (tree instanceof Rule) {
 					Rule myrule = (Rule) tree;
-					String id = myrule.getId().toString();
-					int effect = myrule.getEffect();
-					
-					StringBuilder builder = new StringBuilder();
-					policy.encode(builder);
-					
-					// find the corresponding rule.
-					int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
-					//int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to include '\n'
-					// default target starting/ending index.
-					int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
-					int targetEndingIndex = targetStartingIndex;
-					// if there exists a target, update the targetEndingIndex; otherwise, use default.
-					if(!myrule.isTargetEmpty()) {
-						targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
-					} 
-					// default condition starting/ending index.
-					int conditionStartingIndex = targetEndingIndex;
-					int conditionEndingIndex = conditionStartingIndex;
-					// if there exists a condition, update the conditionEndingIndex; otherwise, use default.
-					if (!myrule.isConditionEmpty()) {
-						conditionEndingIndex = builder.indexOf("</Condition>", conditionStartingIndex) + "</Condition>".length()+1;// +1 to include '\n'
-					}
-	
-					builder.replace(conditionStartingIndex, conditionEndingIndex, falseCondition);
-					String mutantFileName = getMutantFileName("RCF"+mutantIndex);
-					mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+mutantIndex, mutantFileName, mutantIndex));					
-					saveStringToTextFile(builder.toString(), mutantFileName);
+					createRuleConditionFalseMutants(myrule, mutantIndex);
 					mutantIndex++;				
 				}
 			}
 		}	
+	}
+	
+	public List<PolicyMutant> createRuleConditionFalseMutants(Rule myrule, int mutantIndex) throws Exception {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
+		// Collect attributes from targets and conditions.
+		ArrayList<MyAttr> attr = collectAttributes(policy);
+		// build up a false condition
+		String falseCondition = buildFalseCondition(attr);
+		String id = myrule.getId().toString();
+		int effect = myrule.getEffect();
+		
+		StringBuilder builder = new StringBuilder();
+		policy.encode(builder);
+		
+		// find the corresponding rule.
+		int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
+		//int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to include '\n'
+		// default target starting/ending index.
+		int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
+		int targetEndingIndex = targetStartingIndex;
+		// if there exists a target, update the targetEndingIndex; otherwise, use default.
+		if(!myrule.isTargetEmpty()) {
+			targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
+		} 
+		// default condition starting/ending index.
+		int conditionStartingIndex = targetEndingIndex;
+		int conditionEndingIndex = conditionStartingIndex;
+		// if there exists a condition, update the conditionEndingIndex; otherwise, use default.
+		if (!myrule.isConditionEmpty()) {
+			conditionEndingIndex = builder.indexOf("</Condition>", conditionStartingIndex) + "</Condition>".length()+1;// +1 to include '\n'
+		}
+
+		builder.replace(conditionStartingIndex, conditionEndingIndex, falseCondition);
+		String mutantFileName = getMutantFileName("RCF"+mutantIndex);
+		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+mutantIndex, mutantFileName, mutantIndex);
+		mutantList.add(mutant);
+		mutants.add(mutant);
+		saveStringToTextFile(builder.toString(), mutantFileName);
+		return mutants;
 	}
 
 	//TODO RTR
@@ -858,50 +874,58 @@ public class PolicyMutatorByPosition {
 	 * Applies to string/integer functions only.
 	 */
 	public void createAddNotFunctionMutants() {
-		String notFunc = "\t<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
-		String applyClosure = "\t</Apply>\n";
-		
 		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				String id = myrule.getId().toString();
-				int effect = myrule.getEffect();
-				// builder
-				StringBuilder builder = new StringBuilder();
-				policy.encode(builder);
-				// find the corresponding rule.
-				int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
-				// int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to include '\n'
-				// default target starting/ending index.
-				int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
-				int targetEndingIndex = targetStartingIndex;
-				// if there exists a target, update the targetEndingIndex; otherwise, use default.
-				if(!myrule.isTargetEmpty()) {
-					targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
-				} 
-				// default condition starting/ending index.
-				int conditionStartingIndex = targetEndingIndex;
-				int conditionEndingIndex = conditionStartingIndex;
-				// if there exists a condition, update the conditionEndingIndex; otherwise, use default.
-				if (!myrule.isConditionEmpty()) {
-					conditionEndingIndex = builder.indexOf("</Condition>", conditionStartingIndex);
-					// If there is a condition, add not function as the first function in the condition.
-					// head
-					builder.replace(conditionStartingIndex+"<Condition>".length()+1, conditionStartingIndex+"<Condition>".length()+1, notFunc);
-					// tail
-					builder.replace(conditionEndingIndex+notFunc.length(), conditionEndingIndex+notFunc.length(), applyClosure);
-					// save...
-					String mutantFileName = getMutantFileName("ANF"+mutantIndex);
-					mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANF"+mutantIndex, mutantFileName, ruleIndex));					
-					saveStringToTextFile(builder.toString(), mutantFileName);
-					mutantIndex++;
-				}		
+				createAddNotFunctionMutants(myrule, mutantIndex, ruleIndex);
 				ruleIndex++;
 			}
 		}
+	}
+	
+	public List<PolicyMutant> createAddNotFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
+		String notFunc = "\t<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
+		String applyClosure = "\t</Apply>\n";
+		String id = myrule.getId().toString();
+		int effect = myrule.getEffect();
+		// builder
+		StringBuilder builder = new StringBuilder();
+		policy.encode(builder);
+		// find the corresponding rule.
+		int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
+		// int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to include '\n'
+		// default target starting/ending index.
+		int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
+		int targetEndingIndex = targetStartingIndex;
+		// if there exists a target, update the targetEndingIndex; otherwise, use default.
+		if(!myrule.isTargetEmpty()) {
+			targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
+		} 
+		// default condition starting/ending index.
+		int conditionStartingIndex = targetEndingIndex;
+		int conditionEndingIndex = conditionStartingIndex;
+		// if there exists a condition, update the conditionEndingIndex; otherwise, use default.
+		if (!myrule.isConditionEmpty()) {
+			conditionEndingIndex = builder.indexOf("</Condition>", conditionStartingIndex);
+			// If there is a condition, add not function as the first function in the condition.
+			// head
+			builder.replace(conditionStartingIndex+"<Condition>".length()+1, conditionStartingIndex+"<Condition>".length()+1, notFunc);
+			// tail
+			builder.replace(conditionEndingIndex+notFunc.length(), conditionEndingIndex+notFunc.length(), applyClosure);
+			// save...
+			String mutantFileName = getMutantFileName("ANF"+mutantIndex);
+			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANF"+mutantIndex, mutantFileName, ruleIndex);
+			mutantList.add(mutant);
+			mutants.add(mutant);
+			saveStringToTextFile(builder.toString(), mutantFileName);
+			mutantIndex++;
+		}	
+		return mutants;
 	}
 	
 	// RNF
