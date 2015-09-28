@@ -1103,6 +1103,23 @@ public class PolicyMutatorByPosition {
 	 * It replaces a comparison function with another one.
 	 */
 	public void createChangeComparisonFunctionMutants() {
+
+		int mutantIndex = 1;
+		int ruleIndex = 1;
+		for (CombinerElement rule : policy.getChildElements()) {
+			PolicyTreeElement tree = rule.getElement();
+			if (tree instanceof Rule) {
+				Rule myrule = (Rule) tree;
+				createChangeComparisonFunctionMutants(myrule, mutantIndex, ruleIndex);
+				ruleIndex++;
+			}
+		}
+			
+	}
+	
+	public void createChangeComparisonFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
 		// The same functions apply to both integers and strings.
 		String[] strFunctionKey = {"urn:oasis:names:tc:xacml:1.0:function:string-equal", 
 				"urn:oasis:names:tc:xacml:1.0:function:string-greater-than", 
@@ -1116,55 +1133,47 @@ public class PolicyMutatorByPosition {
 				"urn:oasis:names:tc:xacml:1.0:function:integer-less-than-or-equal"};
 		String strFuncHeading = "urn:oasis:names:tc:xacml:1.0:function:string";
 		String intFuncHeading = "urn:oasis:names:tc:xacml:1.0:function:integer";
-		int mutantIndex = 1;
-		int ruleIndex = 1;
-		for (CombinerElement rule : policy.getChildElements()) {
-			PolicyTreeElement tree = rule.getElement();
-			if (tree instanceof Rule) {
-				Rule myrule = (Rule) tree;
-				String id = myrule.getId().toString();
-				int effect = myrule.getEffect();
-				// builder
-				StringBuilder builder = new StringBuilder();
-				policy.encode(builder);			
-				// find the corresponding rule.
-				int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
-				int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to kill the blank line.
-				// Replace the first occurence of the function.
-				int str_func_occur = builder.indexOf(strFuncHeading, ruleStartingIndex);
-				int int_func_occur = builder.indexOf(intFuncHeading, ruleStartingIndex);
-				if (str_func_occur > ruleStartingIndex && str_func_occur < ruleEndingIndex) {
-					for (String func : strFunctionKey) {
-						StringBuilder builder_str = new StringBuilder();
-						policy.encode(builder_str);	
-						int func_end = builder_str.indexOf("\"", str_func_occur);
-						if ( !builder_str.substring(str_func_occur, func_end).equals(func)) {
-							builder_str.replace(str_func_occur, func_end, func);
-							String mutantFileName = getMutantFileName("CCF"+mutantIndex);
-							mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex));					
-							saveStringToTextFile(builder_str.toString(), mutantFileName);
-							mutantIndex++;
-						}
-					}
+		String id = myrule.getId().toString();
+		int effect = myrule.getEffect();
+		// builder
+		StringBuilder builder = new StringBuilder();
+		policy.encode(builder);			
+		// find the corresponding rule.
+		int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
+		int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to kill the blank line.
+		// Replace the first occurence of the function.
+		int str_func_occur = builder.indexOf(strFuncHeading, ruleStartingIndex);
+		int int_func_occur = builder.indexOf(intFuncHeading, ruleStartingIndex);
+		if (str_func_occur > ruleStartingIndex && str_func_occur < ruleEndingIndex) {
+			for (String func : strFunctionKey) {
+				StringBuilder builder_str = new StringBuilder();
+				policy.encode(builder_str);	
+				int func_end = builder_str.indexOf("\"", str_func_occur);
+				if ( !builder_str.substring(str_func_occur, func_end).equals(func)) {
+					builder_str.replace(str_func_occur, func_end, func);
+					String mutantFileName = getMutantFileName("CCF"+ruleIndex+"_"+mutantIndex);
+					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
+					mutantList.add(mutant);
+					mutants.add(mutant);
+					saveStringToTextFile(builder_str.toString(), mutantFileName);
+					mutantIndex++;
 				}
-				if (int_func_occur > ruleStartingIndex && int_func_occur < ruleEndingIndex) {
-					for (String func : intFunctionKey) {
-						StringBuilder builder_int = new StringBuilder();
-						policy.encode(builder_int);	
-						int func_end = builder_int.indexOf("\"", int_func_occur);
-						if ( !builder_int.substring(int_func_occur, func_end).equals(func)) {
-							builder_int.replace(int_func_occur, func_end, func);
-							String mutantFileName = getMutantFileName("CCF"+mutantIndex);
-							mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex));					
-							saveStringToTextFile(builder_int.toString(), mutantFileName);
-							mutantIndex++;
-						}
-					}
-				}
-				ruleIndex++;
 			}
 		}
-			
+		if (int_func_occur > ruleStartingIndex && int_func_occur < ruleEndingIndex) {
+			for (String func : intFunctionKey) {
+				StringBuilder builder_int = new StringBuilder();
+				policy.encode(builder_int);	
+				int func_end = builder_int.indexOf("\"", int_func_occur);
+				if ( !builder_int.substring(int_func_occur, func_end).equals(func)) {
+					builder_int.replace(int_func_occur, func_end, func);
+					String mutantFileName = getMutantFileName("CCF"+mutantIndex);
+					mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex));					
+					saveStringToTextFile(builder_int.toString(), mutantFileName);
+					mutantIndex++;
+				}
+			}
+		}
 	}
 	
 	// RPTE
