@@ -935,56 +935,64 @@ public class PolicyMutatorByPosition {
 	/**
 	 * It deletes the Not function defined in the condition.
 	 */
-	public void createRemoveNotFunctionMutants() {
-		String notFunc = "<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
-		String applyClosure = "</Apply>\n";
-		
+	public void createRemoveNotFunctionMutants() {	
 		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				String id = myrule.getId().toString();
-				int effect = myrule.getEffect();
-				// builder
-				StringBuilder builder = new StringBuilder();
-				policy.encode(builder);
-				// find the corresponding rule.
-				int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
-				// int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to include '\n'
-				// default target starting/ending index.
-				int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
-				int targetEndingIndex = targetStartingIndex;
-				// if there exists a target, update the targetEndingIndex; otherwise, use default.
-				if(!myrule.isTargetEmpty()) {
-					targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
-				} 
-				// default condition starting/ending index.
-				int conditionStartingIndex = targetEndingIndex;
-				int conditionEndingIndex = conditionStartingIndex;
-				// if there exists a condition, update the conditionEndingIndex; otherwise, use default.
-				if (!myrule.isConditionEmpty()) {
-					conditionEndingIndex = builder.indexOf("</Condition>", conditionStartingIndex);
-					// check if there exists a not function.
-					int notFunctionIndex = -1; 
-					notFunctionIndex = builder.indexOf(notFunc, conditionStartingIndex);
-					if (notFunctionIndex != -1 && notFunctionIndex < conditionEndingIndex) {
-						// remove head
-						builder.replace(notFunctionIndex, notFunctionIndex+notFunc.length(), "");
-						// remove tail
-						builder.replace(conditionEndingIndex-notFunc.length()-applyClosure.length(), 
-								conditionEndingIndex-notFunc.length(), "");
-						// save...
-						String mutantFileName = getMutantFileName("RNF"+mutantIndex);
-						mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RNF"+mutantIndex, mutantFileName, ruleIndex));					
-						saveStringToTextFile(builder.toString(), mutantFileName);
-						mutantIndex++;
-					}
-				}		
+				createRemoveNotFunctionMutants(myrule, mutantIndex, ruleIndex);
 				ruleIndex++;
 			}
 		}
+	}
+	
+	public List<PolicyMutant> createRemoveNotFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
+		String notFunc = "<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
+		String applyClosure = "</Apply>\n";
+		String id = myrule.getId().toString();
+		int effect = myrule.getEffect();
+		// builder
+		StringBuilder builder = new StringBuilder();
+		policy.encode(builder);
+		// find the corresponding rule.
+		int ruleStartingIndex = builder.indexOf("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >");
+		// int ruleEndingIndex = builder.indexOf("</Rule>", ruleStartingIndex) + 7+1; // +1 to include '\n'
+		// default target starting/ending index.
+		int targetStartingIndex = ruleStartingIndex + ("<Rule RuleId=\"" + id + "\" Effect=\"" + (effect==0 ? "Permit" : "Deny") + "\"  >").length()+1; // +1 to include '\n'
+		int targetEndingIndex = targetStartingIndex;
+		// if there exists a target, update the targetEndingIndex; otherwise, use default.
+		if(!myrule.isTargetEmpty()) {
+			targetEndingIndex = builder.indexOf("</Target>", targetStartingIndex) + 9+1; // +1 to include '\n'		
+		} 
+		// default condition starting/ending index.
+		int conditionStartingIndex = targetEndingIndex;
+		int conditionEndingIndex = conditionStartingIndex;
+		// if there exists a condition, update the conditionEndingIndex; otherwise, use default.
+		if (!myrule.isConditionEmpty()) {
+			conditionEndingIndex = builder.indexOf("</Condition>", conditionStartingIndex);
+			// check if there exists a not function.
+			int notFunctionIndex = -1; 
+			notFunctionIndex = builder.indexOf(notFunc, conditionStartingIndex);
+			if (notFunctionIndex != -1 && notFunctionIndex < conditionEndingIndex) {
+				// remove head
+				builder.replace(notFunctionIndex, notFunctionIndex+notFunc.length(), "");
+				// remove tail
+				builder.replace(conditionEndingIndex-notFunc.length()-applyClosure.length(), 
+						conditionEndingIndex-notFunc.length(), "");
+				// save...
+				String mutantFileName = getMutantFileName("RNF"+mutantIndex);
+				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RNF"+mutantIndex, mutantFileName, ruleIndex);
+				mutantList.add(mutant);
+				mutants.add(mutant);
+				saveStringToTextFile(builder.toString(), mutantFileName);
+				mutantIndex++;
+			}
+		}
+		return mutants;
 	}
 
 	// FCF
