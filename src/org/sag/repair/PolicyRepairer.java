@@ -68,7 +68,7 @@ public class PolicyRepairer {
 		PolicyMutatorByPosition mutatorByPosition = new PolicyMutatorByPosition(policyFileToRepair);
 		mutatorByPosition.createAllMutants();
 		List<PolicyMutant> mutantsByPosition = mutatorByPosition.getMutantList();
-		for(PolicyMutant mutant: findAllCorrectMutants(mutants)) {
+		for(PolicyMutant mutant: findAllCorrectMutants(mutantsByPosition)) {
 			System.out.println(mutant.getMutantFilePath());
 		}
 		

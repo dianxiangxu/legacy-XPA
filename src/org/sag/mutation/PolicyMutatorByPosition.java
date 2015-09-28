@@ -398,7 +398,7 @@ public class PolicyMutatorByPosition {
 		// Append the mutant rule to the end of the rule.
 		builder1.replace(ruleEndingIndex, ruleEndingIndex, mutantRule1);
 		// Save mutation
-		String mutantFileName1 = getMutantFileName("ANR"+mutantIndex);
+		String mutantFileName1 = getMutantFileName("ANR"+ruleIndex + "_" + mutantIndex);
 		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANR"+ruleIndex + "_" + mutantIndex, mutantFileName1, ruleIndex);
 		mutantList.add(mutant);
 		mutants.add(mutant);
@@ -414,7 +414,7 @@ public class PolicyMutatorByPosition {
 			// Append the mutant rule to the end of the rule.
 			builder2.replace(ruleEndingIndex, ruleEndingIndex, mutantRule2);
 			
-			String mutantFileName2 = getMutantFileName("ANR"+mutantIndex);
+			String mutantFileName2 = getMutantFileName("ANR"+ruleIndex+"_"+mutantIndex);
 			mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANR"+ruleIndex+"_"+mutantIndex, mutantFileName2, ruleIndex);
 			mutantList.add(mutant);
 			mutants.add(mutant);
@@ -1231,8 +1231,8 @@ public class PolicyMutatorByPosition {
 							listAllOf.remove(i);
 							StringBuilder builder = new StringBuilder();
 							policy.encode(builder);
-							String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
-							PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex);
+							String mutantFileName = getMutantFileName("RPTE"+ruleIndex+"_"+mutantIndex);
+							PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
 							mutantList.add(mutant);
 							mutants.add(mutant);
 							saveStringToTextFile(builder.toString(), mutantFileName);
@@ -1251,8 +1251,8 @@ public class PolicyMutatorByPosition {
 									listMatch.remove(i);
 									StringBuilder builder = new StringBuilder();
 									policy.encode(builder);
-									String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
-									PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex);
+									String mutantFileName = getMutantFileName("RPTE"+ruleIndex+"_"+mutantIndex);
+									PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
 									mutantList.add(mutant);
 									mutants.add(mutant);
 									saveStringToTextFile(builder.toString(), mutantFileName);

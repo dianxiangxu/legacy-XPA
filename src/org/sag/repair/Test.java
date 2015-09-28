@@ -10,12 +10,13 @@ public class Test {
 	public static void main(String[] args) throws Exception {
 		//testRepair();
 		//batchRun();
-		compareByPosition();
+		String policyFileToRepair = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
+		compareByPosition(policyFileToRepair);
 	}
 	
-	static void compareByPosition() throws Exception {
+	static void compareByPosition(String policyFileToRepair) throws Exception {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
-		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
+		//String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR2.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
 		repairer.testByPosition(policyFileToRepair);
 	}
