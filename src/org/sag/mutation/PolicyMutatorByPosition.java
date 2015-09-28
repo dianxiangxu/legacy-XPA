@@ -1190,69 +1190,82 @@ public class PolicyMutatorByPosition {
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				if (!myrule.isTargetEmpty()) {
-					Target target = (Target) myrule.getTarget();
-					// Analyze AnyOf...
-					List<AnyOfSelection> listAnyOf = target.getAnyOfSelections();
-					if (listAnyOf.size()!=0) {
-						if (listAnyOf.size()>1) {
-							// Mutation for multiple AnyOf...
-							for (int i=0; i<listAnyOf.size(); i++) {
-								AnyOfSelection original = listAnyOf.get(i);
-								listAnyOf.remove(i);
-								StringBuilder builder = new StringBuilder();
-								policy.encode(builder);
-								String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
-								mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex));
-								saveStringToTextFile(builder.toString(), mutantFileName);
-								listAnyOf.add(i, original);				
-								mutantIndex++;
-							}
-						}
-						// for each AnyOf, analyze AllOf...
-						for (AnyOfSelection selAnyOf : listAnyOf) {
-							List<AllOfSelection> listAllOf = selAnyOf.getAllOfSelections();
-							if (listAllOf.size()!=0) {
-								if (listAllOf.size()>1) {
-									// Mutation for multiple AllOf
-									for (int i=0; i<listAllOf.size(); i++) {
-										AllOfSelection original = listAllOf.get(i);
-										listAllOf.remove(i);
-										StringBuilder builder = new StringBuilder();
-										policy.encode(builder);
-										String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
-										mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex));
-										saveStringToTextFile(builder.toString(), mutantFileName);
-										listAllOf.add(i, original);
-										mutantIndex++;
-									}
-								}
-								// for each AllOf, analyze Match...
-								for (AllOfSelection selAllOf: listAllOf) {
-									List<TargetMatch> listMatch = selAllOf.getMatches();
-									if (listMatch.size()!=0) {
-										if (listMatch.size()>1) {
-											// Mutation for multiple AllOf
-											for (int i=0; i<listMatch.size(); i++) {
-												TargetMatch original = listMatch.get(i);
-												listMatch.remove(i);
-												StringBuilder builder = new StringBuilder();
-												policy.encode(builder);
-												String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
-												mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex));
-												saveStringToTextFile(builder.toString(), mutantFileName);
-												listMatch.add(i, original);
-												mutantIndex++;
-											}
-										}
-									}
-								}
-							}
-						}		
-					}
+					createRemoveParallelTargetElementMutants(myrule, mutantIndex, ruleIndex);
 				}
 				ruleIndex++;
 			}
 		}
+	}
+	
+	public List<PolicyMutant> createRemoveParallelTargetElementMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		
+		Target target = (Target) myrule.getTarget();
+		// Analyze AnyOf...
+		List<AnyOfSelection> listAnyOf = target.getAnyOfSelections();
+		if (listAnyOf.size()!=0) {
+			if (listAnyOf.size()>1) {
+				// Mutation for multiple AnyOf...
+				for (int i=0; i<listAnyOf.size(); i++) {
+					AnyOfSelection original = listAnyOf.get(i);
+					listAnyOf.remove(i);
+					StringBuilder builder = new StringBuilder();
+					policy.encode(builder);
+					String mutantFileName = getMutantFileName("RPTE"+ruleIndex+"_"+mutantIndex);
+					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, ruleIndex);
+					mutantList.add(mutant);
+					mutants.add(mutant);
+					saveStringToTextFile(builder.toString(), mutantFileName);
+					listAnyOf.add(i, original);				
+					mutantIndex++;
+				}
+			}
+			// for each AnyOf, analyze AllOf...
+			for (AnyOfSelection selAnyOf : listAnyOf) {
+				List<AllOfSelection> listAllOf = selAnyOf.getAllOfSelections();
+				if (listAllOf.size()!=0) {
+					if (listAllOf.size()>1) {
+						// Mutation for multiple AllOf
+						for (int i=0; i<listAllOf.size(); i++) {
+							AllOfSelection original = listAllOf.get(i);
+							listAllOf.remove(i);
+							StringBuilder builder = new StringBuilder();
+							policy.encode(builder);
+							String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
+							PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex);
+							mutantList.add(mutant);
+							mutants.add(mutant);
+							saveStringToTextFile(builder.toString(), mutantFileName);
+							listAllOf.add(i, original);
+							mutantIndex++;
+						}
+					}
+					// for each AllOf, analyze Match...
+					for (AllOfSelection selAllOf: listAllOf) {
+						List<TargetMatch> listMatch = selAllOf.getMatches();
+						if (listMatch.size()!=0) {
+							if (listMatch.size()>1) {
+								// Mutation for multiple AllOf
+								for (int i=0; i<listMatch.size(); i++) {
+									TargetMatch original = listMatch.get(i);
+									listMatch.remove(i);
+									StringBuilder builder = new StringBuilder();
+									policy.encode(builder);
+									String mutantFileName = getMutantFileName("RPTE"+mutantIndex);
+									PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+mutantIndex, mutantFileName, ruleIndex);
+									mutantList.add(mutant);
+									mutants.add(mutant);
+									saveStringToTextFile(builder.toString(), mutantFileName);
+									listMatch.add(i, original);
+									mutantIndex++;
+								}
+							}
+						}
+					}
+				}
+			}		
+		}
+		return mutants;
 	}
 
 	// RPCE
@@ -1260,7 +1273,6 @@ public class PolicyMutatorByPosition {
 	 * Remove one of the parallel Apply from condition, if such a form exists.
 	 */
 	public void createRemoveParallelConditionElementMutants() {
-		// TODO Auto-generated method stub
 //		int mutantIndex=1;
 //		int ruleIndex=1;
 //		for (CombinerElement rule : policy.getChildElements()) {
