@@ -100,6 +100,20 @@
 </AnyOf>
 </Target>
 </Rule>
+<Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule6" Effect="Deny"  >
+<Target>
+<AnyOf>
+<AllOf>
+<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">assigned</AttributeValue><AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id" DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource" MustBePresent="true"/>
+</Match>
+<Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">read</AttributeValue><AttributeDesignator AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id" DataType="http://www.w3.org/2001/XMLSchema#string" Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action" MustBePresent="true"/>
+</Match>
+</AllOf>
+</AnyOf>
+</Target>
+</Rule>
 <Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule7" Effect="Permit"  >
 <Target>
 <AnyOf>
@@ -183,8 +197,6 @@
 </AllOf>
 </AnyOf>
 </Target>
-</Rule>
-<Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule12" Effect="Permit"  >
 </Rule>
 <Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule13" Effect="Permit"  >
 <Target>

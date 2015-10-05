@@ -357,7 +357,6 @@ public class PolicyMutatorByPosition {
 	 * Append the additional rule right after the rule.
 	 */
 	public void createAddNewRuleMutants() {
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
@@ -366,15 +365,16 @@ public class PolicyMutatorByPosition {
 				// Adding a rule method 1: Adding a mutant rule by flipping the rule effect
 				// Adding a rule method 2: Adding a mutant rule by adding the same rule with target-always-true.
 				Rule myrule = (Rule) tree;
-				createAddNewRuleMutants(myrule, mutantIndex, ruleIndex);
+				createAddNewRuleMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	//changed mutant file name convention
-	public List<PolicyMutant> createAddNewRuleMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createAddNewRuleMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
+		int mutantIndex = 1;
 		String id = myrule.getId().toString();
 		int effect = myrule.getEffect();
 		
@@ -620,14 +620,13 @@ public class PolicyMutatorByPosition {
 	 * Remove the Target(if exists) OF EACH RULE ensuring that the Rule is applied to all requests.
 	 */
 	public void createRuleTargetTrueMutants() {	
-		int mutantIndex=1;
 		int ruleIndex = 1;	// to indicate bug position.
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				if(!myrule.isTargetEmpty()) {
-					createRuleTargetTrueMutants(myrule, mutantIndex, ruleIndex);
+					createRuleTargetTrueMutants(myrule, ruleIndex);
 				}
 				ruleIndex++;
 			}
@@ -635,9 +634,9 @@ public class PolicyMutatorByPosition {
 
 	}
 	
-	public List<PolicyMutant> createRuleTargetTrueMutants(Rule myrule, int mutantIndex, int ruleIndex) {	
+	public List<PolicyMutant> createRuleTargetTrueMutants(Rule myrule, int ruleIndex) {	
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		AbstractTarget target = myrule.getTarget();
 		// Analyze AnyOf... The target might still be empty.
 		List<AnyOfSelection> listAnyOf = ((Target)target).getAnyOfSelections();
@@ -664,20 +663,20 @@ public class PolicyMutatorByPosition {
 	*/
 	//moved the build false target operation to function createRuleTargetFalseMutants(Rule myrule, int mutantIndex)
 	public void createRuleTargetFalseMutants() throws Exception {
-		int mutantIndex=1;
+		int ruleIndex=1;
 		// create mutation for each rule
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createRuleTargetFalseMutants(myrule, mutantIndex);
-				mutantIndex++;
+				createRuleTargetFalseMutants(myrule, ruleIndex);
+				ruleIndex++;
 				
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRuleTargetFalseMutants(Rule myrule, int mutantIndex) throws Exception {
+	public List<PolicyMutant> createRuleTargetFalseMutants(Rule myrule, int ruleIndex) throws Exception {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
 		// Collect attributes from targets and conditions.
@@ -706,8 +705,8 @@ public class PolicyMutatorByPosition {
 		} 
 		
 		builder.replace(targetStartingIndex, targetEndingIndex, falseTarget);
-		String mutantFileName = getMutantFileName("RTF"+mutantIndex);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+mutantIndex, mutantFileName, mutantIndex);
+		String mutantFileName = getMutantFileName("RTF"+ruleIndex);
+		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+ruleIndex, mutantFileName, ruleIndex);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);
@@ -719,21 +718,20 @@ public class PolicyMutatorByPosition {
 	 * Removes the condition(if exists) of each Rule ensuring that the Condition always evaluates to True.
 	 */
 	public void createRuleConditionTrueMutants() {
-		int mutantIndex=1;
 		int ruleIndex = 1;	// to indicate bug position.
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createRuleConditionTrueMutants(myrule, mutantIndex, ruleIndex);
+				createRuleConditionTrueMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRuleConditionTrueMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createRuleConditionTrueMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		if(!myrule.isConditionEmpty()) {
 			Condition condition = myrule.getCondition();	
 			// Check if Condition is still empty like <Condition/> valid but not properly implemented in balana.
@@ -762,7 +760,7 @@ public class PolicyMutatorByPosition {
 	 */
 	//move build false condition operation to createRuleConditionFalseMutants(Rule myrule, int mutantIndex)
 	public void createRuleConditionFalseMutants() throws Exception {
-		int mutantIndex=1;
+		int ruleIndex=1;
 
 		// Collect attributes from targets and conditions.
 		ArrayList<MyAttr> attr = collectAttributes(policy);
@@ -776,14 +774,14 @@ public class PolicyMutatorByPosition {
 				PolicyTreeElement tree = rule.getElement();
 				if (tree instanceof Rule) {
 					Rule myrule = (Rule) tree;
-					createRuleConditionFalseMutants(myrule, mutantIndex);
-					mutantIndex++;				
+					createRuleConditionFalseMutants(myrule, ruleIndex);
+					ruleIndex++;				
 				}
 			}
 		}	
 	}
 	
-	public List<PolicyMutant> createRuleConditionFalseMutants(Rule myrule, int mutantIndex) throws Exception {
+	public List<PolicyMutant> createRuleConditionFalseMutants(Rule myrule, int ruleIndex) throws Exception {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
 		// Collect attributes from targets and conditions.
@@ -815,8 +813,8 @@ public class PolicyMutatorByPosition {
 		}
 
 		builder.replace(conditionStartingIndex, conditionEndingIndex, falseCondition);
-		String mutantFileName = getMutantFileName("RCF"+mutantIndex);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+mutantIndex, mutantFileName, mutantIndex);
+		String mutantFileName = getMutantFileName("RCF"+ruleIndex);
+		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+ruleIndex, mutantFileName, ruleIndex);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);
@@ -874,21 +872,20 @@ public class PolicyMutatorByPosition {
 	 * Applies to string/integer functions only.
 	 */
 	public void createAddNotFunctionMutants() {
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createAddNotFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createAddNotFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createAddNotFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createAddNotFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		String notFunc = "\t<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
 		String applyClosure = "\t</Apply>\n";
 		String id = myrule.getId().toString();
@@ -936,21 +933,20 @@ public class PolicyMutatorByPosition {
 	 * It deletes the Not function defined in the condition.
 	 */
 	public void createRemoveNotFunctionMutants() {	
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createRemoveNotFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createRemoveNotFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRemoveNotFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createRemoveNotFunctionMutants(Rule myrule,  int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		String notFunc = "<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
 		String applyClosure = "</Apply>\n";
 		String id = myrule.getId().toString();
@@ -1003,21 +999,20 @@ public class PolicyMutatorByPosition {
 	 */
 	public void createFlipComparisonFunctionMutants() {
 
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createFlipComparisonFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createFlipComparisonFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createFlipComparisonFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createFlipComparisonFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		// The same functions apply to both integers and strings.
 //		String[] strFunc = {"urn:oasis:names:tc:xacml:1.0:function:string-less-than", 
 //				"urn:oasis:names:tc:xacml:1.0:function:string-less-than-or-equal", 
@@ -1103,23 +1098,21 @@ public class PolicyMutatorByPosition {
 	 * It replaces a comparison function with another one.
 	 */
 	public void createChangeComparisonFunctionMutants() {
-
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createChangeComparisonFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createChangeComparisonFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 			
 	}
 	
-	public void createChangeComparisonFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createChangeComparisonFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		// The same functions apply to both integers and strings.
 		String[] strFunctionKey = {"urn:oasis:names:tc:xacml:1.0:function:string-equal", 
 				"urn:oasis:names:tc:xacml:1.0:function:string-greater-than", 
@@ -1168,12 +1161,15 @@ public class PolicyMutatorByPosition {
 				if ( !builder_int.substring(int_func_occur, func_end).equals(func)) {
 					builder_int.replace(int_func_occur, func_end, func);
 					String mutantFileName = getMutantFileName("CCF"+mutantIndex);
-					mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex));					
+					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex);
+					mutantList.add(mutant);					
+					mutants.add(mutant);
 					saveStringToTextFile(builder_int.toString(), mutantFileName);
 					mutantIndex++;
 				}
 			}
 		}
+		return mutants;
 	}
 	
 	// RPTE
@@ -1183,23 +1179,22 @@ public class PolicyMutatorByPosition {
 	 * A target has the following structure: Target: AnyOf - AllOf - Match
 	 */
 	public void createRemoveParallelTargetElementMutants() {
-		int mutantIndex=1;
 		int ruleIndex=1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				if (!myrule.isTargetEmpty()) {
-					createRemoveParallelTargetElementMutants(myrule, mutantIndex, ruleIndex);
+					createRemoveParallelTargetElementMutants(myrule, ruleIndex);
 				}
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRemoveParallelTargetElementMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createRemoveParallelTargetElementMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		 int mutantIndex = 1;
 		Target target = (Target) myrule.getTarget();
 		// Analyze AnyOf...
 		List<AnyOfSelection> listAnyOf = target.getAnyOfSelections();

@@ -86,6 +86,8 @@
 </AnyOf>
 </Target>
 </Rule>
+<Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule5" Effect="Permit"  >
+</Rule>
 <Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule6" Effect="Permit"  >
 <Target>
 <AnyOf>
@@ -169,8 +171,6 @@
 </AllOf>
 </AnyOf>
 </Target>
-</Rule>
-<Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule11" Effect="Permit"  >
 </Rule>
 <Rule RuleId="urn:oasis:names:tc:xacml:1.0:Rule12" Effect="Permit"  >
 <Target>

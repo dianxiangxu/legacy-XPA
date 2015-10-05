@@ -7,6 +7,9 @@ import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicyMutatorByPosition;
+import org.wso2.balana.PolicyTreeElement;
+import org.wso2.balana.Rule;
+import org.wso2.balana.combine.CombinerElement;
 
 public class PolicyRepairer {
 	String testSuiteFile = null;
@@ -117,5 +120,139 @@ public class PolicyRepairer {
 		
 		return null;
 	}
+	/**
+	 * @param policyFileToRepair, file path of the policy file to be repaired
+	 * @return file path of repaired file; null if cannot be repaired
+	 * @throws Exception
+	 * generate a mutant a time and check whether it can pass the test suite
+	 */
+	public PolicyMutant repairOneByOne(String policyFileToRepair) throws Exception {
+		List<PolicyMutant> mutantList = null;
+		PolicyMutant correctMutant = null;
+		PolicyMutatorByPosition mutator = new PolicyMutatorByPosition(policyFileToRepair);
+		
+		//create mutant methods who's bugPosition == -1
+		// CRC
+		mutantList = mutator.createCombiningAlgorithmMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		
+		//create mutant methods who's bugPosition == 0
+		// PTT
+		mutantList = mutator.createPolicyTargetTrueMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		// PTF
+		mutantList = mutator.createPolicyTargetTrueMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		//FPR
+		mutantList = mutator.createFirstPermitRuleMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		//FDR
+		mutantList = mutator.createFirstDenyRuleMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
 
+		//create mutant methods who's bugpositon depend on rule
+		//final int mutantIndex=1;
+		int ruleIndex = 1;
+		int maxRules = mutator.getPolicy().getChildElements().size();
+		for (CombinerElement rule : mutator.getPolicy().getChildElements()) {
+			PolicyTreeElement tree = rule.getElement();
+			if (tree instanceof Rule) {
+				Rule myrule = (Rule) tree;
+				//CRE
+				mutantList = mutator.createRuleEffectFlippingMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//ANR
+				mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RTT
+				mutantList = mutator.createRuleTargetTrueMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RTF
+				mutantList = mutator.createRuleTargetFalseMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RCT
+				mutantList = mutator.createRuleConditionTrueMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RCF
+				mutantList = mutator.createRuleConditionFalseMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//ANF
+				mutantList = mutator.createAddNotFunctionMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RNF
+				mutantList = mutator.createRemoveNotFunctionMutants(myrule,  ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//FCF
+				mutantList = mutator.createFlipComparisonFunctionMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//CCF
+				mutantList = mutator.createChangeComparisonFunctionMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RPTE
+				mutantList = mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				
+				
+				
+				//RER
+				//BECAREFUL!!! bugPosition is maxRule
+				mutantList = mutator.createRemoveRuleMutants(myrule, ruleIndex, maxRules);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				ruleIndex++;
+			}
+		}
+		return null;
+	}
 }
+
