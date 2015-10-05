@@ -86,36 +86,36 @@ public class PolicyRepairer {
 		return result;
 	}
 	
-//	/**
-//	 * @param policyFileToRepair, file path of the policy file to be repaired
-//	 * @return file path of repaired file; null if cannot be repaired
-//	 * @throws Exception
-//	 * generate a mutant a time and check whether it can pass the test suite
-//	 */
-//	public PolicyMutant repairOneByOne(String policyFileToRepair) throws Exception {
-//		List<PolicyMutant> mutantList = null;
-//		PolicyMutant correctMutant = null;
-//		mutator = new PolicyMutatorByPosition(policyFileToRepair);
-//		// PTT
-//		mutantList = ((PolicyMutatorByPosition) mutator).createPolicyTargetTrueMutants();
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-//		// PTF
-//		mutantList = ((PolicyMutatorByPosition) mutator).createPolicyTargetTrueMutants();
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-//		// CRC
-//		mutantList = ((PolicyMutatorByPosition) mutator).createCombiningAlgorithmMutants();
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-//		
-//		return null;
-//	}
+	/**
+	 * @param policyFileToRepair, file path of the policy file to be repaired
+	 * @return file path of repaired file; null if cannot be repaired
+	 * @throws Exception
+	 * generate a mutant a time and check whether it can pass the test suite
+	 */
+	public PolicyMutant repairSmartly(String policyFileToRepair) throws Exception {
+		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
+		PolicyMutant correctMutant = null;
+		PolicyMutatorByPosition mutator = new PolicyMutatorByPosition(policyFileToRepair);
+		// PTT
+		mutants = ((PolicyMutatorByPosition) mutator).createPolicyTargetTrueMutants();
+		correctMutant = find1stCorrectMutant(mutants);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		// PTF
+		mutants = ((PolicyMutatorByPosition) mutator).createPolicyTargetFalseMutants();
+		correctMutant = find1stCorrectMutant(mutants);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		// CRC
+		mutants = ((PolicyMutatorByPosition) mutator).createCombiningAlgorithmMutants();
+		correctMutant = find1stCorrectMutant(mutants);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		
+		return null;
+	}
 
 }
