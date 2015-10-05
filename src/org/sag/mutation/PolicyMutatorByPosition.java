@@ -933,21 +933,20 @@ public class PolicyMutatorByPosition {
 	 * It deletes the Not function defined in the condition.
 	 */
 	public void createRemoveNotFunctionMutants() {	
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createRemoveNotFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createRemoveNotFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRemoveNotFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createRemoveNotFunctionMutants(Rule myrule,  int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		String notFunc = "<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
 		String applyClosure = "</Apply>\n";
 		String id = myrule.getId().toString();
