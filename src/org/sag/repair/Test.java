@@ -8,8 +8,15 @@ import org.sag.mutation.PolicySpreadSheetMutantSuite;
 public class Test {
 
 	public static void main(String[] args) throws Exception {
+		//String PolicyFilePath = "Experiments//conference3//conference3.xml";
+//		String PolicyFilePath = "Experiments//conference3//mutants//conference3_ANR2.xml";
+		
+//		genMutantsAndTest(PolicyFilePath);
+		
+//		runTestsuiteOnPolicy(PolicyFilePath);
+		
 		testRepair();
-		//batchRun();
+		
 		
 //		String policyFileToRepair = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 //		compareByPosition(policyFileToRepair);
@@ -24,21 +31,27 @@ public class Test {
 	
 	static void testRepair() throws Exception {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
-		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR1.xml";
+		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR4.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
 //		PolicyMutant correctedPolicy = repairer.repair(policyFileToRepair);
-		//TODO validate correctness
 		PolicyMutant correctedPolicy = repairer.repairOneByOne(policyFileToRepair);
-		if(correctedPolicy != null) {
-			System.out.format("repaired file: %s\n",correctedPolicy.getMutantFilePath());
-		} else {
+		if(correctedPolicy == null) {
 			System.out.println("cannot repair\n");
+		} else {
+			System.out.format("\npolicy File To Repair: %s\n", policyFileToRepair);
+			runTestsuiteOnPolicy(policyFileToRepair);
+			System.out.format("\nrepaired file: %s\n",correctedPolicy.getMutantFilePath());
+			runTestsuiteOnPolicy(correctedPolicy.getMutantFilePath());
 		}
 	}
 	
-	static void batchRun() throws Exception {
-		//String PolicyFilePath = "Experiments//conference3//conference3.xml";
-		String PolicyFilePath = "Experiments//conference3//mutants//conference3_ANR1.xml";
+	/**
+	 * for given policy file, generate some mutants and test the mutants, write test results
+	 * to a spread sheet file
+	 * @param PolicyFilePath 
+	 * @throws Exception
+	 */
+	static void genMutantsAndTest(String PolicyFilePath) throws Exception {
 		PolicyMutator policyMutator = new PolicyMutator(PolicyFilePath);
 		policyMutator.createPolicyTargetTrueMutants();
 		policyMutator.createPolicyTargetFalseMutants();
@@ -68,11 +81,14 @@ public class Test {
 		mutantSuite.runAndWriteDetectionInfoToExcelFile(outputFileName, testSuite);
 	}
 	
-	static void simpleRun() throws Exception {
-		//String policyfile = "Experiments//conference3//conference3.xml";
-		String mutantfile = "Experiments//conference3//mutants//conference3_ANR1.xml";
-		String testSuiteFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
-		PolicySpreadSheetTestSuite policySpreadSheetTestSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutantfile);
+	/**
+	 * run testsuite on given policy
+	 * @param policyfile
+	 * @throws Exception
+	 */
+	static void runTestsuiteOnPolicy(String policyfile) throws Exception {
+		String testSuiteFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
+		PolicySpreadSheetTestSuite policySpreadSheetTestSuite = new PolicySpreadSheetTestSuite(testSuiteFile, policyfile);
 		policySpreadSheetTestSuite.runAllTests();
 	}
 
