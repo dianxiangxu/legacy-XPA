@@ -93,7 +93,8 @@ public class PolicyRepairer {
 	 * @param policyFileToRepair, file path of the policy file to be repaired
 	 * @return file path of repaired file; null if cannot be repaired
 	 * @throws Exception
-	 * generate a mutant a time and check whether it can pass the test suite
+	 * use fault localizer to find bugPosition, then generate mutants accordingly
+	 * to repair
 	 */
 	public PolicyMutant repairSmartly(String policyFileToRepair) throws Exception {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
