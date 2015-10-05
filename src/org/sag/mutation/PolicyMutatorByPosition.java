@@ -357,7 +357,6 @@ public class PolicyMutatorByPosition {
 	 * Append the additional rule right after the rule.
 	 */
 	public void createAddNewRuleMutants() {
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
@@ -366,15 +365,16 @@ public class PolicyMutatorByPosition {
 				// Adding a rule method 1: Adding a mutant rule by flipping the rule effect
 				// Adding a rule method 2: Adding a mutant rule by adding the same rule with target-always-true.
 				Rule myrule = (Rule) tree;
-				createAddNewRuleMutants(myrule, mutantIndex, ruleIndex);
+				createAddNewRuleMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	//changed mutant file name convention
-	public List<PolicyMutant> createAddNewRuleMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createAddNewRuleMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
+		int mutantIndex = 1;
 		String id = myrule.getId().toString();
 		int effect = myrule.getEffect();
 		
@@ -620,14 +620,13 @@ public class PolicyMutatorByPosition {
 	 * Remove the Target(if exists) OF EACH RULE ensuring that the Rule is applied to all requests.
 	 */
 	public void createRuleTargetTrueMutants() {	
-		int mutantIndex=1;
 		int ruleIndex = 1;	// to indicate bug position.
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				if(!myrule.isTargetEmpty()) {
-					createRuleTargetTrueMutants(myrule, mutantIndex, ruleIndex);
+					createRuleTargetTrueMutants(myrule, ruleIndex);
 				}
 				ruleIndex++;
 			}
@@ -635,9 +634,9 @@ public class PolicyMutatorByPosition {
 
 	}
 	
-	public List<PolicyMutant> createRuleTargetTrueMutants(Rule myrule, int mutantIndex, int ruleIndex) {	
+	public List<PolicyMutant> createRuleTargetTrueMutants(Rule myrule, int ruleIndex) {	
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		AbstractTarget target = myrule.getTarget();
 		// Analyze AnyOf... The target might still be empty.
 		List<AnyOfSelection> listAnyOf = ((Target)target).getAnyOfSelections();

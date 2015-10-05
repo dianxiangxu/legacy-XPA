@@ -7,6 +7,9 @@ import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicyMutatorByPosition;
+import org.wso2.balana.PolicyTreeElement;
+import org.wso2.balana.Rule;
+import org.wso2.balana.combine.CombinerElement;
 
 public class PolicyRepairer {
 	String testSuiteFile = null;
@@ -132,7 +135,41 @@ public class PolicyRepairer {
 		}
 
 		//create mutant methods who's bugpositon depend on rule
-		
+		//final int mutantIndex=1;
+		int ruleIndex = 1;
+		int maxRules = mutator.getPolicy().getChildElements().size();
+		for (CombinerElement rule : mutator.getPolicy().getChildElements()) {
+			PolicyTreeElement tree = rule.getElement();
+			if (tree instanceof Rule) {
+				Rule myrule = (Rule) tree;
+				//CRE
+				mutantList = createRuleEffectFlippingMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//ANR
+				mutantList = createAddNewRuleMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RTT
+				mutantList = createRuleTargetTrueMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RER
+				//BECAREFUL!!! bugPosition is maxRule
+				mutantList = createRemoveRuleMutants(myrule, ruleIndex, maxRules);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				ruleIndex++;
+			}
+		}
 		return null;
 	}
 
