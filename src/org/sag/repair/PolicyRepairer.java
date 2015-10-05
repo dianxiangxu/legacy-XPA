@@ -160,6 +160,20 @@ public class PolicyRepairer {
 				if(correctMutant != null) {
 					return correctMutant;
 				}
+				//RTF
+				mutantList = createRuleTargetFalseMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//RCT
+				mutantList = createRuleConditionTrueMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				
+				
 				//RER
 				//BECAREFUL!!! bugPosition is maxRule
 				mutantList = createRemoveRuleMutants(myrule, ruleIndex, maxRules);

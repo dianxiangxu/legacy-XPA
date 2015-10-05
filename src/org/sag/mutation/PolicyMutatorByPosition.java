@@ -663,20 +663,20 @@ public class PolicyMutatorByPosition {
 	*/
 	//moved the build false target operation to function createRuleTargetFalseMutants(Rule myrule, int mutantIndex)
 	public void createRuleTargetFalseMutants() throws Exception {
-		int mutantIndex=1;
+		int ruleIndex=1;
 		// create mutation for each rule
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createRuleTargetFalseMutants(myrule, mutantIndex);
-				mutantIndex++;
+				createRuleTargetFalseMutants(myrule, ruleIndex);
+				ruleIndex++;
 				
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRuleTargetFalseMutants(Rule myrule, int mutantIndex) throws Exception {
+	public List<PolicyMutant> createRuleTargetFalseMutants(Rule myrule, int ruleIndex) throws Exception {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
 		// Collect attributes from targets and conditions.
@@ -705,8 +705,8 @@ public class PolicyMutatorByPosition {
 		} 
 		
 		builder.replace(targetStartingIndex, targetEndingIndex, falseTarget);
-		String mutantFileName = getMutantFileName("RTF"+mutantIndex);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+mutantIndex, mutantFileName, mutantIndex);
+		String mutantFileName = getMutantFileName("RTF"+ruleIndex);
+		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+ruleIndex, mutantFileName, ruleIndex);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);
@@ -718,21 +718,20 @@ public class PolicyMutatorByPosition {
 	 * Removes the condition(if exists) of each Rule ensuring that the Condition always evaluates to True.
 	 */
 	public void createRuleConditionTrueMutants() {
-		int mutantIndex=1;
 		int ruleIndex = 1;	// to indicate bug position.
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createRuleConditionTrueMutants(myrule, mutantIndex, ruleIndex);
+				createRuleConditionTrueMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRuleConditionTrueMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createRuleConditionTrueMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		if(!myrule.isConditionEmpty()) {
 			Condition condition = myrule.getCondition();	
 			// Check if Condition is still empty like <Condition/> valid but not properly implemented in balana.
