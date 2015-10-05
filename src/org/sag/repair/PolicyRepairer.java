@@ -190,8 +190,18 @@ public class PolicyRepairer {
 				if(correctMutant != null) {
 					return correctMutant;
 				}
-				
-				
+				//FCF
+				mutantList = createFlipComparisonFunctionMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				//CCF
+				mutantList = createChangeComparisonFunctionMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
 				//RER
 				//BECAREFUL!!! bugPosition is maxRule
 				mutantList = createRemoveRuleMutants(myrule, ruleIndex, maxRules);

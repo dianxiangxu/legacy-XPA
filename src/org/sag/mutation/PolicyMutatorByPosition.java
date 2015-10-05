@@ -999,21 +999,20 @@ public class PolicyMutatorByPosition {
 	 */
 	public void createFlipComparisonFunctionMutants() {
 
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createFlipComparisonFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createFlipComparisonFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createFlipComparisonFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createFlipComparisonFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		// The same functions apply to both integers and strings.
 //		String[] strFunc = {"urn:oasis:names:tc:xacml:1.0:function:string-less-than", 
 //				"urn:oasis:names:tc:xacml:1.0:function:string-less-than-or-equal", 
@@ -1099,23 +1098,21 @@ public class PolicyMutatorByPosition {
 	 * It replaces a comparison function with another one.
 	 */
 	public void createChangeComparisonFunctionMutants() {
-
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createChangeComparisonFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createChangeComparisonFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 			
 	}
 	
-	public void createChangeComparisonFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public void createChangeComparisonFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		// The same functions apply to both integers and strings.
 		String[] strFunctionKey = {"urn:oasis:names:tc:xacml:1.0:function:string-equal", 
 				"urn:oasis:names:tc:xacml:1.0:function:string-greater-than", 
