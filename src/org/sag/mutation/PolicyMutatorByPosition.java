@@ -1176,23 +1176,22 @@ public class PolicyMutatorByPosition {
 	 * A target has the following structure: Target: AnyOf - AllOf - Match
 	 */
 	public void createRemoveParallelTargetElementMutants() {
-		int mutantIndex=1;
 		int ruleIndex=1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				if (!myrule.isTargetEmpty()) {
-					createRemoveParallelTargetElementMutants(myrule, mutantIndex, ruleIndex);
+					createRemoveParallelTargetElementMutants(myrule, ruleIndex);
 				}
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createRemoveParallelTargetElementMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createRemoveParallelTargetElementMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		 int mutantIndex = 1;
 		Target target = (Target) myrule.getTarget();
 		// Analyze AnyOf...
 		List<AnyOfSelection> listAnyOf = target.getAnyOfSelections();
