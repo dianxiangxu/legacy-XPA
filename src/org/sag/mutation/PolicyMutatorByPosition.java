@@ -760,7 +760,7 @@ public class PolicyMutatorByPosition {
 	 */
 	//move build false condition operation to createRuleConditionFalseMutants(Rule myrule, int mutantIndex)
 	public void createRuleConditionFalseMutants() throws Exception {
-		int mutantIndex=1;
+		int ruleIndex=1;
 
 		// Collect attributes from targets and conditions.
 		ArrayList<MyAttr> attr = collectAttributes(policy);
@@ -774,14 +774,14 @@ public class PolicyMutatorByPosition {
 				PolicyTreeElement tree = rule.getElement();
 				if (tree instanceof Rule) {
 					Rule myrule = (Rule) tree;
-					createRuleConditionFalseMutants(myrule, mutantIndex);
-					mutantIndex++;				
+					createRuleConditionFalseMutants(myrule, ruleIndex);
+					ruleIndex++;				
 				}
 			}
 		}	
 	}
 	
-	public List<PolicyMutant> createRuleConditionFalseMutants(Rule myrule, int mutantIndex) throws Exception {
+	public List<PolicyMutant> createRuleConditionFalseMutants(Rule myrule, int ruleIndex) throws Exception {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		
 		// Collect attributes from targets and conditions.
@@ -813,8 +813,8 @@ public class PolicyMutatorByPosition {
 		}
 
 		builder.replace(conditionStartingIndex, conditionEndingIndex, falseCondition);
-		String mutantFileName = getMutantFileName("RCF"+mutantIndex);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+mutantIndex, mutantFileName, mutantIndex);
+		String mutantFileName = getMutantFileName("RCF"+ruleIndex);
+		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+ruleIndex, mutantFileName, ruleIndex);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);

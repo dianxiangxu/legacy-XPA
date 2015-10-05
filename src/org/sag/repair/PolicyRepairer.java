@@ -172,6 +172,15 @@ public class PolicyRepairer {
 				if(correctMutant != null) {
 					return correctMutant;
 				}
+				//RCF
+				mutantList = createRuleConditionFalseMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
+				
+				
+				
 				
 				
 				//RER
