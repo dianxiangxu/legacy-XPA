@@ -86,36 +86,54 @@ public class PolicyRepairer {
 		return result;
 	}
 	
-//	/**
-//	 * @param policyFileToRepair, file path of the policy file to be repaired
-//	 * @return file path of repaired file; null if cannot be repaired
-//	 * @throws Exception
-//	 * generate a mutant a time and check whether it can pass the test suite
-//	 */
-//	public PolicyMutant repairOneByOne(String policyFileToRepair) throws Exception {
-//		List<PolicyMutant> mutantList = null;
-//		PolicyMutant correctMutant = null;
-//		mutator = new PolicyMutatorByPosition(policyFileToRepair);
-//		// PTT
-//		mutantList = ((PolicyMutatorByPosition) mutator).createPolicyTargetTrueMutants();
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-//		// PTF
-//		mutantList = ((PolicyMutatorByPosition) mutator).createPolicyTargetTrueMutants();
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-//		// CRC
-//		mutantList = ((PolicyMutatorByPosition) mutator).createCombiningAlgorithmMutants();
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-//		
-//		return null;
-//	}
+	/**
+	 * @param policyFileToRepair, file path of the policy file to be repaired
+	 * @return file path of repaired file; null if cannot be repaired
+	 * @throws Exception
+	 * generate a mutant a time and check whether it can pass the test suite
+	 */
+	public PolicyMutant repairOneByOne(String policyFileToRepair) throws Exception {
+		List<PolicyMutant> mutantList = null;
+		PolicyMutant correctMutant = null;
+		mutator = new PolicyMutatorByPosition(policyFileToRepair);
+		
+		//create mutant methods who's bugPosition == -1
+		// CRC
+		mutantList = mutator.createCombiningAlgorithmMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		
+		//create mutant methods who's bugPosition == 0
+		// PTT
+		mutantList = mutator.createPolicyTargetTrueMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		// PTF
+		mutantList = mutator.createPolicyTargetTrueMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		//FPR
+		mutantList = mutator.createFirstPermitRuleMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+		//FDR
+		mutantList = mutator.createFirstDenyRuleMutants();
+		correctMutant = find1stCorrectMutant(mutantList);
+		if(correctMutant != null) {
+			return correctMutant;
+		}
+
+		//create mutant methods who's bugpositon depend on rule
+		
+		return null;
+	}
 
 }
