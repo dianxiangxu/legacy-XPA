@@ -178,7 +178,12 @@ public class PolicyRepairer {
 				if(correctMutant != null) {
 					return correctMutant;
 				}
-				
+				//ANF
+				mutantList = createAddNotFunctionMutants(myrule, ruleIndex);
+				correctMutant = find1stCorrectMutant(mutantList);
+				if(correctMutant != null) {
+					return correctMutant;
+				}
 				
 				
 				

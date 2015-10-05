@@ -872,21 +872,20 @@ public class PolicyMutatorByPosition {
 	 * Applies to string/integer functions only.
 	 */
 	public void createAddNotFunctionMutants() {
-		int mutantIndex = 1;
 		int ruleIndex = 1;
 		for (CombinerElement rule : policy.getChildElements()) {
 			PolicyTreeElement tree = rule.getElement();
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
-				createAddNotFunctionMutants(myrule, mutantIndex, ruleIndex);
+				createAddNotFunctionMutants(myrule, ruleIndex);
 				ruleIndex++;
 			}
 		}
 	}
 	
-	public List<PolicyMutant> createAddNotFunctionMutants(Rule myrule, int mutantIndex, int ruleIndex) {
+	public List<PolicyMutant> createAddNotFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		
+		int mutantIndex = 1;
 		String notFunc = "\t<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n";
 		String applyClosure = "\t</Apply>\n";
 		String id = myrule.getId().toString();
