@@ -1110,7 +1110,7 @@ public class PolicyMutatorByPosition {
 			
 	}
 	
-	public void createChangeComparisonFunctionMutants(Rule myrule, int ruleIndex) {
+	public List<PolicyMutant> createChangeComparisonFunctionMutants(Rule myrule, int ruleIndex) {
 		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
 		int mutantIndex = 1;
 		// The same functions apply to both integers and strings.
@@ -1161,12 +1161,15 @@ public class PolicyMutatorByPosition {
 				if ( !builder_int.substring(int_func_occur, func_end).equals(func)) {
 					builder_int.replace(int_func_occur, func_end, func);
 					String mutantFileName = getMutantFileName("CCF"+mutantIndex);
-					mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex));					
+					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, ruleIndex);
+					mutantList.add(mutant);					
+					mutants.add(mutant);
 					saveStringToTextFile(builder_int.toString(), mutantFileName);
 					mutantIndex++;
 				}
 			}
 		}
+		return mutants;
 	}
 	
 	// RPTE

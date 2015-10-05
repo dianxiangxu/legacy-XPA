@@ -98,7 +98,7 @@ public class PolicyRepairer {
 	public PolicyMutant repairOneByOne(String policyFileToRepair) throws Exception {
 		List<PolicyMutant> mutantList = null;
 		PolicyMutant correctMutant = null;
-		mutator = new PolicyMutatorByPosition(policyFileToRepair);
+		PolicyMutatorByPosition mutator = new PolicyMutatorByPosition(policyFileToRepair);
 		
 		//create mutant methods who's bugPosition == -1
 		// CRC
@@ -143,67 +143,67 @@ public class PolicyRepairer {
 			if (tree instanceof Rule) {
 				Rule myrule = (Rule) tree;
 				//CRE
-				mutantList = createRuleEffectFlippingMutants(myrule, ruleIndex);
+				mutantList = mutator.createRuleEffectFlippingMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//ANR
-				mutantList = createAddNewRuleMutants(myrule, ruleIndex);
+				mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//RTT
-				mutantList = createRuleTargetTrueMutants(myrule, ruleIndex);
+				mutantList = mutator.createRuleTargetTrueMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//RTF
-				mutantList = createRuleTargetFalseMutants(myrule, ruleIndex);
+				mutantList = mutator.createRuleTargetFalseMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//RCT
-				mutantList = createRuleConditionTrueMutants(myrule, ruleIndex);
+				mutantList = mutator.createRuleConditionTrueMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//RCF
-				mutantList = createRuleConditionFalseMutants(myrule, ruleIndex);
+				mutantList = mutator.createRuleConditionFalseMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//ANF
-				mutantList = createAddNotFunctionMutants(myrule, ruleIndex);
+				mutantList = mutator.createAddNotFunctionMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//RNF
-				mutantList = createRemoveNotFunctionMutants(myrule,  ruleIndex);
+				mutantList = mutator.createRemoveNotFunctionMutants(myrule,  ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//FCF
-				mutantList = createFlipComparisonFunctionMutants(myrule, ruleIndex);
+				mutantList = mutator.createFlipComparisonFunctionMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//CCF
-				mutantList = createChangeComparisonFunctionMutants(myrule, ruleIndex);
+				mutantList = mutator.createChangeComparisonFunctionMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
 				}
 				//RPTE
-				mutantList = createRemoveParallelTargetElementMutants(myrule, ruleIndex);
+				mutantList = mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
@@ -213,7 +213,7 @@ public class PolicyRepairer {
 				
 				//RER
 				//BECAREFUL!!! bugPosition is maxRule
-				mutantList = createRemoveRuleMutants(myrule, ruleIndex, maxRules);
+				mutantList = mutator.createRemoveRuleMutants(myrule, ruleIndex, maxRules);
 				correctMutant = find1stCorrectMutant(mutantList);
 				if(correctMutant != null) {
 					return correctMutant;
