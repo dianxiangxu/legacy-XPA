@@ -407,6 +407,7 @@ public class MutationPanel2 extends JPanel {
 					CRE = policyx
 							.generate_FlipRuleEffect(getTestPanel(), opt);
 					determineValidTests(CRE, policyMutator, policyPath, "CRE");
+					//valid.addAll(CRE);
 					totalGenerationTime += System.currentTimeMillis() - start;
 					if(boxOptimize.isSelected());
 						//removeDuplicates(valid);
