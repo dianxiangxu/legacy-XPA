@@ -34,7 +34,8 @@ public class Test {
 		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR4.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
 //		PolicyMutant correctedPolicy = repairer.repair(policyFileToRepair);
-		PolicyMutant correctedPolicy = repairer.repairOneByOne(policyFileToRepair);
+//		PolicyMutant correctedPolicy = repairer.repairOneByOne_new(policyFileToRepair);
+		PolicyMutant correctedPolicy = repairer.repairRandomOrder(policyFileToRepair);
 		if(correctedPolicy == null) {
 			System.out.println("cannot repair\n");
 		} else {
