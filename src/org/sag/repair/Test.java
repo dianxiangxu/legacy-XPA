@@ -97,7 +97,8 @@ public class Test {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteSpreadSheetFile,
 				policyFileToRepair);
-		testSuite.runAllTests();
+		//testSuite.runAllTests();
+		testSuite.runAllTestsOnMutant();
 		System.out.println("\n");
 		testSuite.generateJUnitFile("src", 
 				"org.sag.coverage", "KmarketGeneratedTests");
