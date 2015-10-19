@@ -145,9 +145,15 @@ Condition condition = rule.getCondition();
     }
 
     // record the entry of policy evaluation
-    before(AbstractPolicy p): target(p) && call(* AbstractPolicy.evaluate(*))  {
-//        System.out.print("\n"+p.getId());
-		PolicyCoverageFactory.startNewPolicyCoverage(p.getId().toString(), p.getChildren().size());
+    before(AbstractPolicy policy, EvaluationCtx context): target(policy) && call(* AbstractPolicy.evaluate(*)) && args(context) {
+//        System.out.print("\nPolicy ID: "+p.getId()+"\n");
+    	AbstractTarget policyTarget = policy.getTarget();
+    	int result = 0; // assume that there is no policy target (considered a match)
+        if (policyTarget != null) {
+        	MatchResult matchResult = policyTarget.match(context);
+            result = matchResult.getResult();
+        }
+		PolicyCoverageFactory.startNewPolicyCoverage(policy.getId().toString(), policy.getChildren().size(), result);
     }
 
     // record the result of policy evaluation

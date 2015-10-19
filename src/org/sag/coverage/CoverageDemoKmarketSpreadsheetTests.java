@@ -12,9 +12,9 @@ public class CoverageDemoKmarketSpreadsheetTests {
 				policyFileToRepair);
 		testSuite.runAllTests();
 		System.out.println("\n");
-		testSuite.generateJUnitFile("src", 
-				"org.sag.coverage", "KmarketGeneratedTests");
-		PolicyCoverageFactory.writeCoverageToSpreadSheet("tests//coverage.xls");
+//		testSuite.generateJUnitFile("src", 
+//				"org.sag.coverage", "KmarketGeneratedTests");
+		PolicyCoverageFactory.writeCoverageToSpreadSheet("Experiments//conference3//coverage.xls");
 		for (SpectrumBasedDiagnosisResults results: SpectrumBasedFaultLocalizer.applyAllFaultLocalizers()){
 			results.printCoefficients();
 		}

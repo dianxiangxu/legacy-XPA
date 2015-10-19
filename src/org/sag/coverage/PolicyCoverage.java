@@ -8,18 +8,20 @@ public class PolicyCoverage {
 	private int oracle;
 	private String policyID;
 	private int numberOfRules;
+	private int targetMatchResult;
 	private ArrayList<RuleCoverage> ruleCoverages;
 	private int decision;
 
-	public PolicyCoverage(String testID, int oracle, String policyID, int numberOfRules){
-		this(testID, oracle, policyID, numberOfRules, new ArrayList<RuleCoverage>());
+	public PolicyCoverage(String testID, int oracle, String policyID, int numberOfRules, int targetMatchResult){
+		this(testID, oracle, policyID, numberOfRules, targetMatchResult, new ArrayList<RuleCoverage>());
 	}
 
-	public PolicyCoverage(String testID, int oracle, String policyID, int numberOfRules, ArrayList<RuleCoverage> ruleCoverages){
+	public PolicyCoverage(String testID, int oracle, String policyID, int numberOfRules, int targetMatchResult, ArrayList<RuleCoverage> ruleCoverages){
 		this.testID = testID;
 		this.oracle = oracle;
 		this.policyID = policyID;
 		this.numberOfRules = numberOfRules;
+		this.targetMatchResult = targetMatchResult;
 		this.ruleCoverages = ruleCoverages;
 	}
 
@@ -38,6 +40,10 @@ public class PolicyCoverage {
 
 	public int getNumberOfRules(){
 		return numberOfRules;
+	}
+	
+	public int getTargetMatchResult(){
+		return targetMatchResult;
 	}
 	
 	public void addRuleCoverage(RuleCoverage ruleCoverage){

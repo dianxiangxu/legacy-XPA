@@ -22,9 +22,9 @@ public class PolicyCoverageFactory {
 		currentTestID = null;
 	}
 	
-	public static void startNewPolicyCoverage(String policyID, int numberOfRules){
+	public static void startNewPolicyCoverage(String policyID, int numberOfRules, int targetMatchResult){
 		flush();
-		currentPolicyCoverage = new PolicyCoverage(currentTestID, currentTestOracle, policyID, numberOfRules); 
+		currentPolicyCoverage = new PolicyCoverage(currentTestID, currentTestOracle, policyID, numberOfRules, targetMatchResult); 
 	}
 	
 	public static void flush(){
@@ -36,6 +36,8 @@ public class PolicyCoverageFactory {
 	
 	public static void writeCoverageToSpreadSheet(String fileName){
 		flush();
+		if (policyCoverages.size()==0)
+			System.err.println("No policy coverage!\n");				
 		HSSFWorkbook workBook = new HSSFWorkbook();
 		workBook.createSheet("rule coverage");
 		Sheet sheet = workBook.getSheetAt(0);
@@ -282,6 +284,8 @@ public class PolicyCoverageFactory {
 		coveredRulesCell.setCellValue("");
 		Cell decisionCell = row.createCell(6);
 		decisionCell.setCellValue("");
+		Cell targetMatchResultCell = row.createCell(7);
+		targetMatchResultCell.setCellValue("");		
 		int columnIndex = 7;
 		for (RuleCoverage ruleCoverage: policyCoverage.getRuleCoverages()){
 			Cell resultCell = row.createCell(columnIndex++);
@@ -309,7 +313,9 @@ public class PolicyCoverageFactory {
 		coveredRulesCell.setCellValue("executed");
 		Cell decisionCell = row.createCell(6);
 		decisionCell.setCellValue("decision");
-		int columnIndex = 7;
+		Cell targetMatchResultCell = row.createCell(7);
+		targetMatchResultCell.setCellValue("policy target match");		
+		int columnIndex = 8;
 		for (RuleCoverage ruleCoverage: policyCoverage.getRuleCoverages()){
 			Cell resultCell = row.createCell(columnIndex++);
 			resultCell.setCellValue("effect");
@@ -338,7 +344,9 @@ public class PolicyCoverageFactory {
 		coveredRulesCell.setCellValue(policyCoverage.getRuleCoverages().size());
 		Cell decisionCell = row.createCell(6);
 		decisionCell.setCellValue(policyCoverage.getDecision());
-		int columnIndex = 7;
+		Cell targetMatchResultCell = row.createCell(7);
+		targetMatchResultCell.setCellValue(policyCoverage.getTargetMatchResult());				
+		int columnIndex = 8;
 		for (RuleCoverage ruleCoverage: policyCoverage.getRuleCoverages()){
 			Cell resultCell = row.createCell(columnIndex++);
 			resultCell.setCellValue(ruleCoverage.getRuleResult());
