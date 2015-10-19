@@ -3,6 +3,7 @@ package org.sag.faultlocalization;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SpectrumBasedDiagnosisResults {
 	public static enum DebuggingStyle {TOPDOWN, BOTTOMUP};
@@ -15,10 +16,14 @@ public class SpectrumBasedDiagnosisResults {
 	private String methodName;
 	private RuleCoefficient[] ruleCoefficients;
 	/**
-	 * @return the ruleCoefficients
+	 * @return the rule indexes ranked by their suspicion
 	 */
-	public ArrayList<RuleCoefficient> getRuleCoefficients() {
-		return (ArrayList<RuleCoefficient>) Arrays.asList(ruleCoefficients);
+	public List<Integer> getRuleIndexRankedBySuspicion() {
+		List<Integer> ruleIndexRankedBySuspicion = new ArrayList<Integer>();
+		for(RuleCoefficient coefficient: ruleCoefficients) {
+			ruleIndexRankedBySuspicion.add(coefficient.getRuleIndex() + 1);
+		}
+		return ruleIndexRankedBySuspicion;
 	}
 
 	private double score;

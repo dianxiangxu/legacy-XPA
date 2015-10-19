@@ -1,5 +1,7 @@
 package org.sag.repair;
 
+import java.util.List;
+
 import org.sag.coverage.PolicyCoverageFactory;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
@@ -18,7 +20,8 @@ public class Test {
 		
 //		runTestsuiteOnPolicy(PolicyFilePath);
 		
-		testRepair();
+//		testRepair();
+		testFaultLocalizer();
 		
 		
 //		String policyFileToRepair = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
@@ -39,14 +42,7 @@ public class Test {
 //		PolicyMutant correctedPolicy = repairer.repair(policyFileToRepair);
 //		PolicyMutant correctedPolicy = repairer.repairOneByOne_new(policyFileToRepair);
 		PolicyMutant correctedPolicy = repairer.repairRandomOrder(policyFileToRepair);
-		if(correctedPolicy == null) {
-			System.out.println("cannot repair\n");
-		} else {
-			System.out.format("\npolicy File To Repair: %s\n", policyFileToRepair);
-			runTestsuiteOnPolicy(policyFileToRepair);
-			System.out.format("\nrepaired file: %s\n",correctedPolicy.getMutantFilePath());
-			runTestsuiteOnPolicy(correctedPolicy.getMutantFilePath());
-		}
+		showRepairResult(correctedPolicy, policyFileToRepair);
 	}
 	
 	/**
@@ -105,12 +101,27 @@ public class Test {
 		System.out.println("\n");
 		testSuite.generateJUnitFile("src", 
 				"org.sag.coverage", "KmarketGeneratedTests");
-		PolicyCoverageFactory.writeCoverageToSpreadSheet("tests//coverage.xls");
+		//PolicyCoverageFactory.writeCoverageToSpreadSheet("tests//coverage.xls");
+		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
 		for (SpectrumBasedDiagnosisResults results: SpectrumBasedFaultLocalizer.applyAllFaultLocalizers()){
 			results.printCoefficients();
+			List<Integer> suspicionRank = results.getRuleIndexRankedBySuspicion();
+			PolicyMutant correctedPolicy = repairer.repairBySuspicionRank(policyFileToRepair, suspicionRank);
+			showRepairResult(correctedPolicy, policyFileToRepair);
 		}
 		
 		
+	}
+	
+	static public void showRepairResult(PolicyMutant correctedPolicy, String policyFileToRepair) throws Exception {
+		if(correctedPolicy == null) {
+			System.out.println("cannot repair\n");
+		} else {
+			System.out.format("\npolicy File To Repair: %s\n", policyFileToRepair);
+			runTestsuiteOnPolicy(policyFileToRepair);
+			System.out.format("\nrepaired file: %s\n",correctedPolicy.getMutantFilePath());
+			runTestsuiteOnPolicy(correctedPolicy.getMutantFilePath());
+		}
 	}
 
 }
