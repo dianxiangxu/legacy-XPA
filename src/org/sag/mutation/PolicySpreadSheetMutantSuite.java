@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.sag.coverage.PolicyRunner;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.faultlocalization.TestCellResult;
 
 public class PolicySpreadSheetMutantSuite {
 
@@ -147,7 +148,8 @@ public class PolicySpreadSheetMutantSuite {
 		for (int i = 0; i < numTests+1; i++) {
 			detectionCount[i] = 0;
 		}
-		// 01/27/15 if #col > 255, print a very brief info.
+		
+		// 01/27/15 if #col > 255, print a brief version of the result, because of the limit of columns.
 		if (numTests+3 > 255) {
 			writeSimpleDetectionTitleRow(sheet, 0, numTests);
 			int rowIndex = 1;
@@ -157,6 +159,7 @@ public class PolicySpreadSheetMutantSuite {
 			writeSimpleDetectionCountRow(sheet, rowIndex++, detectionCount);
 			writeSimpleDetectionRateRow(sheet, rowIndex++, detectionCount, policyMutantSuite.size());
 		} else {
+			// Else (#col <= 255) write the full detail of test results.
 			// write title row. specify number of columns by number of tests.
 			if (numTests!=0)
 				writeDetectionTitleRow(sheet, 0, numTests);
@@ -210,10 +213,12 @@ public class PolicySpreadSheetMutantSuite {
 		mutantCells[1].setCellValue(mutant.getFaultLocation());
 		PolicySpreadSheetTestSuite mutantTestSuite = 
 				new PolicySpreadSheetTestSuite(tests.getTestRecord(), mutant.getMutantFilePath(mutantsDirectory));
-		boolean[] testResult = mutantTestSuite.runAllTestsOnMutant();
+		//boolean[] testResult = mutantTestSuite.runAllTestsOnMutant();
+		TestCellResult[] rowResult;	
+		rowResult = mutantTestSuite.runAllTestsOnMutant();
 				
-		for (int j = 0; j < testResult.length; j++) {
-			if(testResult[j]) {
+		for (int j = 0; j < rowResult.length; j++) {
+			if(rowResult[j].getVerdict()) {
 				// idle
 			} else {
 				// just count
@@ -270,12 +275,12 @@ public class PolicySpreadSheetMutantSuite {
 	 */
 	private void writeDetectionTitleRow(Sheet sheet, int rowIndex, int numTests) {
 		Row titleRow = sheet.createRow(rowIndex);
-		Cell[] titleCells = new Cell[numTests+3]; // name, bugPosition, test1~n, detected?.
+		Cell[] titleCells = new Cell[numTests+3]; // name, bugPosition, test1~n, detected?
 		// Optimization may apply.
 		for (int i = 0; i < numTests+3; i++) {
 			titleCells[i] = titleRow.createCell(i);
 			if (i==0)
-				titleCells[i].setCellValue(""); // mutant name
+				titleCells[i].setCellValue(""); // header for mutant name
 			if (i==1)
 				titleCells[i].setCellValue("Bug Position");
 			if (i>=2 && i<=numTests+1) {
@@ -289,6 +294,8 @@ public class PolicySpreadSheetMutantSuite {
 	
 	private void writeDetectionInfoRow(Sheet sheet, int rowIndex,
 			PolicyMutant mutant, PolicySpreadSheetTestSuite tests, int[] detectionCount) throws Exception {
+
+		// initialize
 		Row mutantRow = sheet.createRow(rowIndex);
 		Cell[] mutantCells = new Cell[tests.getNumberOfTests()+3];
 		boolean killed = false; // fault detected?
@@ -301,14 +308,18 @@ public class PolicySpreadSheetMutantSuite {
 		mutantCells[1].setCellValue(mutant.getFaultLocation());
 		PolicySpreadSheetTestSuite mutantTestSuite = 
 				new PolicySpreadSheetTestSuite(tests.getTestRecord(), mutant.getMutantFilePath(mutantsDirectory));
-		boolean[] testResult = mutantTestSuite.runAllTestsOnMutant();
-				
-		for (int j = 0; j < testResult.length; j++) {
-			if(testResult[j]) {
-				mutantCells[j+2].setCellValue("Pass" + PolicyRunner.testExecutionResult);
+		
+		// 11/1/15 fix test result return
+		//boolean[] testResult = mutantTestSuite.runAllTestsOnMutant();
+		TestCellResult[] rowResult;	
+		rowResult = mutantTestSuite.runAllTestsOnMutant();
+		
+		for (int j = 0; j < rowResult.length; j++) {
+			if(rowResult[j].getVerdict()) {
+				mutantCells[j+2].setCellValue(rowResult[j].getLiteralDetail());
 			} else {
 				// just count
-				mutantCells[j+2].setCellValue("Fail" + PolicyRunner.testExecutionResult);
+				mutantCells[j+2].setCellValue(rowResult[j].getLiteralDetail());
 				detectionCount[j]++;
 				killed = true;
 			}

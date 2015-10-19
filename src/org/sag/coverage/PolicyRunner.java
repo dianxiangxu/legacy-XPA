@@ -62,8 +62,10 @@ public class PolicyRunner {
     	int oracle = balanaFinalDecision(oracleString);
     	PolicyCoverageFactory.currentTestOracle = oracle;
     	int response = getResponse(request);
-    	testExecutionResult = "(" + oracle + "/" + response + ")";
-    	return response == oracle;
+    	boolean verdict = (response==oracle);
+    	// 11/1/15 modify literal form.
+    	testExecutionResult = (verdict ? "Pass" : "Fail") + "(" + oracle + "/" + response + ")";
+    	return verdict;
     }
 
     public boolean runTestFromFile(String testID, String requestFile, String oracleString){

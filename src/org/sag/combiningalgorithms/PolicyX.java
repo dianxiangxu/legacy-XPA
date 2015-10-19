@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
@@ -78,14 +81,28 @@ public class PolicyX {
 	public HashMap typeMap = new HashMap();
 	public HashMap valueMap = new HashMap();
 	
+	private LinkedHashMap<String, String> vMap = new LinkedHashMap<String, String>();
+	private LinkedHashMap<String, String> tMap = new LinkedHashMap<String, String>();
+	private LinkedHashMap<String, String> rMap = new LinkedHashMap<String, String>();
+	private LinkedHashMap<String, String> funcMap = new LinkedHashMap<String, String>();
+	private LinkedHashMap<String, String> catMap = new LinkedHashMap<String, String>();
+	
 	private boolean[][] rule_table;
 	private final int TRUE_TRUE = 0;
 	private final int TRUE_FALSE = 1;
 	private final int FALSE_TRUE = 2;
 	private final int FALSE_FALSE = 3;
-	private final int ALL_OF = 4;
-	private final int ANY_OF = 5;
-	private final int ELEMENT = 6;
+	private final int IND_TRUE = 4;
+	
+	String int_function = "urn:oasis:names:tc:xacml:1.0:function:integer-equal";
+	String str_function = "urn:oasis:names:tc:xacml:1.0:function:string-equal";
+	String int_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only";
+	String str_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:string-one-and-only";
+	String str_value = "RANDOM$@^$%#&!";
+	String str_value1 = "str_A";
+	String str_value2 = "str_B";
+	String int_value1 = "123456789";
+	String int_value2 = "-987654321";
 	
 	private boolean[][] fault_table;
 	
@@ -1050,8 +1067,8 @@ public class PolicyX {
 						if(match.getEval() instanceof AttributeDesignator)
 						{
 							AttributeDesignator attr = (AttributeDesignator)match.getEval();
-							String rand_id = randomAttribute();
-							String rand_cat = randomAttribute();
+							//String rand_id = randomAttribute();
+							//String rand_cat = randomAttribute();
 							if(k == atindex)
 							{
 								allBuilder.append(" ("
@@ -1094,6 +1111,150 @@ public class PolicyX {
 					allBuilder.insert(0, " (and");
 					allBuilder.append(")");
 					orBuilder.append(allBuilder);
+				}
+				orBuilder.insert(0, " (or ");
+				orBuilder.append(")");
+				sb.append(orBuilder);
+			}
+			sb.insert(0, "(and ");
+			sb.append(")");
+			return sb.toString();
+		}
+		return "";
+	}
+	
+	//If we are at the last Match statement, ensure this statement is reachable within the rule
+	//make this last Match statement evaluate to false by using a value that is always false
+	//this forces an N/A evaluation for the policy and RE for the mutant.
+	//If we are not the last Match statement, only need to ensure the statement is reachable
+	//all other statements after that don't matter. This forces an N/A eval for the policy and IND
+	//eval for the mutant. However, if we are the first Match statement, we only make the statement immediately
+	//following eval to True.
+	//Only used when PCA = First-Applicable
+	public String getTargetAttribute_FALSEIND(Target target, int alindex, int atindex, ArrayList<MyAttr> collector)
+	{
+		StringBuffer sb = new StringBuffer();
+		if(target != null)
+		{
+			List<AnyOfSelection> anyOf = target.getAnyOfSelections();
+			for(int i = 0; i < anyOf.size(); i++)
+			{
+				AnyOfSelection any = anyOf.get(i);
+				StringBuffer orBuilder = new StringBuffer();
+				List<AllOfSelection> allOf = any.getAllOfSelections();
+				for(int j = 0; j < allOf.size(); j++)
+				{
+					if(j != alindex)
+						continue;
+					AllOfSelection all = allOf.get(j);
+					StringBuffer allBuilder = new StringBuffer();
+					List<TargetMatch> matches = all.getMatches();
+					if(atindex == matches.size() - 1)
+					{
+						for(int k = 0; k < matches.size(); k++)
+						{
+							TargetMatch match = matches.get(k);
+							if(match.getEval() instanceof AttributeDesignator)
+							{
+								AttributeDesignator attr = (AttributeDesignator)match.getEval();
+								if(k == atindex)
+								{
+									allBuilder.append(" ("
+											+ al.returnFunction(match.getMatchFunction().encode())
+											+ " " + getName(attr.getId().toString())
+											+ " ");
+									if(attr.getType().toString().contains("string"))
+										allBuilder.append("\"" + "r@nd0m" + "\")");
+									if(attr.getType().toString().contains("integer"))
+										allBuilder.append(1234567890 + ")");
+								}
+								else
+								{
+									allBuilder.append(" ("
+											+ al.returnFunction(match.getMatchFunction().encode())
+											+ " " + getName(attr.getId().toString())
+											+ " ");
+									if(attr.getType().toString().contains("string"))
+									{
+										String val = match.getAttrValue().encode();
+										val = val.replaceAll("\n", "");
+										val = val.trim();
+										allBuilder.append("\"" + val + "\")");
+									}
+									if(attr.getType().toString().contains("integer"))
+									{
+										String val = match.getAttrValue().encode();
+										val = val.replaceAll("\n", "");
+										val = val.trim();
+										allBuilder.append(val + ")");
+									}
+								}
+								getType(getName(attr.getId().toString()),
+										attr.getType().toString());
+								MyAttr myattr = new MyAttr(attr.getId().toString(), attr.getCategory().toString(), attr.getType().toString());
+								if (isExist(collector, myattr) == false) 
+									collector.add(myattr);
+							}
+						}
+						allBuilder.insert(0, " (and");
+						allBuilder.append(")");
+						orBuilder.append(allBuilder);
+					}
+					else
+					{
+						boolean reachable = false;
+						for(int k = 0; k < matches.size(); k++)
+						{
+							TargetMatch match = matches.get(k);
+							if(match.getEval() instanceof AttributeDesignator)
+							{
+								AttributeDesignator attr = (AttributeDesignator)match.getEval();
+								if(k == atindex)
+								{
+									allBuilder.append(" ("
+											+ al.returnFunction(match.getMatchFunction().encode())
+											+ " " + getName(attr.getId().toString())
+											+ " ");
+									if(attr.getType().toString().contains("string"))
+										allBuilder.append("\"" + "r@nd0m" + "\")");
+									if(attr.getType().toString().contains("integer"))
+										allBuilder.append(1234567890 + ")");
+								}
+								else if(!reachable)
+								{
+									allBuilder.append(" ("
+											+ al.returnFunction(match.getMatchFunction().encode())
+											+ " " + getName(attr.getId().toString())
+											+ " ");
+									if(attr.getType().toString().contains("string"))
+									{
+										String val = match.getAttrValue().encode();
+										val = val.replaceAll("\n", "");
+										val = val.trim();
+										allBuilder.append("\"" + val + "\")");
+									}
+									if(attr.getType().toString().contains("integer"))
+									{
+										String val = match.getAttrValue().encode();
+										val = val.replaceAll("\n", "");
+										val = val.trim();
+										allBuilder.append(val + ")");
+									}
+									reachable = !reachable;
+								}
+								else
+									continue;
+								getType(getName(attr.getId().toString()),
+										attr.getType().toString());
+								MyAttr myattr = new MyAttr(attr.getId().toString(), attr.getCategory().toString(), attr.getType().toString());
+								if (isExist(collector, myattr) == false) 
+									collector.add(myattr);
+							}
+						}
+						allBuilder.insert(0, " (and");
+						allBuilder.append(")");
+						orBuilder.append(allBuilder);
+					}
 				}
 				orBuilder.insert(0, " (or ");
 				orBuilder.append(")");
@@ -4945,6 +5106,7 @@ public class PolicyX {
 		List<Rule> rules = getRuleFromPolicy(policy);
 		Rule def = isDefaultRule(rules.get(rules.size() - 1)) ? rules.get(rules.size() - 1) : null;
 		function f = new function();
+		
 		if(cmbAlg instanceof PermitOverridesRuleAlg)
 		{
 			if(def != null)
@@ -5878,7 +6040,7 @@ public class PolicyX {
 	
 	private void buildRPTERequests_override(List<Rule> rules, ArrayList<PolicySpreadSheetTestRecord> generator, TestPanel t, boolean opt)
 	{
-		int count = 1;
+		int count = 1, ind_count = 1;
 		int index = 0;
 		//boolean[][] alls = buildAllOfTable(rules);
 		//boolean[][] anys = buildAnyOfTable(rules);
@@ -6135,6 +6297,59 @@ public class PolicyX {
 	{
 		PolicySpreadSheetTestRecord ptr = null;
 		function f = new function();
+		if(!(policy.getCombiningAlg() instanceof FirstApplicableRuleAlg))
+			sb.append(getTargetAttribute_NegateValue((Target)rule.getTarget(), alindex, atindex, collector) + "\n");
+		else
+			sb.append(getTargetAttribute_FALSEIND((Target)rule.getTarget(), alindex, atindex, collector) + "\n");
+		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		
+		for(Rule r : rules)
+		{
+			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+				continue;
+			else
+				sb.append(False_Condition(r.getCondition(), collector) + "\n");
+		}
+		//System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			//System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			//System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "requestRPTE" + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " RPTE" + count,
+					"requestRPTE" + count + ".txt", request, "");
+		}
+		else
+			System.err.println("UNSAT");
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRPTERequest3IND(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int atindex, int alindex)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
 		sb.append(getTargetAttribute_NegateValue((Target)rule.getTarget(), alindex, atindex, collector) + "\n");
 		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
 		
@@ -6163,7 +6378,7 @@ public class PolicyX {
 			try
 			{
 				String path = t.getTestOutputDestination("_MutationTests")
-						+ File.separator + "requestRPTE" + count + ".txt";
+						+ File.separator + "requestRPTE_IND" + count + ".txt";
 				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
 				bw.write(request);
 				bw.close();
@@ -6174,7 +6389,7 @@ public class PolicyX {
 			}
 			ptr = new PolicySpreadSheetTestRecord(
 					PolicySpreadSheetTestSuite.TEST_KEYWORD + " RPTE" + count,
-					"requestRPTE" + count + ".txt", request, "");
+					"requestRPTE_IND" + count + ".txt", request, "");
 		}
 		return ptr;
 	}
@@ -6227,6 +6442,54 @@ public class PolicyX {
 		return ptr;
 	}
 	
+	private PolicySpreadSheetTestRecord buildRPTERequest1IND(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int anindex)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(getTargetAnyOf_NegateValues((Target)rule.getTarget(), anindex, collector) + "\n");
+		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		
+		for(Rule r : rules)
+		{
+			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+				continue;
+			else
+				sb.append(False_Condition(r.getCondition(), collector) + "\n");
+		}
+		//System.out.println("Here is the z3-str input: \n" + sb.toString());
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "requestRPTE_IND" + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " RPTE" + count,
+					"requestRPTE_IND" + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
 	private PolicySpreadSheetTestRecord buildRPTERequest2(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int alindex, int anindex)
 	{
 		PolicySpreadSheetTestRecord ptr = null;
@@ -6275,6 +6538,58 @@ public class PolicyX {
 			ptr = new PolicySpreadSheetTestRecord(
 					PolicySpreadSheetTestSuite.TEST_KEYWORD + " RPTE" + count,
 					"requestRPTE" + count + ".txt", request, "");
+		}
+		return ptr;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRPTERequest2IND(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, TestPanel t, int alindex, int anindex)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(getTargetAllOf_NegateValues((Target)rule.getTarget(), anindex, alindex, collector) + "\n");
+		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		
+		for(Rule r : rules)
+		{
+			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+				continue;
+			else
+				sb.append(False_Condition(r.getCondition(), collector) + "\n");
+		}
+		//System.out.println("Here is the z3-str input: \n" + sb.toString());
+		//System.err.println("nameMap null? " + nameMap == null);
+		//System.err.println("typeMap null? " + typeMap == null);
+		//System.err.println("sb null? " + sb == null);
+		//System.err.println("sb tostring null? " + sb.toString() == null);
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		if(sat)
+		{
+			System.out.println(nameMap.size() + " map size");
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(collector.size() + " collection size");
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "requestRPTE_IND" + count + ".txt";
+				BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " RPTE" + count,
+					"requestRPTE_IND" + count + ".txt", request, "");
 		}
 		return ptr;
 	}
@@ -9813,20 +10128,368 @@ public class PolicyX {
 		return match_skip;
 	}
 	
-	private HashSet<String> mostUnique(List<Rule> rules)
+	private LinkedHashMap<String, String> getValues(List<Rule> rules)
 	{
-		HashSet<String> subject = new HashSet<String>();
-		HashSet<String> resource = new HashSet<String>();
-		HashSet<String> action = new HashSet<String>();
-		HashSet<String> place = new HashSet<String>();
+		LinkedHashMap<String, String> value_map = new LinkedHashMap<String, String>();
+		for(Rule R : rules)
+		{
+			if(R.getTarget() != null)
+			{
+				Target rt = (Target)R.getTarget();
+				for(AnyOfSelection any : rt.getAnyOfSelections())
+				{
+					for(AllOfSelection all : any.getAllOfSelections())
+					{
+						for(TargetMatch match : all.getMatches())
+						{
+							if(match.getEval() instanceof AttributeDesignator)
+							{
+								AttributeDesignator attr = (AttributeDesignator)match.getEval();
+								if(value_map.get(match.getAttrValue().encode() + " " + attr.getId().toString()) == null)
+								{
+									value_map.put(match.getAttrValue().encode() + " " + attr.getId().toString(), match.getAttrValue().encode());
+									vMap.put(match.getAttrValue().encode() + " " + attr.getId().toString(), match.getAttrValue().encode());
+									tMap.put(match.getAttrValue().encode() + " " + attr.getId().toString(), attr.getType().toString());
+									rMap.put(match.getAttrValue().encode() + " " + attr.getId().toString(), attr.getId().toString());
+									funcMap.put(match.getAttrValue().encode() + " " + attr.getId().toString(), match.getMatchFunction().encode());
+									catMap.put(match.getAttrValue().encode() + " " + attr.getId().toString(), attr.getCategory().toString());
+								}
+								else
+									continue;
+							}
+						}
+					}
+				}
+			}
+			else
+				continue;
+		}
+		return value_map;
+	}
+	
+	private String getUniqueAttribute(Target rt, int anIndex, int alIndex, int atIndex, ArrayList<MyAttr> collector)
+	{
+		StringBuffer sb = new StringBuffer();
+		if(rt != null)
+		{
+			for(int i = 0; i < rt.getAnyOfSelections().size(); i++)
+			{
+				if(i != anIndex)
+					continue;
+				StringBuilder orBuilder = new StringBuilder();
+				AnyOfSelection any = rt.getAnyOfSelections().get(i);
+				for(int j = 0; j < any.getAllOfSelections().size(); j++)
+				{
+					if(j != alIndex)
+						continue;
+					StringBuilder andBuilder = new StringBuilder();
+					AllOfSelection all = any.getAllOfSelections().get(j);
+					for(int k = 0; k < all.getMatches().size(); k++)
+					{
+						TargetMatch match = all.getMatches().get(k);
+						if(match.getEval() instanceof AttributeDesignator)
+						{
+							AttributeDesignator attr = (AttributeDesignator)match.getEval();
+							if(k == atIndex)
+							{ 
+								continue;
+							}
+							else
+							{
+								andBuilder.append(" ("
+										+ al.returnFunction(match.getMatchFunction().encode())
+										+ " " + getName(attr.getId().toString())
+										+ " ");
+								if(attr.getType().toString().contains("string"))
+								{
+									String val = match.getAttrValue().encode();
+									val = val.replaceAll("\n", "");
+									val = val.trim();
+									andBuilder.append("\"" + val + "\")");
+								}
+								if(attr.getType().toString().contains("integer"))
+								{
+									String val = match.getAttrValue().encode();
+									val = val.replaceAll("\n", "");
+									val = val.trim();
+									andBuilder.append(val + ")");
+								}
+							}
+							getType(getName(attr.getId().toString()),
+									attr.getType().toString());
+							MyAttr myattr = new MyAttr(attr.getId().toString(), attr.getCategory().toString(), attr.getType().toString());
+							if (isExist(collector, myattr) == false) 
+								collector.add(myattr);
+						}
+					}
+					andBuilder.insert(0, " (and");
+					andBuilder.append(")");
+					orBuilder.append(andBuilder);
+				}
+				orBuilder.insert(0, " (or ");
+				orBuilder.append(")");
+				sb.append(orBuilder);
+			}
+			sb.insert(0, "(and ");
+			sb.append(")");
+			return sb.toString();
+		}
+		return "";
+	}
+	
+	private String getAttributeFromKey(String key, ArrayList<MyAttr> collector)
+	{
+		StringBuffer sb = new StringBuffer();
+		StringBuilder orBuilder = new StringBuilder();
+		StringBuilder andBuilder = new StringBuilder();
+		String val = vMap.get(key);
+		String type = tMap.get(key);
+		String ID = rMap.get(key);
+		String func = funcMap.get(key);
+		String cat = catMap.get(key);
+		andBuilder.append(" ("
+				+  al.returnFunction(func)
+				+ " " + getName(ID)
+				+ " ");
+		if(type.contains("string"))
+		{
+			val = val.replaceAll("\n", "");
+			val = val.trim();
+			andBuilder.append("\"" + val + "\")");
+		}
+		if(type.contains("integer"))
+		{
+			val = val.replaceAll("\n", "");
+			val = val.trim();
+			andBuilder.append(val + ")");
+		}
+		getType(getName(ID), type);
+		MyAttr mattr = new MyAttr(ID, cat, type);
+		if(!isExist(collector, mattr))
+			collector.add(mattr);
+		andBuilder.insert(0, " (and");
+		andBuilder.append(")");
+		orBuilder.append(andBuilder);
+		orBuilder.insert(0, " (or ");
+		orBuilder.append(")");
+		sb.append(orBuilder);
+		sb.insert(0, "(and ");
+		sb.append(")");
+		return sb.toString();
+	}
+	
+	private String getNonUniqueAttributes(Target rt, String unique, ArrayList<MyAttr> collector)
+	{
+		StringBuffer sb = new StringBuffer();
+		if(rt != null)
+		{
+			for(AnyOfSelection any : rt.getAnyOfSelections())
+			{
+				StringBuilder orBuilder = new StringBuilder();
+				for(AllOfSelection all : any.getAllOfSelections())
+				{
+					StringBuilder andBuilder = new StringBuilder();
+					for(TargetMatch match : all.getMatches())
+					{
+						if(match.getEval() instanceof AttributeDesignator)
+						{
+							AttributeDesignator attr = (AttributeDesignator)match.getEval();
+							if(attr.getId().toString().compareTo(unique) == 0)
+								continue;
+							else
+							{
+								andBuilder.append(" ("
+										+ al.returnFunction(match.getMatchFunction().encode())
+										+ " " + getName(attr.getId().toString())
+										+ " ");
+								if(attr.getType().toString().contains("string"))
+									andBuilder.append("\"" + match.getAttrValue().encode().replaceAll("\n", "").trim() + "\")");
+								if(attr.getType().toString().contains("integer"))
+									andBuilder.append(match.getAttrValue().encode().replaceAll("\n", "").trim() + ")");
+								getType(getName(attr.getId().toString()), attr.getType().toString());
+								MyAttr mine = new MyAttr(attr.getId().toString(), attr.getCategory().toString(), attr.getType().toString());
+								if(!isExist(collector, mine))
+									collector.add(mine);
+							}
+						}
+					}
+					andBuilder.insert(0, " (and");
+					andBuilder.append(")");
+					orBuilder.append(andBuilder);
+				}
+				orBuilder.insert(0, " (or ");
+				orBuilder.append(")");
+				sb.append(orBuilder);
+			}
+			sb.insert(0, "(and ");
+			sb.append(")");
+			return sb.toString();
+		}
+		return "";
+	}
+	
+	private ArrayList<String> getNonUniqueTargetIds(List<Rule> rules)
+	{
+		ArrayList<String> target_ids = new ArrayList<String>();
+		String min_unique = "";
+		String max_unique = "";
+		int min = Integer.MAX_VALUE;
+		int max = 0;
+		ArrayList<MyAttr> ids = new ArrayList<MyAttr>();
+		for(Rule r : rules)
+			True_Target((Target)r.getTarget(), ids);
+		for(MyAttr attr : ids)
+		{
+			String current = attr.getName();
+			HashSet<String> values = new HashSet<String>();
+			for(Rule r : rules)
+			{
+				if(r.getTarget() != null)
+				{
+					Target rtemp = (Target)r.getTarget();
+					for(AnyOfSelection any : rtemp.getAnyOfSelections())
+					{
+						for(AllOfSelection all : any.getAllOfSelections())
+						{
+							for(TargetMatch match : all.getMatches())
+							{
+								if(match.getEval() instanceof AttributeDesignator)
+								{
+									AttributeDesignator temp = (AttributeDesignator)match.getEval();
+									if(temp.getId().toString().compareTo(current) == 0)
+										values.add(match.getAttrValue().encode());
+								}
+							}
+						}
+					}
+				}
+			}
+			if(values.size() < min)
+			{
+				target_ids.remove(min_unique);
+				target_ids.add(current);
+				min_unique = current;
+				min = values.size();
+			}
+			else if(values.size() > max)
+			{
+				target_ids.remove(max_unique);
+				target_ids.add(current);
+				max_unique = current;
+				max = values.size();
+			}
+		}
+		return target_ids;
+	}
+	
+	private PolicySpreadSheetTestRecord buildRequest_ind(List<Rule> rules, Rule rule, StringBuffer sb, ArrayList<MyAttr> collector, int count, int i, int j, int k, TestPanel t, HashMap<String, String> value_map, String type)
+	{
+		PolicySpreadSheetTestRecord ptr = null;
+		function f = new function();
+		sb.append(getUniqueAttribute((Target)rule.getTarget(), i, j, k, collector) + "\n");
+		sb.append(True_Condition(rule.getCondition(), collector) + "\n");
+		for(Rule r : rules)
+		{
+			if(r.getId().equals(rule.getId()) || isDefaultRule(r))
+				continue;
+			else
+				sb.append(False_Condition(r.getCondition(), collector) + "\n");
+		}
 		
-		if(subject.size() > resource.size() && subject.size() > action.size() && subject.size() > place.size())
-			return subject;
-		else if(resource.size() > subject.size() && resource.size() > action.size() && resource.size() > place.size())
-			return resource;
-		else if(action.size() > subject.size() && action.size() > resource.size() && action.size() > place.size())
-			return action;
-		else
-			return place;
+		boolean sat = z3str(sb.toString(), nameMap, typeMap);
+		System.err.println(sb.toString());
+		if(sat)
+		{
+			try
+			{
+				z3.getValue(collector, nameMap);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			if(collector.size() == 0)
+				return ptr;
+			String request = f.print(collector);
+			try
+			{
+				String path = t.getTestOutputDestination("_MutationTests")
+						+ File.separator + "request" + type + count + ".txt";
+				FileWriter fw = new FileWriter(path);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(request);
+				bw.close();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+			ptr = new PolicySpreadSheetTestRecord(
+					PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+					"request" + type + count + ".txt", request, "");
+		}
+		else 
+		{
+			System.err.println(sb.toString());
+		}
+		return ptr;
+	}
+	
+	private void buildRequest_ind2(TestPanel t, String type, ArrayList<PolicySpreadSheetTestRecord> generator)
+	{
+		function f = new function();
+		int count = 1;
+		for(String key : vMap.keySet())
+		{
+			PolicySpreadSheetTestRecord ptr = null;
+			ArrayList<MyAttr> collector = new ArrayList<MyAttr>();
+			StringBuffer sb = new StringBuffer();
+			sb.append(TruePolicyTarget(policy, collector) + "\n");
+			sb.append(getAttributeFromKey(key, collector) + "\n");
+			boolean sat = z3str(sb.toString(), nameMap, typeMap);
+			if(sat)
+			{
+				try
+				{
+					z3.getValue(collector, nameMap);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				String request = f.print(collector);
+				try
+				{
+					String path = t.getTestOutputDestination("_MutationTests")
+							+ File.separator + "request" + type + count + ".txt";
+					BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+					bw.write(request);
+					bw.close();
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+				ptr = new PolicySpreadSheetTestRecord(
+						PolicySpreadSheetTestSuite.TEST_KEYWORD + " " + type + count,
+						"request" + type + count + ".txt", request, "");
+			}
+			if(ptr != null)
+			{
+				generator.add(ptr);
+				count++;
+			}
+		}
+	}
+	
+	private ArrayList<MyAttr> getAttributes(List<Rule> rules)
+	{
+		ArrayList<MyAttr> attributes = new ArrayList<MyAttr>();
+		for(Rule r : rules)
+		{
+			getTargetAttribute((Target)r.getTarget(), attributes);
+			getConditionAttribute(r.getCondition(), attributes);
+		}
+		return attributes;
 	}
 }

@@ -407,6 +407,7 @@ public class MutationPanel2 extends JPanel {
 					CRE = policyx
 							.generate_FlipRuleEffect(getTestPanel(), opt);
 					determineValidTests(CRE, policyMutator, policyPath, "CRE");
+					//valid.addAll(CRE);
 					totalGenerationTime += System.currentTimeMillis() - start;
 					if(boxOptimize.isSelected());
 						//removeDuplicates(valid);
@@ -593,12 +594,13 @@ public class MutationPanel2 extends JPanel {
 					long start = System.currentTimeMillis();
 					removeDuplicates(valid, policyMutator);
 					CRCvsCRE(valid, crc, policyMutator);
-					CRCvsCRC(valid, crc, policyMutator);
+					if(CRE.size() > 5)
+						CRCvsCRC(valid, crc, policyMutator);
 					//RTTvsRPTE(valid, rpte, policyMutator);
 					RPTEvsRTT(valid, rpte, policyMutator);
 					//RPTEvsRPTE(valid, rpte, policyMutator);
-					CRCvsFT(valid, crc, policyMutator);
-					CRCvsTF(valid, crc, policyMutator);
+					//CRCvsFT(valid, crc, policyMutator);
+					//CRCvsTF(valid, crc, policyMutator);
 					totalOptimizationTime += (System.currentTimeMillis() - start);
 				}
 
@@ -1905,8 +1907,9 @@ public class MutationPanel2 extends JPanel {
 				String req = record.getRequest();
 				for(int j = 0; j < cre_sublist.size(); j++)
 				{
-					
-					if(cre_sublist.get(j).getRequest().contains(req))//if request kills all mutants
+					String num = cre_sublist.get(j).getNumber().substring(cre_sublist.get(j).getNumber().indexOf(' '));
+					String mpath = mutator.getMutantFileName(num);
+					if(validation(xpa.getWorkingPolicyFilePath(), mpath, req))//if request kills all mutants
 					{
 						String rem = cre_sublist.get(j).getRequestFile();
 						Runtime run = Runtime.getRuntime();
@@ -1969,7 +1972,23 @@ public class MutationPanel2 extends JPanel {
 				PolicySpreadSheetTestRecord mutant = crc.get(j);
 				String num = mutant.getNumber().substring(mutant.getNumber().indexOf(' ') + 1);
 				String mpath = mutator.getMutantFileName(num);
-				if(validation(xpa.getWorkingPolicyFilePath(), mpath, record.getRequest()))
+				if(record.getRequest().compareTo(mutant.getRequest()) == 0)
+				{
+					String rem = testPanel.getTestOutputDestination("_MutationTests")
+							+ File.separator + mutant.getRequestFile();
+					Runtime run = Runtime.getRuntime();
+					try
+					{
+						run.exec("rm " + rem);
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					crc.remove(j);
+					records.remove(mutant);
+				}
+				else if(validation(xpa.getWorkingPolicyFilePath(), mpath, record.getRequest()))
 				{
 					String rem = testPanel.getTestOutputDestination("_MutationTests")
 							+ File.separator + mutant.getRequestFile();
@@ -2163,6 +2182,17 @@ public class MutationPanel2 extends JPanel {
 				killed_mutants.add(M);
 		}
 		return killed_mutants;
+	}
+	
+	private boolean compareKills(ArrayList<PolicyMutant> m1, ArrayList<PolicyMutant> m2)
+	{
+		for(PolicyMutant out : m1)
+		{
+			for(PolicyMutant in : m2)
+				if(out.getNumber().compareTo(in.getNumber()) != 0)
+					return false;
+		}
+		return true;
 	}
 	
 	private int getPolicyEffect(Policy p)
