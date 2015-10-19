@@ -1,6 +1,9 @@
 package org.sag.repair;
 
+import org.sag.coverage.PolicyCoverageFactory;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
+import org.sag.faultlocalization.SpectrumBasedFaultLocalizer;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
@@ -91,6 +94,23 @@ public class Test {
 		String testSuiteFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		PolicySpreadSheetTestSuite policySpreadSheetTestSuite = new PolicySpreadSheetTestSuite(testSuiteFile, policyfile);
 		policySpreadSheetTestSuite.runAllTests();
+	}
+	
+	static void testFaultLocalizer() throws Exception {
+		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR4.xml";
+		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
+		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteSpreadSheetFile,
+				policyFileToRepair);
+		testSuite.runAllTests();
+		System.out.println("\n");
+		testSuite.generateJUnitFile("src", 
+				"org.sag.coverage", "KmarketGeneratedTests");
+		PolicyCoverageFactory.writeCoverageToSpreadSheet("tests//coverage.xls");
+		for (SpectrumBasedDiagnosisResults results: SpectrumBasedFaultLocalizer.applyAllFaultLocalizers()){
+			results.printCoefficients();
+		}
+		
+		
 	}
 
 }

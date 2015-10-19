@@ -1,6 +1,7 @@
 
 package org.sag.faultlocalization;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class SpectrumBasedDiagnosisResults {
@@ -13,6 +14,13 @@ public class SpectrumBasedDiagnosisResults {
 	
 	private String methodName;
 	private RuleCoefficient[] ruleCoefficients;
+	/**
+	 * @return the ruleCoefficients
+	 */
+	public ArrayList<RuleCoefficient> getRuleCoefficients() {
+		return (ArrayList<RuleCoefficient>) Arrays.asList(ruleCoefficients);
+	}
+
 	private double score;
 	
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s){
