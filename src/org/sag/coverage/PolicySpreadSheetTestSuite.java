@@ -11,6 +11,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.sag.faultlocalization.TestCellResult;
 
 public class PolicySpreadSheetTestSuite {
 
@@ -154,11 +155,18 @@ public class PolicySpreadSheetTestSuite {
 //		return false;
 //	}
 	
-	public boolean[] runAllTestsOnMutant() throws Exception {
+	// 11/1/15 Change return type from boolean[] to TestCellResult[].
+	public TestCellResult[] runAllTestsOnMutant() throws Exception {
 		try {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);
+			
 			// test results
-			boolean[] testResult = new boolean[getNumberOfTests()];
+			//boolean[] testResult = new boolean[getNumberOfTests()];
+			TestCellResult[] rowResult = new TestCellResult[policyTestSuite.size()];
+			for (int i = 0; i < rowResult.length; i++) {
+				rowResult[i] = new TestCellResult();
+			}
+			
 			for (int i = 0; i < policyTestSuite.size(); i++) {
 				PolicyCoverageFactory.currentTestID = policyTestSuite.get(i).getNumber();
 				if (policyTestSuite.get(i).getOracle().equals("")) {
@@ -167,13 +175,17 @@ public class PolicySpreadSheetTestSuite {
 							policyTestSuite.get(i).getRequest());
 				} else {
 					if (policyTester.runTest(policyTestSuite.get(i).getNumber(),
-							policyTestSuite.get(i).getRequest(), policyTestSuite.get(i).getOracle()))
-						testResult[i] = true;
-					else
-						testResult[i] = false;
+							policyTestSuite.get(i).getRequest(), policyTestSuite.get(i).getOracle())) {
+						rowResult[i].setVerdict(true); // pass
+						rowResult[i].setLiteralDetail(PolicyRunner.testExecutionResult);
+					}
+					else {
+						rowResult[i].setVerdict(false); // fail
+						rowResult[i].setLiteralDetail(PolicyRunner.testExecutionResult);
+					}
 				}
 			}
-			return testResult;
+			return rowResult;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
