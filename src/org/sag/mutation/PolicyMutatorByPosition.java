@@ -639,6 +639,11 @@ public class PolicyMutatorByPosition {
 		int mutantIndex = 1;
 		AbstractTarget target = myrule.getTarget();
 		// Analyze AnyOf... The target might still be empty.
+		//System.out.println(target);
+		if(target == null) {
+			System.err.println("target is null");
+			return mutants;
+		}
 		List<AnyOfSelection> listAnyOf = ((Target)target).getAnyOfSelections();
 		//System.out.println("Size = " + listAnyOf.size());
 		if (listAnyOf.size()!=0) {
@@ -1197,6 +1202,10 @@ public class PolicyMutatorByPosition {
 		 int mutantIndex = 1;
 		Target target = (Target) myrule.getTarget();
 		// Analyze AnyOf...
+		if(target == null) {
+			System.err.println("target is null");
+			return mutants;
+		}
 		List<AnyOfSelection> listAnyOf = target.getAnyOfSelections();
 		if (listAnyOf.size()!=0) {
 			if (listAnyOf.size()>1) {

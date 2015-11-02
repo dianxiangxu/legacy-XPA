@@ -20,6 +20,9 @@ public class PolicyRepairer {
 	}
 	
 	private PolicyMutant find1stCorrectMutant(List<PolicyMutant> mutantList) throws Exception	{
+		if(mutantList == null) {
+			return null;
+		}
 		for(PolicyMutant mutant: mutantList) {
 			//System.out.println(mutant.getMutantFilePath() + "\n");
 			PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant.getMutantFilePath());
