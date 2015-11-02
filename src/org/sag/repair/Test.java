@@ -2,7 +2,7 @@ package org.sag.repair;
 
 import java.util.List;
 
-import org.sag.coverage.PolicyCoverageFactory;
+
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
 import org.sag.faultlocalization.SpectrumBasedFaultLocalizer;
