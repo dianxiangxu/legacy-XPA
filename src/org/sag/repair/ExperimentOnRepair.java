@@ -23,14 +23,13 @@ public class ExperimentOnRepair {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		System.out.println("test\n");
-
 		String PolicyFilePath = "Experiments//conference3//conference3.xml";
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		ExperimentOnRepair experiment = new ExperimentOnRepair(PolicyFilePath,
 				testSuiteSpreadSheetFile);
 		long startTime = System.currentTimeMillis();
-		experiment.startExperiment("repairRandomOrder");
+//		experiment.startExperiment("repairRandomOrder", null);
+		experiment.startExperiment("repairSmartly", "jaccard");
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 		System.out.printf("running time: " + duration + " milliseconds\n");
@@ -51,15 +50,22 @@ public class ExperimentOnRepair {
 		this.mutantList = createSelectedMutants();
 	}
 
-	public void startExperiment(String repairMethod) throws Exception {
+	public void startExperiment(String repairMethod, String faultLocalizeMethod) throws Exception {
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
 		Class<?> cls = repairer.getClass();
-		Method method = cls.getMethod(repairMethod, String.class);
-		for (PolicyMutant mutant : this.mutantList) {
-			PolicyMutant correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath());
-//			PolicyMutant correctedPolicy = repairer.repairRandomOrder(mutant
-//					.getMutantFilePath());
-			Test.showRepairResult(correctedPolicy, mutant.getMutantFilePath());
+		PolicyMutant correctedPolicy;
+		if(faultLocalizeMethod != null) {
+			Method method = cls.getMethod(repairMethod, String.class, String.class);
+			for (PolicyMutant mutant : this.mutantList) {
+				correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath(), faultLocalizeMethod);
+				Test.showRepairResult(correctedPolicy, mutant.getMutantFilePath());
+			}
+		} else {
+			for (PolicyMutant mutant : this.mutantList) {
+				Method method = cls.getMethod(repairMethod, String.class);
+				correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath());
+				Test.showRepairResult(correctedPolicy, mutant.getMutantFilePath());
+			}
 		}
 	}
 

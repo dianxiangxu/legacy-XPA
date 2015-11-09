@@ -1,5 +1,7 @@
 package org.sag.faultlocalization;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import org.sag.coverage.PolicyCoverage;
@@ -95,6 +97,16 @@ public class SpectrumBasedFaultLocalizer {
 		}
 */		
 		return allResults;
+	}
+	
+	public static SpectrumBasedDiagnosisResults applyOneFaultLocalizerToPolicyMutant(String faultLocalizeMethod) 
+			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		SpectrumBasedFaultLocalizer faultLocalizer = new SpectrumBasedFaultLocalizer(PolicyCoverageFactory.policyCoverages);
+		Class<?> cls = faultLocalizer.getClass();
+		Method method = cls.getDeclaredMethod(faultLocalizeMethod);
+		method.invoke(faultLocalizer);
+		SpectrumBasedDiagnosisResults res = new SpectrumBasedDiagnosisResults(faultLocalizeMethod, faultLocalizer.s);
+		return res;
 	}
 
 	// aep = a10: passed test in which rule was executed

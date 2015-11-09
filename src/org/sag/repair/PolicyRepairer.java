@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
+import org.sag.faultlocalization.SpectrumBasedFaultLocalizer;
 import org.sag.faultlocalization.TestCellResult;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
@@ -110,30 +112,15 @@ public class PolicyRepairer {
 	 * use fault localizer to find bugPosition, then generate mutants accordingly
 	 * to repair
 	 */
-	public PolicyMutant repairSmartly(String policyFileToRepair) throws Exception {
-		List<PolicyMutant> mutants = new ArrayList<PolicyMutant>();
-		PolicyMutant correctMutant = null;
-		PolicyMutatorByPosition mutator = new PolicyMutatorByPosition(policyFileToRepair);
-		// PTT
-		mutants = ((PolicyMutatorByPosition) mutator).createPolicyTargetTrueMutants();
-		correctMutant = find1stCorrectMutant(mutants);
-		if(correctMutant != null) {
-			return correctMutant;
-		}
-		// PTF
-		mutants = ((PolicyMutatorByPosition) mutator).createPolicyTargetFalseMutants();
-		correctMutant = find1stCorrectMutant(mutants);
-		if(correctMutant != null) {
-			return correctMutant;
-		}
-		// CRC
-		mutants = ((PolicyMutatorByPosition) mutator).createCombiningAlgorithmMutants();
-		correctMutant = find1stCorrectMutant(mutants);
-		if(correctMutant != null) {
-			return correctMutant;
-		}
-		
-		return null;
+	public PolicyMutant repairSmartly(String policyFileToRepair, String faultLocalizeMethod) throws Exception {
+		List<Integer> suspicionRank = new ArrayList<Integer>();
+		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(this.testSuiteFile,
+				policyFileToRepair);
+		testSuite.runAllTests();//we need to run tests to get coverage information, which is in turn used to get suspicion rank
+		SpectrumBasedDiagnosisResults diagnosisResults = 
+				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);
+		suspicionRank = diagnosisResults.getRuleIndexRankedBySuspicion();
+		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
 	}
 
 

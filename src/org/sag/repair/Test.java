@@ -21,7 +21,9 @@ public class Test {
 //		runTestsuiteOnPolicy(PolicyFilePath);
 		
 //		testRepair();
+		
 		testFaultLocalizer();
+		
 		
 		
 //		String policyFileToRepair = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
@@ -110,6 +112,8 @@ public class Test {
 			PolicyMutant correctedPolicy = repairer.repairBySuspicionRank(policyFileToRepair, suspicionRank);
 			showRepairResult(correctedPolicy, policyFileToRepair);
 		}
+		
+		repairer.repairSmartly(policyFileToRepair, "jaccard");
 		
 		
 	}
