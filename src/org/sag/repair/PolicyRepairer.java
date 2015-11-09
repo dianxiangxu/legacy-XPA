@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.sag.coverage.PolicySpreadSheetTestSuite;
+import org.sag.faultlocalization.TestCellResult;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicyMutatorByPosition;
@@ -26,8 +27,12 @@ public class PolicyRepairer {
 		for(PolicyMutant mutant: mutantList) {
 			//System.out.println(mutant.getMutantFilePath() + "\n");
 			PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant.getMutantFilePath());
-			boolean[] testResults = testSuite.runAllTestsOnMutant();
-			boolean is_repaired = booleanArrayAnd(testResults);
+			TestCellResult[] testCellResults = testSuite.runAllTestsOnMutant();
+			List<Boolean> testResults = new ArrayList<Boolean>();
+			for(TestCellResult res : testCellResults) {
+				testResults.add(res.getVerdict());
+			}
+			boolean is_repaired = booleanListAnd(testResults);
 			if(is_repaired) {
 				return mutant;
 			}
@@ -40,8 +45,12 @@ public class PolicyRepairer {
 		for(PolicyMutant mutant: mutantList) {
 			//System.out.println(mutant.getMutantFilePath() + "\n");
 			PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant.getMutantFilePath());
-			boolean[] testResults = testSuite.runAllTestsOnMutant();
-			boolean is_repaired = booleanArrayAnd(testResults);
+			TestCellResult[] testCellResults = testSuite.runAllTestsOnMutant();
+			List<Boolean> testResults = new ArrayList<Boolean>();
+			for(TestCellResult res : testCellResults) {
+				testResults.add(res.getVerdict());
+			}
+			boolean is_repaired = booleanListAnd(testResults);
 			if(is_repaired) {
 				correctMutants.add(mutant);
 			}
@@ -82,12 +91,12 @@ public class PolicyRepairer {
 	}
 	
 	/**
-	 * @param booleanArray
+	 * @param booleanList
 	 * @return result of logical AND on all elements of the boolean array
 	 */
-	private boolean booleanArrayAnd(boolean[] booleanArray) {
+	private boolean booleanListAnd(List<Boolean> booleanList) {
 		boolean result = true;
-		for(boolean b: booleanArray) {
+		for(boolean b: booleanList) {
 			result = result && b;
 		}
 		return result;
