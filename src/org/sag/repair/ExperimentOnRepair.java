@@ -17,7 +17,7 @@ import org.sag.mutation.PolicyMutant;
 public class ExperimentOnRepair {
 	private String policyFilePath;
 	private String testSuiteSpreadSheetFile;
-
+	private List<PolicyMutant> mutantList;
 	/**
 	 * @param args
 	 * @throws Exception
@@ -41,20 +41,21 @@ public class ExperimentOnRepair {
 	}
 
 	/**
+	 * @throws Exception 
 	 * 
 	 */
 	public ExperimentOnRepair(String policyFilePath,
-			String testSuiteSpreadSheetFile) {
+			String testSuiteSpreadSheetFile) throws Exception {
 		this.policyFilePath = policyFilePath;
 		this.testSuiteSpreadSheetFile = testSuiteSpreadSheetFile;
+		this.mutantList = createSelectedMutants();
 	}
 
 	public void startExperiment(String repairMethod) throws Exception {
-		List<PolicyMutant> mutantList = createSelectedMutants();
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
 		Class<?> cls = repairer.getClass();
 		Method method = cls.getMethod(repairMethod, String.class);
-		for (PolicyMutant mutant : mutantList) {
+		for (PolicyMutant mutant : this.mutantList) {
 			PolicyMutant correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath());
 //			PolicyMutant correctedPolicy = repairer.repairRandomOrder(mutant
 //					.getMutantFilePath());
