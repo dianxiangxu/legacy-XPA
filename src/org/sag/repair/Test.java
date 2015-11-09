@@ -106,15 +106,15 @@ public class Test {
 				"org.sag.coverage", "KmarketGeneratedTests");
 		//PolicyCoverageFactory.writeCoverageToSpreadSheet("tests//coverage.xls");
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
-		for (SpectrumBasedDiagnosisResults results: SpectrumBasedFaultLocalizer.applyAllFaultLocalizers()){
-			results.printCoefficients();
-			List<Integer> suspicionRank = results.getRuleIndexRankedBySuspicion();
-			PolicyMutant correctedPolicy = repairer.repairBySuspicionRank(policyFileToRepair, suspicionRank);
-			showRepairResult(correctedPolicy, policyFileToRepair);
-		}
+//		for (SpectrumBasedDiagnosisResults results: SpectrumBasedFaultLocalizer.applyAllFaultLocalizers()){
+//			results.printCoefficients();
+//			List<Integer> suspicionRank = results.getRuleIndexRankedBySuspicion();
+//			PolicyMutant correctedPolicy = repairer.repairBySuspicionRank(policyFileToRepair, suspicionRank);
+//			showRepairResult(correctedPolicy, policyFileToRepair);
+//		}
 		
-		repairer.repairSmartly(policyFileToRepair, "jaccard");
-		
+		PolicyMutant correctedPolicy = repairer.repairSmartly(policyFileToRepair, "jaccard");
+		showRepairResult(correctedPolicy, policyFileToRepair);
 		
 	}
 	

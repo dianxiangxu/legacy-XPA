@@ -21,7 +21,7 @@ public class SpectrumBasedDiagnosisResults {
 	public List<Integer> getRuleIndexRankedBySuspicion() {
 		List<Integer> ruleIndexRankedBySuspicion = new ArrayList<Integer>();
 		for(RuleCoefficient coefficient: ruleCoefficients) {
-			ruleIndexRankedBySuspicion.add(coefficient.getRuleIndex() + 1);
+			ruleIndexRankedBySuspicion.add(coefficient.getRuleIndex());
 		}
 		return ruleIndexRankedBySuspicion;
 	}
