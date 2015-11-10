@@ -53,14 +53,18 @@ public class FaultLocalizationExperiment {
 	}
 	
 	private void runExperiment (String testSuiteSpreadSheetFile,  String experimentResultFileName) throws Exception {
+
 		ArrayList<PolicySpreadSheetTestRecord> testSuite = PolicySpreadSheetTestSuite.readTestSuite(testSuiteSpreadSheetFile);
 		for (PolicyMutant policyMutant: policyMutants ){
 			try {
-				experimentResults.add(policyMutant.run(testSuite));
+				ArrayList<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults = policyMutant.run(testSuite);
+				if (spectrumBasedDiagnosisResults!=null)
+					experimentResults.add(spectrumBasedDiagnosisResults);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 			}		
+
 		}
 		if (experimentResults.size()>0) {
 			writeExperimentResult(experimentResultFileName);

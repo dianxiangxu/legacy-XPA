@@ -192,7 +192,8 @@ public class PolicySpreadSheetTestSuite {
 		return null;		
 	}
 	
-	public void runAllTests() throws Exception {
+	public boolean runAllTests() throws Exception {
+		boolean allPass = true;
 		try {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);
 			for (PolicySpreadSheetTestRecord test : policyTestSuite) {
@@ -207,13 +208,18 @@ public class PolicySpreadSheetTestSuite {
 					if (policyTester.runTest(test.getNumber(),
 							test.getRequest(), test.getOracle()))
 						System.out.print(": pass");
-					else
+					else {
+						allPass = false;
 						System.out.print(": fail");
+					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		if (allPass)
+			System.out.println("All tests pass: "+ policyUnderTest);
+		return allPass;
 	}
 
 	public Vector<Vector<Object>> getTestData() {

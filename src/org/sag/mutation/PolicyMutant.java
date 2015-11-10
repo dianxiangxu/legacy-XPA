@@ -35,8 +35,10 @@ public class PolicyMutant {
 		PolicyCoverageFactory.init();
 		// Test
 			//System.out.println(mutantFilePath);
-		new PolicySpreadSheetTestSuite(testCases, mutantFilePath).runAllTests();
-		return SpectrumBasedFaultLocalizer.applyAllFaultLocalizersToPolicyMutant(faultLocation);
+		if (!new PolicySpreadSheetTestSuite(testCases, mutantFilePath).runAllTests()) // not all tests passed (i.e., at least one test failed, otherwise fault localization is meaningless)
+		    return SpectrumBasedFaultLocalizer.applyAllFaultLocalizersToPolicyMutant(faultLocation);
+		else
+			return null;
 	}
 
 	public String getNumber(){
