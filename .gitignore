@@ -4,6 +4,7 @@
 /Z3_input
 /Z3_output
 /bin
+Z3-str/str
 
 #ignore cpp temporary files
 # Compiled Object files
