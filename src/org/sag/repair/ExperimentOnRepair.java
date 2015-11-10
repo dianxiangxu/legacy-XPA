@@ -29,7 +29,7 @@ public class ExperimentOnRepair {
 				testSuiteSpreadSheetFile);
 		long startTime = System.currentTimeMillis();
 //		experiment.startExperiment("repairRandomOrder", null);
-		experiment.startExperiment("repairSmartly", "jaccard");
+		experiment.startExperiment("repairSmartly", "sokal");
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 		System.out.printf("running time: " + duration + " milliseconds\n");

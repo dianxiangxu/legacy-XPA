@@ -113,7 +113,7 @@ public class Test {
 //			showRepairResult(correctedPolicy, policyFileToRepair);
 //		}
 		
-		PolicyMutant correctedPolicy = repairer.repairSmartly(policyFileToRepair, "jaccard");
+		PolicyMutant correctedPolicy = repairer.repairSmartly(policyFileToRepair, "sokal");
 		showRepairResult(correctedPolicy, policyFileToRepair);
 		
 	}
