@@ -67,7 +67,7 @@ public class Call_Z3str {
 		try {
 			//replace with path to your z3-str directory
 			Process p = run
-					.exec("/home/shuaipeng/z3-str-peng/Z3-str/Z3-str.py -f ./Z3_input");
+					.exec("Z3-str/Z3-str.py -f ./Z3_input");
 			BufferedInputStream in = new BufferedInputStream(p.getInputStream());
 			BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
 			StringBuffer tmpTrack = new StringBuffer();
@@ -115,42 +115,50 @@ public class Call_Z3str {
 		return false;
 	}
 
-	public void getValue(ArrayList<MyAttr> collector, HashMap nameMap)
-			throws IOException {
-		FileReader fr = new FileReader("./Z3_output");
-		BufferedReader br = new BufferedReader(fr);
-		String s;
-		while ((s = br.readLine()) != null) {
-			String[] data = s.split(" ");
-			if (data.length > 2 && data[1].equals("->")) {
-				//System.out.println(s);
-				Iterator iter = nameMap.entrySet().iterator();
-				while (iter.hasNext()) {
-					Map.Entry entry = (Map.Entry) iter.next();
-					if (data[0].equals(entry.getValue())) {
-						for (MyAttr myattr : collector) {
-							if (myattr.getName().equals(entry.getKey())) {
-								String value = "";
-								for (int l = 2; l < data.length -1 ; l++) {
-									value = value + data[l].toString() + " ";
-								}
-								value = value + data[data.length-1].toString();
-								myattr.setDomain(value);
-							}
-						}
-					}
-				}
-			}
-		}
-		fr.close();
-		// TODO
-		// value should be added after checking type
-		for (MyAttr myattr : collector) {
-			if (myattr.getDomain().isEmpty()) {
-				myattr.addValue("0");
-			}
-		}
-	}
+    public void getValue(ArrayList<MyAttr> collector, HashMap nameMap)
+            throws IOException {
+   
+        FileReader fr = new FileReader("./Z3_output");
+        BufferedReader br = new BufferedReader(fr);
+        String s;
+        while ((s = br.readLine()) != null) {
+            String[] data = s.split(" ");
+            int preValueIndex = 0;
+            while (preValueIndex<data.length && !data[preValueIndex].equals("->")) {
+                preValueIndex++;
+            }
+            if (data.length > preValueIndex+1) {
+                Iterator iter = nameMap.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    if (data[0].equals(entry.getValue())) {
+                        for (MyAttr myattr : collector) {
+                            if (myattr.getName().equals(entry.getKey())) {
+                                String value = "";
+                                for (int l = preValueIndex+1; l < data.length -1 ; l++) {
+                                    value = value + data[l].toString() + " ";
+                                }
+                                value = value + data[data.length-1].toString();
+                                value = value.replaceAll("\"", "");
+
+                                myattr.setDomain(value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        fr.close();
+
+        // value should be added after checking type
+        for (MyAttr myattr : collector) {
+            if (myattr.getDomain().isEmpty()) {
+                myattr.addValue("0");
+            }
+        }
+           
+    }
+    
 	
 	private void printTrack(String request){
 		try{
