@@ -628,17 +628,20 @@ public class PolicyMutator {
 						if(denyruleStartingIndex < 0)
 							denyruleStartingIndex = builder.indexOf("<Rule Effect=\"" + "Deny" + "\" RuleId=\"" + idDeny + "\"  >");
 						int denyruleEndingIndex = builder.indexOf("</Rule>", denyruleStartingIndex) + 7+1; // +1 to kill the blank line.
-						// copy of deny rule
-						String denyrule = builder.substring(denyruleStartingIndex, denyruleEndingIndex);
-						// copy of permit rule
-						String permitrule = builder.substring(permitruleStartingIndex, permitruleEndingIndex);
-						// replace the deny rule with the permit rule
-						builder.replace(denyruleStartingIndex, denyruleEndingIndex, permitrule);
-						// replace the deny rule with the permit rule
-						builder.replace(permitruleStartingIndex, permitruleEndingIndex, denyrule);
-
-						//System.out.println(builder.toString());
-
+						if (denyruleStartingIndex<0 || denyruleEndingIndex<0 || permitruleStartingIndex<0 || permitruleEndingIndex<0){
+							applicable = false;
+						} else {
+							// copy of deny rule
+							String denyrule = builder.substring(denyruleStartingIndex, denyruleEndingIndex);
+							// copy of permit rule
+							String permitrule = builder.substring(permitruleStartingIndex, permitruleEndingIndex);
+							// replace the deny rule with the permit rule
+							builder.replace(denyruleStartingIndex, denyruleEndingIndex, permitrule);
+							// replace the deny rule with the permit rule
+							builder.replace(permitruleStartingIndex, permitruleEndingIndex, denyrule);
+	
+							//System.out.println(builder.toString());
+						}
 						// Important: set p = p+1;
 						d++;
 					}
