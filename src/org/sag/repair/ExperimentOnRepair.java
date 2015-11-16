@@ -27,9 +27,12 @@ public class ExperimentOnRepair {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		ExperimentOnRepair experiment = new ExperimentOnRepair(PolicyFilePath,
 				testSuiteSpreadSheetFile);
+		List<List<String>> repairMethodPairList = PolicyRepairer.getRepairMethodPairList();
+		List<String> repairMethodPair = repairMethodPairList.get(0);
 		long startTime = System.currentTimeMillis();
 //		experiment.startExperiment("repairRandomOrder", null);
-		experiment.startExperiment("repairSmartly", "sokal");
+		experiment.startExperiment(repairMethodPair.get(0), repairMethodPair.get(1));
+//		experiment.startExperiment("repairSmartly", "sokal");
 		long endTime = System.currentTimeMillis();
 		long duration = endTime - startTime;
 		System.out.printf("running time: " + duration + " milliseconds\n");
@@ -59,6 +62,7 @@ public class ExperimentOnRepair {
 			for (PolicyMutant mutant : this.mutantList) {
 				correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath(), faultLocalizeMethod);
 				Test.showRepairResult(correctedPolicy, mutant.getMutantFilePath());
+				System.out.println("==========");
 			}
 		} else {
 			for (PolicyMutant mutant : this.mutantList) {

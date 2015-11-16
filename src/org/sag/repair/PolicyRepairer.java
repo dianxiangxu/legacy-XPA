@@ -1,6 +1,7 @@
 package org.sag.repair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,6 +18,28 @@ import org.wso2.balana.combine.CombinerElement;
 
 public class PolicyRepairer {
 	String testSuiteFile = null;
+	@SuppressWarnings("serial")
+	static private List<List<String>> repairMethodPairList = new ArrayList<List<String>>() {
+		{
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "jaccard")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "tarantula")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai2")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "cbi")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "hamann")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "simpleMatching")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
+			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
+			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
+			
+		}
+	};
 	
 	public PolicyRepairer(String testSuiteFile) {
 		this.testSuiteFile = testSuiteFile;
@@ -326,5 +349,10 @@ public class PolicyRepairer {
 		}
 		return correctMutant;
 	}
+
+	public static List<List<String>> getRepairMethodPairList() {
+		return PolicyRepairer.repairMethodPairList;
+	}
+
 }
 
