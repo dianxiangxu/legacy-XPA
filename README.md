@@ -25,3 +25,11 @@ make
 test whether Z3-str works:
 ./Z3-str.py -f tests/concat-002	#if the files Z3-str.py and str do not have executable permission, change permission use the commmand 'sudo chmod +x Z3-str.py str'
 
+# after cloning repository
+delete .project file
+create new project
+in property->java build path, in 'Source' tab, set XPA/src as source folder; in 'Libraries' tab, 'Add JARs' to add jars in 'lib' folder, also add JRE System Library and JUnit library.
+install AJDT from http://download.eclipse.org/tools/ajdt/43/update/ if you don't have it installed in your eclipse.
+right click on project->AspectJ Tools->conver to AspectJ project
+
+
