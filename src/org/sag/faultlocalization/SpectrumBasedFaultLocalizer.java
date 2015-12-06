@@ -14,30 +14,31 @@ public class SpectrumBasedFaultLocalizer {
 	
 	private double[] s;
 	
-	public SpectrumBasedFaultLocalizer(ArrayList<PolicyCoverage> policyCoverages){
-		int numberOfRules= getNumberOfRules(policyCoverages);
-		ruleMatrix = new int[policyCoverages.size()][numberOfRules];
-		for (int testNo=0; testNo<ruleMatrix.length; testNo++){
-			PolicyCoverage policyCoverage = policyCoverages.get(testNo);
-			int numberOfCoveredRules = policyCoverage.getRuleCoverages().size();
-			for (int ruleNo=0; ruleNo<numberOfRules; ruleNo++) {
-				if (ruleNo<numberOfCoveredRules){
-//					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable 
-//					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
-					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
-					//System.out.println("Test Number " + testNo + " Rule Number " + ruleNo + " Score = " + ruleMatrix[testNo][ruleNo]);
-				} else {
-					ruleMatrix[testNo][ruleNo] = 0;		
-				}
-			}
-		}
-		verdicts = new int[policyCoverages.size()];
-		for (int testNo=0; testNo<ruleMatrix.length; testNo++){
-			PolicyCoverage policyCoverage = policyCoverages.get(testNo);
-			verdicts[testNo] = policyCoverage.getDecision() == policyCoverage.getOracle()? 0: 1; 
-		}
-		s = new double[numberOfRules];
-	}
+    public SpectrumBasedFaultLocalizer(ArrayList<PolicyCoverage> policyCoverages){
+        int numberOfRules= getNumberOfRules(policyCoverages);
+        ruleMatrix = new int[policyCoverages.size()][numberOfRules+1];
+        for (int testNo=0; testNo<ruleMatrix.length; testNo++){
+            PolicyCoverage policyCoverage = policyCoverages.get(testNo);
+            ruleMatrix[testNo][0] = policyCoverage.getTargetMatchResult()==0? 1: 0;   
+            int numberOfCoveredRules = policyCoverage.getRuleCoverages().size();
+            for (int ruleNo=1; ruleNo<numberOfRules+1; ruleNo++) {
+                if (ruleNo<numberOfCoveredRules){
+//                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable
+//                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
+                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
+                    //System.out.println("Test Number " + testNo + " Rule Number " + ruleNo + " Score = " + ruleMatrix[testNo][ruleNo]);
+                } else {
+                    ruleMatrix[testNo][ruleNo] = 0;       
+                }
+            }
+        }
+        verdicts = new int[policyCoverages.size()];
+        for (int testNo=0; testNo<ruleMatrix.length; testNo++){
+            PolicyCoverage policyCoverage = policyCoverages.get(testNo);
+            verdicts[testNo] = policyCoverage.getDecision() == policyCoverage.getOracle()? 0: 1;
+        }
+        s = new double[numberOfRules+1];
+    }
 	
 	private int getNumberOfRules(ArrayList<PolicyCoverage> policyCoverages){
 		if (policyCoverages.size()>0)

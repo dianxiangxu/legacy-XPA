@@ -199,6 +199,10 @@ public class PolicyRepairer {
 				}
 			} else {
 				//take care, ruleIndex begins from one
+				if(bugPosition-1 >= ruleList.size()) {
+					//this is caused by the RER(createRemoveRuleMutants())
+					continue;
+				}
 				correctMutant = repairBugPositionRules(mutator, ruleList.get(bugPosition-1), bugPosition);
 				if(correctMutant != null) {
 					return correctMutant;
