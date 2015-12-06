@@ -181,6 +181,8 @@ public class PolicyRepairer {
 		PolicyMutatorByPosition mutator = new PolicyMutatorByPosition(policyFileToRepair);
 		List<Rule> ruleList = getRuleList(mutator);
 		int maxRules = mutator.getPolicy().getChildElements().size();
+		suspicionRank.add(-1);// a temporary solution for fault in combining algorithms
+		//bugPosition equals to -1 indicates fault in combining algorithm
 		for(int bugPosition : suspicionRank) {
 			if(bugPosition == -1) {
 				correctMutant = repairBugPositionCombiningAlgorithm(mutator);
