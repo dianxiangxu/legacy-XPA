@@ -18,6 +18,7 @@ import org.wso2.balana.combine.CombinerElement;
 
 public class PolicyRepairer {
 	String testSuiteFile = null;
+	private int numTriesBeforSucceed;
 	@SuppressWarnings("serial")
 	static private List<List<String>> repairMethodPairList = new ArrayList<List<String>>() {
 		{
@@ -30,13 +31,13 @@ public class PolicyRepairer {
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "cbi")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "hamann")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "simpleMatching")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
-			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
 			
 		}
 	};
@@ -143,6 +144,7 @@ public class PolicyRepairer {
 		SpectrumBasedDiagnosisResults diagnosisResults = 
 				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);
 		suspicionRank = diagnosisResults.getRuleIndexRankedBySuspicion();
+		suspicionRank.add(0, -1);// a temporary solution for fault in combining algorithms
 		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
 	}
 
@@ -181,23 +183,24 @@ public class PolicyRepairer {
 		PolicyMutatorByPosition mutator = new PolicyMutatorByPosition(policyFileToRepair);
 		List<Rule> ruleList = getRuleList(mutator);
 		int maxRules = mutator.getPolicy().getChildElements().size();
-		suspicionRank.add(-1);// a temporary solution for fault in combining algorithms
 		//bugPosition equals to -1 indicates fault in combining algorithm
-		for(int bugPosition : suspicionRank) {
+		int bugPosition = Integer.MAX_VALUE;
+		for(int i = 0; i < suspicionRank.size(); i++) {
+			bugPosition = suspicionRank.get(i);
 			if(bugPosition == -1) {
 				correctMutant = repairBugPositionCombiningAlgorithm(mutator);
 				if(correctMutant != null) {
-					return correctMutant;
+					break;
 				}
 			} else if (bugPosition == 0) {
 				correctMutant = repairBugPositionPolicyTarget(mutator);
 				if(correctMutant != null) {
-					return correctMutant;
+					break;
 				}
 			} else if (bugPosition == maxRules) {
 				correctMutant = repairBugPositionMaxRules(mutator);
 				if(correctMutant != null) {
-					return correctMutant;
+					break;
 				}
 			} else {
 				//take care, ruleIndex begins from one
@@ -207,13 +210,23 @@ public class PolicyRepairer {
 				}
 				correctMutant = repairBugPositionRules(mutator, ruleList.get(bugPosition-1), bugPosition);
 				if(correctMutant != null) {
-					return correctMutant;
+					break;
 				}
 			}
 		}
+		this.setNumTriesBeforSucceed(suspicionRank.indexOf(bugPosition));
+		System.out.printf("repaired in the %d-th try\n",this.getNumTriesBeforSucceed());
 		return correctMutant;
 	}
 	
+	public int getNumTriesBeforSucceed() {
+		return numTriesBeforSucceed;
+	}
+
+	private void setNumTriesBeforSucceed(int numTriesBeforSucceed) {
+		this.numTriesBeforSucceed = numTriesBeforSucceed;
+	}
+
 	private List<Rule> getRuleList(PolicyMutatorByPosition mutator) {
 		List<Rule> ruleList = new ArrayList<Rule>();
 		for (CombinerElement rule : mutator.getPolicy().getChildElements()) {
