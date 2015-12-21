@@ -80,20 +80,24 @@ public class ExperimentOnRepair {
 
 	public List<PolicyMutant> startExperiment(String repairMethod, String faultLocalizeMethod) throws Exception {
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
-		Class<?> cls = repairer.getClass();
 		List<PolicyMutant> correctedPolicyList = new ArrayList<PolicyMutant>();
 		numTriesList = new ArrayList<Integer>();
 		PolicyMutant correctedPolicy;
-		
 		for (PolicyMutant mutant : this.mutantList) {
-			if(faultLocalizeMethod != null) {
-				Method method = cls.getMethod(repairMethod, String.class, String.class);
-				correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath(), faultLocalizeMethod);
-			} else {
-				Method method = cls.getMethod(repairMethod, String.class);
-				correctedPolicy = (PolicyMutant) method.invoke(repairer, mutant.getMutantFilePath());
-			}
-			
+			String policyFileToRepair = mutant.getMutantFilePath();
+			switch (repairMethod) {
+			case "repairRandomOrder":
+				correctedPolicy = repairer.repairRandomOrder(policyFileToRepair);
+				break;
+			case "repairOneByOne":
+				correctedPolicy = repairer.repairOneByOne(policyFileToRepair);
+				break;
+			case "repairSmartly":
+				correctedPolicy = repairer.repairSmartly(policyFileToRepair, faultLocalizeMethod);
+				break;
+			default:
+				throw new IllegalArgumentException("wrong  repairMethod" + repairMethod);
+			}			
 			correctedPolicyList.add(correctedPolicy);
 			numTriesList.add(repairer.getNumTriesBeforSucceed());
 //			Test.showRepairResult(correctedPolicy, mutant.getMutantFilePath());
@@ -120,6 +124,7 @@ public class ExperimentOnRepair {
 	
 
 	private List<PolicyMutant> createSelectedMutants() throws Exception {
+		//comment out some mutants that cannot be repaired
 		PolicyMutator policyMutator = new PolicyMutator(this.policyFilePath);
 		policyMutator.createPolicyTargetTrueMutants();
 		policyMutator.createPolicyTargetFalseMutants();
@@ -127,7 +132,7 @@ public class ExperimentOnRepair {
 		policyMutator.createRuleEffectFlippingMutants();
 		policyMutator.createRemoveRuleMutants();
 		policyMutator.createAddNewRuleMutants();
-		policyMutator.createRuleTargetTrueMutants();
+		//policyMutator.createRuleTargetTrueMutants();
 		policyMutator.createRuleTargetFalseMutants();
 		policyMutator.createRuleConditionTrueMutants();
 		policyMutator.createRuleConditionFalseMutants();
@@ -137,7 +142,7 @@ public class ExperimentOnRepair {
 		policyMutator.createFlipComparisonFunctionMutants();
 		policyMutator.createAddNotFunctionMutants();
 		policyMutator.createRemoveNotFunctionMutants();
-		policyMutator.createRemoveParallelTargetElementMutants();
+//		policyMutator.createRemoveParallelTargetElementMutants();
 		policyMutator.createRemoveParallelConditionElementMutants();
 		return policyMutator.getMutantList();
 	}
