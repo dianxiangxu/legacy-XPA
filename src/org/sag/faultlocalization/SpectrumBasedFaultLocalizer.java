@@ -24,8 +24,8 @@ public class SpectrumBasedFaultLocalizer {
             for (int ruleNo=1; ruleNo<numberOfRules+1; ruleNo++) {
                 if (ruleNo<numberOfCoveredRules){
 //                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable
-//                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
-                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
+                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
+//                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
                     //System.out.println("Test Number " + testNo + " Rule Number " + ruleNo + " Score = " + ruleMatrix[testNo][ruleNo]);
                 } else {
                     ruleMatrix[testNo][ruleNo] = 0;       
@@ -103,6 +103,53 @@ public class SpectrumBasedFaultLocalizer {
 	public static SpectrumBasedDiagnosisResults applyOneFaultLocalizerToPolicyMutant(String faultLocalizeMethod) 
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		SpectrumBasedFaultLocalizer faultLocalizer = new SpectrumBasedFaultLocalizer(PolicyCoverageFactory.policyCoverages);
+//		switch (faultLocalizeMethod) {
+//		case "jaccard":
+//			faultLocalizer.jaccard();
+//			break;
+//		case "tarantula":
+//			faultLocalizer.tarantula();
+//			break;
+//		case "ochiai":
+//			faultLocalizer.ochiai();
+//			break;
+//		case "ochiai2":
+//			faultLocalizer.ochiai2();
+//			break;
+//		case "cbi":
+//			faultLocalizer.cbi();
+//			break;
+//		case "hamann":
+//			faultLocalizer.hamann();
+//			break;
+//		case "simpleMatching":
+//			faultLocalizer.simpleMatching();
+//			break;
+//		case "sokal":
+//			faultLocalizer.sokal();
+//			break;
+//		case "naish2":
+//			faultLocalizer.naish2();
+//			break;
+//		case "goodman":
+//			faultLocalizer.goodman();
+//			break;
+//		case "sorensenDice":
+//			faultLocalizer.sorensenDice();
+//			break;
+//		case "anderberg":
+//			faultLocalizer.anderberg();
+//			break;
+//		case "euclid":
+//			faultLocalizer.euclid();
+//			break;
+//		case "rogersTanimoto":
+//			faultLocalizer.rogersTanimoto();
+//			break;
+//		default:
+//			throw new IllegalArgumentException("wrong  faultLocalizeMethod" + faultLocalizeMethod);
+//		}
+		
 		Class<?> cls = faultLocalizer.getClass();
 		Method method = cls.getDeclaredMethod(faultLocalizeMethod);
 		method.invoke(faultLocalizer);
@@ -269,23 +316,45 @@ public class SpectrumBasedFaultLocalizer {
 	}
 */
 	
-	// 1/13/15 Jimmy
+	//changed for efficiency
 	private int apq(int p, int q, int j) {
 		int sum = 0;
-		for (int testIndex=0; testIndex<ruleMatrix.length; testIndex++) {
-			if (p==0) {
-				if (ruleMatrix[testIndex][j]==p && verdicts[testIndex]==q)
-					sum = sum + 1; // Target&&Condition both Not Evaluated (Score=1).
-			} else {
-				if (verdicts[testIndex]==q) {
-					if (ruleMatrix[testIndex][j]==1)
+
+		if (p == 0) {
+			for (int testIndex = 0; testIndex < ruleMatrix.length; testIndex++) {
+				if (ruleMatrix[testIndex][j] == p && verdicts[testIndex] == q)
+					sum = sum + 1; // Target&&Condition both Not Evaluated
+									// (Score=1).
+			}
+		} else {
+			for (int testIndex = 0; testIndex < ruleMatrix.length; testIndex++) {
+				if (verdicts[testIndex] == q) {
 					sum += 1;
-					if (ruleMatrix[testIndex][j]==2)
-					sum += 2;
 				}
 			}
 		}
 		return sum;
 	}
+	
+	
+//	// 1/13/15 Jimmy
+//	private int apq(int p, int q, int j) {
+//		int sum = 0;
+//		for (int testIndex=0; testIndex<ruleMatrix.length; testIndex++) {
+//			if (p==0) {
+//				if (ruleMatrix[testIndex][j]==p && verdicts[testIndex]==q)
+//					sum = sum + 1; // Target&&Condition both Not Evaluated (Score=1).
+//			} else {
+//				if (verdicts[testIndex]==q) {
+//					sum += 1;
+////					if (ruleMatrix[testIndex][j]==1)
+////					sum += 1;
+////					if (ruleMatrix[testIndex][j]==2)
+////					sum += 2;
+//				}
+//			}
+//		}
+//		return sum;
+//	}
 		
 }
