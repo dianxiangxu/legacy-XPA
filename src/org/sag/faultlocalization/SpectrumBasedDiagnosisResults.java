@@ -12,7 +12,7 @@ public class SpectrumBasedDiagnosisResults {
 //	public DebuggingStyle debuggingStyle = DebuggingStyle.TOPDOWN;
 	public DebuggingStyle debuggingStyle = null;
 	public ScoreType scoreType = ScoreType.COUNT;
-	
+	private double score;
 	private String methodName;
 	private RuleCoefficient[] ruleCoefficients;
 	/**
@@ -26,8 +26,6 @@ public class SpectrumBasedDiagnosisResults {
 		return ruleIndexRankedBySuspicion;
 	}
 
-	private double score;
-	
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s){
 		this.methodName = methodName;
 		ruleCoefficients = new RuleCoefficient[s.length];
@@ -55,7 +53,13 @@ public class SpectrumBasedDiagnosisResults {
 			}
 		}   
 	}
-
+	/**
+	 * set rank for each element in ruleCoefficients
+	 * note that if two element in ruleCoefficients have almost the same coefficient,
+	 * set their rank as the same. For example, [0.9, 0.9, 0.8, 0.7, 0.7] will have rank
+	 * [2, 2, 3, 5, 5]. The rank is not [1, 1, 3, 4, 4] because we want to know worst 
+	 * case performance.
+	 */
 	private void rankSuspicion(){
 		ruleCoefficients[ruleCoefficients.length-1].setRank(ruleCoefficients.length);
 		for (int index=ruleCoefficients.length-2; index>=0; index--) {
@@ -65,7 +69,10 @@ public class SpectrumBasedDiagnosisResults {
 				ruleCoefficients[index].setRank(index+1);
 		}
 	}
-	
+	/**
+	 * set score for scoreType == ScoreType.PERCENTAGE
+	 * @param bugPosition
+	 */
 	private void percentageOfRulesInspected(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
 			if (ruleCoefficients[index].getRuleIndex()==bugPosition-1) { 
@@ -75,7 +82,10 @@ public class SpectrumBasedDiagnosisResults {
 			}
 		}
 	}
-
+	/**
+	 * set score for scoreType == ScoreType.COUNT
+	 * @param bugPosition
+	 */
 	private void numberOfRulesInspected(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
 			if (ruleCoefficients[index].getRuleIndex()==bugPosition-1) { 
