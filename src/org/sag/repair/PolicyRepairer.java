@@ -22,25 +22,25 @@ public class PolicyRepairer {
 	@SuppressWarnings("serial")
 	static private List<List<String>> repairMethodPairList = new ArrayList<List<String>>() {
 		{
-			//comment out equivalent fault localizers according to
-			//Wong, W. Eric, et al. "The dstar method for effective software fault localization." Reliability, IEEE Transactions on 63.1 (2014): 290-308.
 			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
 			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "jaccard")));//equivalent to anderberg
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "tarantula")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai")));//equivalent to anderberg
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai2")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "cbi")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "hamann")));//equivalent to simple matching
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "simpleMatching")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));//equivalent to simple matching
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));//equivalent to anderberg
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));//equivalent to anderberg
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));//equivalent to simple matching
 			
+			//comment out equivalent fault localizers according to
+			//Wong, W. Eric, et al. "The dstar method for effective software fault localization." Reliability, IEEE Transactions on 63.1 (2014): 290-308.
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "jaccard")));//equivalent to anderberg
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai")));//equivalent to anderberg
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));//equivalent to anderberg
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));//equivalent to anderberg
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "hamann")));//equivalent to simple matching
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));//equivalent to simple matching
+//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));//equivalent to simple matching
 		}
 	};
 	
