@@ -35,7 +35,12 @@ public class SpectrumBasedDiagnosisResults {
 		Arrays.sort(ruleCoefficients);
 		rankSuspicion(); 
 	}
-
+	/**
+	 * call other methods to set the score
+	 * @param methodName
+	 * @param s, an array of coefficient of rules
+	 * @param bugPosition
+	 */
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s, int bugPosition){
 		this(methodName, s);
 		if (bugPosition>=0) {
@@ -83,7 +88,7 @@ public class SpectrumBasedDiagnosisResults {
 		}
 	}
 	/**
-	 * set score for scoreType == ScoreType.COUNT
+	 * set score for scoreType == ScoreType.COUNT and debuggingStyle ==null
 	 * @param bugPosition
 	 */
 	private void numberOfRulesInspected(int bugPosition){
