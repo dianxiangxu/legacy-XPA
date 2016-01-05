@@ -17,6 +17,7 @@ import org.sag.mutation.PolicySpreadSheetMutantSuite;
 public class FaultLocalizationExperiment {
 	
 	private ArrayList<PolicyMutant> policyMutants; 
+	//one dimension for different policy mutants, the other for different fault localizers
 	private ArrayList<ArrayList<SpectrumBasedDiagnosisResults>> experimentResults;
 	
 	public FaultLocalizationExperiment(String testSuiteSpreadSheetFile, String policyMutantSpreadsheetFile, String experimentResultFileName) throws Exception{
