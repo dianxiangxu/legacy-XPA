@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -64,13 +65,13 @@ public class PolicySpreadSheetMutantSuite {
 			return;
 		String mutantFileName = row.getCell(1) != null ? row.getCell(1).toString() : "";
 		// use absolute path. 11/17/14
-		//mutantFileName = mutantFolder.getAbsolutePath() + File.separator + mutantFileName;
+		mutantFileName = mutantFolder.getAbsolutePath() + File.separator + mutantFileName;
 		int bugPosition;
 		try {
-			bugPosition = (int)Double.parseDouble(row.getCell(2).toString());
+			bugPosition = Integer.parseInt(row.getCell(2).toString());
 		}
 		catch (Exception e){
-			bugPosition = -1;
+			bugPosition = Integer.MIN_VALUE;
 		}
 				
 		mutantSuite.add(new PolicyMutant(keyword, mutantFileName, bugPosition));
@@ -101,7 +102,7 @@ public class PolicySpreadSheetMutantSuite {
 		Cell pathCell = row.createCell(1);
 		pathCell.setCellValue(mutant.getMutantFilePath());
 		Cell faultLocationCell = row.createCell(2);
-		faultLocationCell.setCellValue(mutant.getFaultLocation());
+		faultLocationCell.setCellValue(mutant.getFaultLocation().toString());
 	}
 
 	public Vector<Vector<Object>> getMutantData() {
@@ -210,7 +211,7 @@ public class PolicySpreadSheetMutantSuite {
 			mutantCells[i] = mutantRow.createCell(i);
 		}
 		mutantCells[0].setCellValue(mutant.getNumber());
-		mutantCells[1].setCellValue(mutant.getFaultLocation());
+		mutantCells[1].setCellValue(Arrays.toString(mutant.getFaultLocation()));
 		PolicySpreadSheetTestSuite mutantTestSuite = 
 				new PolicySpreadSheetTestSuite(tests.getTestRecord(), mutant.getMutantFilePath(mutantsDirectory));
 		//boolean[] testResult = mutantTestSuite.runAllTestsOnMutant();
@@ -305,7 +306,7 @@ public class PolicySpreadSheetMutantSuite {
 		}
 		// set values.
 		mutantCells[0].setCellValue(mutant.getNumber());
-		mutantCells[1].setCellValue(mutant.getFaultLocation());
+		mutantCells[1].setCellValue(Arrays.toString(mutant.getFaultLocation()));
 		PolicySpreadSheetTestSuite mutantTestSuite = 
 				new PolicySpreadSheetTestSuite(tests.getTestRecord(), mutant.getMutantFilePath(mutantsDirectory));
 		

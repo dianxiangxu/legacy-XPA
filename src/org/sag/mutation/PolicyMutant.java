@@ -2,6 +2,7 @@ package org.sag.mutation;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 import org.sag.coverage.PolicyCoverageFactory;
@@ -15,16 +16,21 @@ public class PolicyMutant {
 	private String mutantFilePath;
 	// change to the following if multiple faults need to be considered
 	// int[] faultLocations 
-	private int faultLocation;
+	private int[] faultLocation;
 
 	private String testResult;
 
 	public PolicyMutant(String number, String fileName, int bugPosition){
 		this.number = number;
 		this.mutantFilePath = fileName;
-		this.faultLocation = bugPosition;
+		this.faultLocation = new int[] {bugPosition};
 	}
 	
+	public PolicyMutant(String number, String fileName, int[] bugPositions){
+		this.number = number;
+		this.mutantFilePath = fileName;
+		this.faultLocation = bugPositions;
+	}
 	public ArrayList<SpectrumBasedDiagnosisResults> run(ArrayList<PolicySpreadSheetTestRecord> testCases) throws Exception{
 		PolicyCoverageFactory.init();
 		// Test
@@ -52,7 +58,7 @@ public class PolicyMutant {
 		mutantFilePath = new File(mutantFilePath).getName();
 	}
 	
-	public int getFaultLocation(){
+	public int[] getFaultLocation(){
 		return faultLocation;
 	}
 
@@ -69,7 +75,7 @@ public class PolicyMutant {
 		vector.add("");		// sequence number
 		vector.add(number);	// mutant name
 		vector.add(mutantFilePath);
-		vector.add(faultLocation);
+		vector.add(Arrays.toString(faultLocation));
 		vector.add(testResult);	
 //		vector.add(mutantString);
 		return vector;

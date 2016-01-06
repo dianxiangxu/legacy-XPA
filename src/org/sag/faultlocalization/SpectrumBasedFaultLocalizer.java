@@ -61,37 +61,37 @@ public class SpectrumBasedFaultLocalizer {
 		return allResults;
 	}
 
-	public static ArrayList<SpectrumBasedDiagnosisResults> applyAllFaultLocalizersToPolicyMutant(int bugPosition){
+	public static ArrayList<SpectrumBasedDiagnosisResults> applyAllFaultLocalizersToPolicyMutant(int[] bugPositions){
 		ArrayList<SpectrumBasedDiagnosisResults> allResults = new ArrayList<SpectrumBasedDiagnosisResults>();
 		SpectrumBasedFaultLocalizer faultLocalizer = new SpectrumBasedFaultLocalizer(PolicyCoverageFactory.policyCoverages);
 		faultLocalizer.jaccard();
-		allResults.add(new SpectrumBasedDiagnosisResults("Jaccard", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("Jaccard", faultLocalizer.s, bugPositions));
 		faultLocalizer.tarantula();
-		allResults.add(new SpectrumBasedDiagnosisResults("Tarantula", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("Tarantula", faultLocalizer.s, bugPositions));
 		faultLocalizer.ochiai();
-		allResults.add(new SpectrumBasedDiagnosisResults("Ochiai", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("Ochiai", faultLocalizer.s, bugPositions));
 		faultLocalizer.ochiai2();
-		allResults.add(new SpectrumBasedDiagnosisResults("Ochiai2", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("Ochiai2", faultLocalizer.s, bugPositions));
 		faultLocalizer.cbi();
-		allResults.add(new SpectrumBasedDiagnosisResults("cbi", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("cbi", faultLocalizer.s, bugPositions));
 		faultLocalizer.hamann();
-		allResults.add(new SpectrumBasedDiagnosisResults("hamann", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("hamann", faultLocalizer.s, bugPositions));
 		faultLocalizer.simpleMatching();
-		allResults.add(new SpectrumBasedDiagnosisResults("simpleMatching", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("simpleMatching", faultLocalizer.s, bugPositions));
 		faultLocalizer.sokal();
-		allResults.add(new SpectrumBasedDiagnosisResults("sokal", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("sokal", faultLocalizer.s, bugPositions));
 		faultLocalizer.naish2();
-		allResults.add(new SpectrumBasedDiagnosisResults("naish2", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("naish2", faultLocalizer.s, bugPositions));
 		faultLocalizer.goodman();
-		allResults.add(new SpectrumBasedDiagnosisResults("goodman", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("goodman", faultLocalizer.s, bugPositions));
 		faultLocalizer.sorensenDice();
-		allResults.add(new SpectrumBasedDiagnosisResults("sorensenDice", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("sorensenDice", faultLocalizer.s, bugPositions));
 		faultLocalizer.anderberg();
-		allResults.add(new SpectrumBasedDiagnosisResults("anderberg", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("anderberg", faultLocalizer.s, bugPositions));
 		faultLocalizer.euclid();
-		allResults.add(new SpectrumBasedDiagnosisResults("euclid", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("euclid", faultLocalizer.s, bugPositions));
 		faultLocalizer.rogersTanimoto();
-		allResults.add(new SpectrumBasedDiagnosisResults("rogersTanimoto", faultLocalizer.s, bugPosition));
+		allResults.add(new SpectrumBasedDiagnosisResults("rogersTanimoto", faultLocalizer.s, bugPositions));
 		
 /*		for (SpectrumBasedDiagnosisResults results: allResults){
 			results.printResults();

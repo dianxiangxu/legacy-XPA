@@ -1,16 +1,16 @@
 package org.sag.faultlocalization;
 
-public class RuleCoefficient implements Comparable<RuleCoefficient> {
+public class PolicyElementCoefficient implements Comparable<PolicyElementCoefficient> {
 	private double coefficient;
-	private int ruleIndex;
+	private int elementIndex;
 	private int rank;
 	
-	public RuleCoefficient(double coefficient, int ruleIndex){
+	public PolicyElementCoefficient(double coefficient, int elementIndex){
 		this.coefficient = coefficient;
-		this.ruleIndex = ruleIndex;
+		this.elementIndex = elementIndex;
 	}
 	
- 	public int compareTo(RuleCoefficient other){
+ 	public int compareTo(PolicyElementCoefficient other){
  		if (approximateEqual(this.coefficient, other.coefficient))
  			return 0;
  		else  // to sort in reverse order
@@ -21,8 +21,8 @@ public class RuleCoefficient implements Comparable<RuleCoefficient> {
  		return coefficient;
  	}
  	
- 	public int getRuleIndex(){
- 		return ruleIndex;
+ 	public int getElementIndex(){
+ 		return elementIndex;
  	}
  	
  	public int getRank(){
@@ -37,7 +37,7 @@ public class RuleCoefficient implements Comparable<RuleCoefficient> {
 		return Math.abs(a-b)<0.0000000001;
 	}
 
-	public boolean approximateEqual(RuleCoefficient other){
+	public boolean approximateEqual(PolicyElementCoefficient other){
 		return approximateEqual(coefficient, other.coefficient);
 	}
 

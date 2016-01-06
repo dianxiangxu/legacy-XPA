@@ -14,23 +14,23 @@ public class SpectrumBasedDiagnosisResults {
 	public ScoreType scoreType = ScoreType.COUNT;
 	private double score;
 	private String methodName;
-	private RuleCoefficient[] ruleCoefficients;
+	private PolicyElementCoefficient[] ruleCoefficients;
 	/**
 	 * @return the rule indexes ranked by their suspicion
 	 */
 	public List<Integer> getRuleIndexRankedBySuspicion() {
 		List<Integer> ruleIndexRankedBySuspicion = new ArrayList<Integer>();
-		for(RuleCoefficient coefficient: ruleCoefficients) {
-			ruleIndexRankedBySuspicion.add(coefficient.getRuleIndex());
+		for(PolicyElementCoefficient coefficient: ruleCoefficients) {
+			ruleIndexRankedBySuspicion.add(coefficient.getElementIndex());
 		}
 		return ruleIndexRankedBySuspicion;
 	}
 
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s){
 		this.methodName = methodName;
-		ruleCoefficients = new RuleCoefficient[s.length];
+		ruleCoefficients = new PolicyElementCoefficient[s.length];
 		for (int index=0; index<s.length; index++) {
-			ruleCoefficients[index] = new RuleCoefficient(s[index], index);
+			ruleCoefficients[index] = new PolicyElementCoefficient(s[index], index);
 		}
 		Arrays.sort(ruleCoefficients);
 		rankSuspicion(); 
@@ -39,25 +39,30 @@ public class SpectrumBasedDiagnosisResults {
 	 * call other methods to set the score
 	 * @param methodName
 	 * @param s, an array of coefficient of rules
-	 * @param bugPosition
+	 * @param bugPositions
 	 */
-	public SpectrumBasedDiagnosisResults(String methodName, double[] s, int bugPosition){
+	public SpectrumBasedDiagnosisResults(String methodName, double[] s,
+			int[] bugPositions) {
 		this(methodName, s);
-		if (bugPosition>=0) {
-			if (scoreType == ScoreType.PERCENTAGE)
-				percentageOfRulesInspected(bugPosition);
-			else {
-			   if (debuggingStyle ==null) {
-					numberOfRulesInspected(bugPosition);
-			   } else {
-				   if (debuggingStyle == DebuggingStyle.TOPDOWN)
-					   topdownDebuggingSaving(bugPosition);
-				   else 
-					   bottomupDebuggingSaving(bugPosition);
-			   }
+		if (bugPositions.length == 1) {
+			int bugPosition = bugPositions[0];
+			if (bugPosition >= 0) {
+				if (scoreType == ScoreType.PERCENTAGE)
+					percentageOfRulesInspected(bugPosition);
+				else {
+					if (debuggingStyle == null) {
+						numberOfRulesInspected(bugPosition);
+					} else {
+						if (debuggingStyle == DebuggingStyle.TOPDOWN)
+							topdownDebuggingSaving(bugPosition);
+						else
+							bottomupDebuggingSaving(bugPosition);
+					}
+				}
 			}
-		}   
+		}
 	}
+
 	/**
 	 * set rank for each element in ruleCoefficients
 	 * note that if two element in ruleCoefficients have almost the same coefficient,
@@ -80,7 +85,7 @@ public class SpectrumBasedDiagnosisResults {
 	 */
 	private void percentageOfRulesInspected(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
-			if (ruleCoefficients[index].getRuleIndex()==bugPosition-1) { 
+			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
 				score = ((double)(ruleCoefficients[index].getRank()))/ruleCoefficients.length;
 //System.out.println("\nCalculated accuracy: "+accuracy);				
 				return;
@@ -93,7 +98,7 @@ public class SpectrumBasedDiagnosisResults {
 	 */
 	private void numberOfRulesInspected(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
-			if (ruleCoefficients[index].getRuleIndex()==bugPosition-1) { 
+			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
 				score = ruleCoefficients[index].getRank();
 //System.out.println("\nCalculated accuracy: "+accuracy);				
 				return;
@@ -103,7 +108,7 @@ public class SpectrumBasedDiagnosisResults {
 
 	private void bottomupDebuggingSaving(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
-			if (ruleCoefficients[index].getRuleIndex()==bugPosition-1) { 
+			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
 				score = (ruleCoefficients.length - bugPosition+1) - ruleCoefficients[index].getRank() ;
 //System.out.println("\nCalculated accuracy: "+accuracy);				
 				return;
@@ -113,7 +118,7 @@ public class SpectrumBasedDiagnosisResults {
 
 	private void topdownDebuggingSaving(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
-			if (ruleCoefficients[index].getRuleIndex()==bugPosition-1) { 
+			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
 				score = bugPosition - ruleCoefficients[index].getRank();
 //System.out.println("\nCalculated accuracy: "+accuracy);				
 				return;
@@ -154,8 +159,8 @@ public class SpectrumBasedDiagnosisResults {
 
 	public void printCoefficients(){
 		System.out.println(methodName);
-		for (RuleCoefficient coefficient: ruleCoefficients) {
-			System.out.println("\tRule "+(coefficient.getRuleIndex()+1)+" ("+coefficient.getRank()+": "+ String.format( "%.3f", coefficient.getCoefficient())+")");
+		for (PolicyElementCoefficient coefficient: ruleCoefficients) {
+			System.out.println("\tRule "+(coefficient.getElementIndex()+1)+" ("+coefficient.getRank()+": "+ String.format( "%.3f", coefficient.getCoefficient())+")");
 		}
 	}
 		
