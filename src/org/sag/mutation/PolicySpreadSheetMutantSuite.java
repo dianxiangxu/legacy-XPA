@@ -66,17 +66,25 @@ public class PolicySpreadSheetMutantSuite {
 		String mutantFileName = row.getCell(1) != null ? row.getCell(1).toString() : "";
 		// use absolute path. 11/17/14
 		mutantFileName = mutantFolder.getAbsolutePath() + File.separator + mutantFileName;
-		int bugPosition;
-		try {
-			bugPosition = Integer.parseInt(row.getCell(2).toString());
-		}
-		catch (Exception e){
-			bugPosition = Integer.MIN_VALUE;
-		}
-				
-		mutantSuite.add(new PolicyMutant(keyword, mutantFileName, bugPosition));
+//		int bugPosition;
+//		try {
+//			bugPosition = Integer.parseInt(row.getCell(2).toString());
+//		}
+//		catch (Exception e){
+//			bugPosition = Integer.MIN_VALUE;
+//		}
+		int[] bugPositions = fromString(row.getCell(2).toString());
+		mutantSuite.add(new PolicyMutant(keyword, mutantFileName, bugPositions));
 	}
 	
+	private static int[] fromString(String str) {
+		String[] strs = str.replace("[", "").replace("]", "").split(",");
+		int results[] = new int[strs.length];
+		for (int i = 0; i < strs.length; i++) {
+			results[i] = Integer.parseInt(strs[i]);
+		}
+		return results;
+	}
 	public static void writePolicyMutantsSpreadSheet(ArrayList<PolicyMutant> mutantList, String mutantSpreadSheetFileName){
 		HSSFWorkbook workBook = new HSSFWorkbook();
 		workBook.createSheet("mutation list");
@@ -102,7 +110,7 @@ public class PolicySpreadSheetMutantSuite {
 		Cell pathCell = row.createCell(1);
 		pathCell.setCellValue(mutant.getMutantFilePath());
 		Cell faultLocationCell = row.createCell(2);
-		faultLocationCell.setCellValue(mutant.getFaultLocation().toString());
+		faultLocationCell.setCellValue(Arrays.toString(mutant.getFaultLocation()));
 	}
 
 	public Vector<Vector<Object>> getMutantData() {
