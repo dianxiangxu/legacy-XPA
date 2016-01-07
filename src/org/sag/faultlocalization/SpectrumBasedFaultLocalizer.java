@@ -3,6 +3,7 @@ package org.sag.faultlocalization;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.sag.coverage.PolicyCoverage;
 import org.sag.coverage.PolicyCoverageFactory;
@@ -103,57 +104,11 @@ public class SpectrumBasedFaultLocalizer {
 	public static SpectrumBasedDiagnosisResults applyOneFaultLocalizerToPolicyMutant(String faultLocalizeMethod) 
 			throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		SpectrumBasedFaultLocalizer faultLocalizer = new SpectrumBasedFaultLocalizer(PolicyCoverageFactory.policyCoverages);
-//		switch (faultLocalizeMethod) {
-//		case "jaccard":
-//			faultLocalizer.jaccard();
-//			break;
-//		case "tarantula":
-//			faultLocalizer.tarantula();
-//			break;
-//		case "ochiai":
-//			faultLocalizer.ochiai();
-//			break;
-//		case "ochiai2":
-//			faultLocalizer.ochiai2();
-//			break;
-//		case "cbi":
-//			faultLocalizer.cbi();
-//			break;
-//		case "hamann":
-//			faultLocalizer.hamann();
-//			break;
-//		case "simpleMatching":
-//			faultLocalizer.simpleMatching();
-//			break;
-//		case "sokal":
-//			faultLocalizer.sokal();
-//			break;
-//		case "naish2":
-//			faultLocalizer.naish2();
-//			break;
-//		case "goodman":
-//			faultLocalizer.goodman();
-//			break;
-//		case "sorensenDice":
-//			faultLocalizer.sorensenDice();
-//			break;
-//		case "anderberg":
-//			faultLocalizer.anderberg();
-//			break;
-//		case "euclid":
-//			faultLocalizer.euclid();
-//			break;
-//		case "rogersTanimoto":
-//			faultLocalizer.rogersTanimoto();
-//			break;
-//		default:
-//			throw new IllegalArgumentException("wrong  faultLocalizeMethod" + faultLocalizeMethod);
-//		}
-		
 		Class<?> cls = faultLocalizer.getClass();
 		Method method = cls.getDeclaredMethod(faultLocalizeMethod);
 		method.invoke(faultLocalizer);
 		SpectrumBasedDiagnosisResults res = new SpectrumBasedDiagnosisResults(faultLocalizeMethod, faultLocalizer.s);
+		System.out.println(Arrays.toString(faultLocalizer.s));
 		return res;
 	}
 
