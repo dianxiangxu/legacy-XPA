@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -84,6 +85,7 @@ public class ExperimentOnRepair {
 		numTriesList = new ArrayList<Integer>();
 		PolicyMutant correctedPolicy;
 		for (PolicyMutant mutant : this.mutantList) {
+			System.out.println("bugPosition:\t" + Arrays.toString(mutant.getFaultLocation()));
 			String policyFileToRepair = mutant.getMutantFilePath();
 			switch (repairMethod) {
 			case "repairRandomOrder":
