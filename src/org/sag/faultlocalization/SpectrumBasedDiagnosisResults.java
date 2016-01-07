@@ -9,8 +9,8 @@ public class SpectrumBasedDiagnosisResults {
 	public static enum DebuggingStyle {TOPDOWN, BOTTOMUP};
 	public static enum ScoreType {COUNT, PERCENTAGE};
 
-//	public DebuggingStyle debuggingStyle = DebuggingStyle.TOPDOWN;
 	public DebuggingStyle debuggingStyle = null;
+//	public DebuggingStyle debuggingStyle = DebuggingStyle.TOPDOWN;
 	public ScoreType scoreType = ScoreType.COUNT;
 	private double score;
 	private String methodName;
@@ -46,7 +46,7 @@ public class SpectrumBasedDiagnosisResults {
 		this(methodName, s);
 		if (bugPositions.length == 1) {
 			int bugPosition = bugPositions[0];
-			if (bugPosition >= 0) {
+			if (bugPosition >= 0) {//how to deal with the case when bugPosition == -1?
 				if (scoreType == ScoreType.PERCENTAGE)
 					percentageOfRulesInspected(bugPosition);
 				else {
@@ -71,6 +71,7 @@ public class SpectrumBasedDiagnosisResults {
 	 * case performance.
 	 */
 	private void rankSuspicion(){
+		//worst case ranking
 		ruleCoefficients[ruleCoefficients.length-1].setRank(ruleCoefficients.length);
 		for (int index=ruleCoefficients.length-2; index>=0; index--) {
 			if (ruleCoefficients[index].approximateEqual(ruleCoefficients[index+1]))
@@ -78,6 +79,14 @@ public class SpectrumBasedDiagnosisResults {
 			else 
 				ruleCoefficients[index].setRank(index+1);
 		}
+//		//best case ranking
+//		ruleCoefficients[0].setRank(1);
+//		for (int index = 1; index < ruleCoefficients.length; index++) {
+//			if (ruleCoefficients[index].approximateEqual(ruleCoefficients[index - 1]))
+//				ruleCoefficients[index].setRank(ruleCoefficients[index - 1].getRank());
+//			else
+//				ruleCoefficients[index].setRank(index + 1);
+//		}
 	}
 	/**
 	 * set score for scoreType == ScoreType.PERCENTAGE
