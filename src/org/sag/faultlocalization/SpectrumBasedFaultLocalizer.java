@@ -3,6 +3,7 @@ package org.sag.faultlocalization;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.sag.coverage.PolicyCoverage;
 import org.sag.coverage.PolicyCoverageFactory;
@@ -23,14 +24,15 @@ public class SpectrumBasedFaultLocalizer {
 			for (int ruleNo=0; ruleNo<numberOfRules; ruleNo++) {
 				if (ruleNo<numberOfCoveredRules){
 //					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable 
-//					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
-					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
+					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
+//					ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
 					//System.out.println("Test Number " + testNo + " Rule Number " + ruleNo + " Score = " + ruleMatrix[testNo][ruleNo]);
 				} else {
 					ruleMatrix[testNo][ruleNo] = 0;		
 				}
 			}
 		}
+		printMatrix(ruleMatrix);
 		verdicts = new int[policyCoverages.size()];
 		for (int testNo=0; testNo<ruleMatrix.length; testNo++){
 			PolicyCoverage policyCoverage = policyCoverages.get(testNo);
@@ -39,6 +41,11 @@ public class SpectrumBasedFaultLocalizer {
 		s = new double[numberOfRules];
 	}
 	
+    private static void printMatrix(int[][] matrix) {
+    	for (int i = 0; i < matrix.length; i++)
+    		System.out.println(i + ": " + Arrays.toString(matrix[i]));
+    }
+    
 	private int getNumberOfRules(ArrayList<PolicyCoverage> policyCoverages){
 		if (policyCoverages.size()>0)
 			return policyCoverages.get(0).getNumberOfRules();
