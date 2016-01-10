@@ -23,9 +23,9 @@ public class SpectrumBasedFaultLocalizer {
             ruleMatrix[testNo][0] = policyCoverage.getTargetMatchResult()==0? 1: 0;   
             int numberOfCoveredRules = policyCoverage.getRuleCoverages().size();
             for (int ruleNo=1; ruleNo<numberOfRules+1; ruleNo++) {
-                if (ruleNo<numberOfCoveredRules){
+                if (ruleNo<numberOfCoveredRules+1){
 //                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable
-                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
+                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo-1).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
 //                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
                     //System.out.println("Test Number " + testNo + " Rule Number " + ruleNo + " Score = " + ruleMatrix[testNo][ruleNo]);
                 } else {
@@ -33,6 +33,7 @@ public class SpectrumBasedFaultLocalizer {
                 }
             }
         }
+        printMatrix(ruleMatrix);
         verdicts = new int[policyCoverages.size()];
         for (int testNo=0; testNo<ruleMatrix.length; testNo++){
             PolicyCoverage policyCoverage = policyCoverages.get(testNo);
@@ -41,6 +42,11 @@ public class SpectrumBasedFaultLocalizer {
         s = new double[numberOfRules+1];
     }
 	
+    private static void printMatrix(int[][] matrix) {
+    	for (int i = 0; i < matrix.length; i++)
+    		System.out.println(i + ": " + Arrays.toString(matrix[i]));
+    }
+    
 	private int getNumberOfRules(ArrayList<PolicyCoverage> policyCoverages){
 		if (policyCoverages.size()>0)
 			return policyCoverages.get(0).getNumberOfRules();
