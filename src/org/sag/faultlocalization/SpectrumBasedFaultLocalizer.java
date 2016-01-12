@@ -49,7 +49,7 @@ public class SpectrumBasedFaultLocalizer {
     private static void printMatrix(int[][] matrix) {
     	for (int i = 0; i < matrix.length; i++)
 //    		System.out.println(i + ": " + Arrays.toString(Arrays.copyOfRange(matrix[i], 1, matrix[i].length)));
-    		System.out.println(i + ": " + matrix[i]);
+    		System.out.println(i + ": " + Arrays.toString(matrix[i]));
     }
     
 	private int getNumberOfRules(ArrayList<PolicyCoverage> policyCoverages){
@@ -312,11 +312,12 @@ public class SpectrumBasedFaultLocalizer {
 					sum = sum + 1; // Target&&Condition both Not Evaluated (Score=1).
 			} else {
 				if (verdicts[testIndex]==q) {
-//					sum += 1;
 					if (ruleMatrix[testIndex][j]==1)
-					sum += 1;
-					if (ruleMatrix[testIndex][j]==2)
-					sum += 2;
+						sum += 1;
+					else if (ruleMatrix[testIndex][j]==2)
+						sum += 2;
+					else if (ruleMatrix[testIndex][j]==0)
+						sum += 0;
 				}
 			}
 		}
