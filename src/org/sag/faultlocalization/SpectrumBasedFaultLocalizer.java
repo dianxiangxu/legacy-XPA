@@ -48,7 +48,8 @@ public class SpectrumBasedFaultLocalizer {
 	
     private static void printMatrix(int[][] matrix) {
     	for (int i = 0; i < matrix.length; i++)
-    		System.out.println(i + ": " + Arrays.toString(matrix[i]));
+//    		System.out.println(i + ": " + Arrays.toString(Arrays.copyOfRange(matrix[i], 1, matrix[i].length)));
+    		System.out.println(i + ": " + matrix[i]);
     }
     
 	private int getNumberOfRules(ArrayList<PolicyCoverage> policyCoverages){
