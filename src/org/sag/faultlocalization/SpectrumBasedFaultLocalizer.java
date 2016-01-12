@@ -32,12 +32,13 @@ public class SpectrumBasedFaultLocalizer {
 				}
 			}
 		}
-		printMatrix(ruleMatrix);
 		verdicts = new int[policyCoverages.size()];
 		for (int testNo=0; testNo<ruleMatrix.length; testNo++){
 			PolicyCoverage policyCoverage = policyCoverages.get(testNo);
 			verdicts[testNo] = policyCoverage.getDecision() == policyCoverage.getOracle()? 0: 1; 
 		}
+		printMatrix(ruleMatrix);
+		System.out.println(Arrays.toString(verdicts));
 		s = new double[numberOfRules];
 	}
 	
