@@ -282,45 +282,45 @@ public class SpectrumBasedFaultLocalizer {
 	}
 */
 	
-	//changed for efficiency
-	private int apq(int p, int q, int j) {
-		int sum = 0;
-
-		if (p == 0) {
-			for (int testIndex = 0; testIndex < ruleMatrix.length; testIndex++) {
-				if (ruleMatrix[testIndex][j] == p && verdicts[testIndex] == q)
-					sum = sum + 1; // Target&&Condition both Not Evaluated
-									// (Score=1).
-			}
-		} else {
-			for (int testIndex = 0; testIndex < ruleMatrix.length; testIndex++) {
-				if (verdicts[testIndex] == q) {
-					sum += 1;
-				}
-			}
-		}
-		return sum;
-	}
-	
-	
-//	// 1/13/15 Jimmy
+//	//changed for efficiency
 //	private int apq(int p, int q, int j) {
 //		int sum = 0;
-//		for (int testIndex=0; testIndex<ruleMatrix.length; testIndex++) {
-//			if (p==0) {
-//				if (ruleMatrix[testIndex][j]==p && verdicts[testIndex]==q)
-//					sum = sum + 1; // Target&&Condition both Not Evaluated (Score=1).
-//			} else {
-//				if (verdicts[testIndex]==q) {
+//
+//		if (p == 0) {
+//			for (int testIndex = 0; testIndex < ruleMatrix.length; testIndex++) {
+//				if (ruleMatrix[testIndex][j] == p && verdicts[testIndex] == q)
+//					sum = sum + 1; // Target&&Condition both Not Evaluated
+//									// (Score=1).
+//			}
+//		} else {
+//			for (int testIndex = 0; testIndex < ruleMatrix.length; testIndex++) {
+//				if (verdicts[testIndex] == q) {
 //					sum += 1;
-////					if (ruleMatrix[testIndex][j]==1)
-////					sum += 1;
-////					if (ruleMatrix[testIndex][j]==2)
-////					sum += 2;
 //				}
 //			}
 //		}
 //		return sum;
 //	}
+	
+	
+	// 1/13/15 Jimmy
+	private int apq(int p, int q, int j) {
+		int sum = 0;
+		for (int testIndex=0; testIndex<ruleMatrix.length; testIndex++) {
+			if (p==0) {
+				if (ruleMatrix[testIndex][j]==p && verdicts[testIndex]==q)
+					sum = sum + 1; // Target&&Condition both Not Evaluated (Score=1).
+			} else {
+				if (verdicts[testIndex]==q) {
+//					sum += 1;
+					if (ruleMatrix[testIndex][j]==1)
+					sum += 1;
+					if (ruleMatrix[testIndex][j]==2)
+					sum += 2;
+				}
+			}
+		}
+		return sum;
+	}
 		
 }
