@@ -21,6 +21,9 @@ public class SpectrumBasedFaultLocalizer {
         for (int testNo=0; testNo<ruleMatrix.length; testNo++){
             PolicyCoverage policyCoverage = policyCoverages.get(testNo);
             ruleMatrix[testNo][0] = policyCoverage.getTargetMatchResult()==0? 1: 0;   
+//            if (ruleMatrix[testNo][0] == 1) {
+//            	throw new RuntimeException("target column of ruleMatrix is not 1");
+//            }
             int numberOfCoveredRules = policyCoverage.getRuleCoverages().size();
             for (int ruleNo=1; ruleNo<numberOfRules+1; ruleNo++) {
                 if (ruleNo<numberOfCoveredRules+1){
@@ -33,12 +36,13 @@ public class SpectrumBasedFaultLocalizer {
                 }
             }
         }
-        printMatrix(ruleMatrix);
         verdicts = new int[policyCoverages.size()];
         for (int testNo=0; testNo<ruleMatrix.length; testNo++){
             PolicyCoverage policyCoverage = policyCoverages.get(testNo);
             verdicts[testNo] = policyCoverage.getDecision() == policyCoverage.getOracle()? 0: 1;
         }
+        printMatrix(ruleMatrix);
+        System.out.println(Arrays.toString(verdicts));
         s = new double[numberOfRules+1];
     }
 	
