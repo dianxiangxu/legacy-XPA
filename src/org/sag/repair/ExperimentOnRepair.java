@@ -35,7 +35,7 @@ public class ExperimentOnRepair {
 	 */
 	public static void main(String[] args) throws Exception {
 		String PolicyFilePath = "Experiments//conference3//conference3.xml";
-		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
+		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
 		ExperimentOnRepair experiment = new ExperimentOnRepair(PolicyFilePath,
 				testSuiteSpreadSheetFile);
 		List<List<String>> repairMethodPairList = PolicyRepairer.getRepairMethodPairList();
