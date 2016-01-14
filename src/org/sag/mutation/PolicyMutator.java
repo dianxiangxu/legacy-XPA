@@ -55,9 +55,19 @@ public class PolicyMutator {
 	String int_value = "-98274365923795632";
 	String int_value1 = "123456789";
 	String int_value2 = "-987654321";
-		
+
+	public PolicyMutator(PolicyMutant baseMutant) throws Exception {
+		this.baseMutant = baseMutant;
+		init(baseMutant.getMutantFilePath());
+	}
+
 	public PolicyMutator(String policyFilePath) throws Exception {
-		this.policyFilePath = policyFilePath;;
+		this.baseMutant = new PolicyMutant("", policyFilePath, new int[]{});
+		init(policyFilePath);
+	}
+
+	private void init(String policyFilePath) {
+		this.policyFilePath = policyFilePath;
 		policy = loadPolicy(policyFilePath);
 		File policyFile = new File(policyFilePath);
 		File mutantsFolder = new File(policyFile.getParent()+File.separator+"mutants");
@@ -76,9 +86,8 @@ public class PolicyMutator {
 		mutantSpreadSheetFolderName = mutantsFolder.getAbsolutePath();
 		mutantFileNameBase = mutantSpreadSheetFolderName.concat(policyPath.substring(indexOfLastSlash));
 		mutantSpreadSheetNameBase = mutantSpreadSheetFolderName.concat(policyPath.substring(indexOfLastSlash));
-
 	}
-
+	
 	public PolicySpreadSheetMutantSuite generateMutants(){
 //		try {
 //			createOneMutant();
