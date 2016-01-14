@@ -5,12 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.sag.coverage.PolicyCoverageFactory;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
 import org.sag.faultlocalization.SpectrumBasedFaultLocalizer;
 import org.sag.faultlocalization.TestCellResult;
 import org.sag.mutation.PolicyMutant;
-import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicyMutator;
 import org.wso2.balana.PolicyTreeElement;
 import org.wso2.balana.Rule;
@@ -22,8 +22,8 @@ public class PolicyRepairer {
 	@SuppressWarnings("serial")
 	static private List<List<String>> repairMethodPairList = new ArrayList<List<String>>() {
 		{
-			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
-			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
+//			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
+//			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "jaccard")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "tarantula")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai")));
@@ -90,7 +90,7 @@ public class PolicyRepairer {
 	 * @throws Exception
 	 * generate all mutants at once and check which one can pass the test suite
 	 */
-	public PolicyMutant repair(String policyFileToRepair) throws Exception {
+	public PolicyMutant repair(PolicyMutant policyFileToRepair) throws Exception {
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		mutator.createAllMutants();
 		List<PolicyMutant> mutants = mutator.getMutantList();
@@ -136,10 +136,11 @@ public class PolicyRepairer {
 	 * use fault localizer to find bugPosition, then generate mutants accordingly
 	 * to repair
 	 */
-	public PolicyMutant repairSmartly(String policyFileToRepair, String faultLocalizeMethod) throws Exception {
+	public PolicyMutant repairSmartly(PolicyMutant policyFileToRepair, String faultLocalizeMethod) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(this.testSuiteFile,
-				policyFileToRepair);
+				policyFileToRepair.getMutantFilePath());
+		PolicyCoverageFactory.init();
 		testSuite.runAllTests();//we need to run tests to get coverage information, which is in turn used to get suspicion rank
 		SpectrumBasedDiagnosisResults diagnosisResults = 
 				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);
@@ -150,7 +151,7 @@ public class PolicyRepairer {
 
 
 	
-	public PolicyMutant repairRandomOrder(String policyFileToRepair) throws Exception {
+	public PolicyMutant repairRandomOrder(PolicyMutant policyFileToRepair) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
@@ -167,7 +168,7 @@ public class PolicyRepairer {
 	 * @throws Exception
 	 * generate a mutant a time and check whether it can pass the test suite
 	 */
-	public PolicyMutant repairOneByOne(String policyFileToRepair) throws Exception {
+	public PolicyMutant repairOneByOne(PolicyMutant policyFileToRepair) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
@@ -178,7 +179,7 @@ public class PolicyRepairer {
 		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
 	}
 	
-	public PolicyMutant repairBySuspicionRank(String policyFileToRepair, List<Integer> suspicionRank) throws Exception {
+	public PolicyMutant repairBySuspicionRank(PolicyMutant policyFileToRepair, List<Integer> suspicionRank) throws Exception {
 		PolicyMutant correctMutant = null;
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		List<Rule> ruleList = getRuleList(mutator);

@@ -86,16 +86,15 @@ public class ExperimentOnRepair {
 		PolicyMutant correctedPolicy;
 		for (PolicyMutant mutant : this.mutantList) {
 			System.out.println("bugPosition:\t" + Arrays.toString(mutant.getFaultLocation()));
-			String policyFileToRepair = mutant.getMutantFilePath();
 			switch (repairMethod) {
 			case "repairRandomOrder":
-				correctedPolicy = repairer.repairRandomOrder(policyFileToRepair);
+				correctedPolicy = repairer.repairRandomOrder(mutant);
 				break;
 			case "repairOneByOne":
-				correctedPolicy = repairer.repairOneByOne(policyFileToRepair);
+				correctedPolicy = repairer.repairOneByOne(mutant);
 				break;
 			case "repairSmartly":
-				correctedPolicy = repairer.repairSmartly(policyFileToRepair, faultLocalizeMethod);
+				correctedPolicy = repairer.repairSmartly(mutant, faultLocalizeMethod);
 				break;
 			default:
 				throw new IllegalArgumentException("wrong  repairMethod" + repairMethod);
@@ -117,7 +116,7 @@ public class ExperimentOnRepair {
 		PolicyMutant correctedPolicy;
 		
 		for (PolicyMutant mutant : this.mutantList) {
-			correctedPolicy = repairer.repairRandomOrder(mutant.getMutantFilePath());
+			correctedPolicy = repairer.repairRandomOrder(mutant);
 			correctedPolicyList.add(correctedPolicy);
 			numTriesList.add(repairer.getNumTriesBeforSucceed());
 		}
