@@ -39,7 +39,7 @@ public class SpectrumBasedFaultLocalizer {
             verdicts[testNo] = policyCoverage.getDecision() == policyCoverage.getOracle()? 0: 1;
         }
         printMatrix(ruleMatrix);
-        System.out.println(Arrays.toString(verdicts));
+        System.out.println("verdict: " + Arrays.toString(verdicts));
         s = new double[numberOfRules+1];
     }
 	
