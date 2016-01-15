@@ -44,23 +44,29 @@ public class SpectrumBasedDiagnosisResults {
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s,
 			int[] bugPositions) {
 		this(methodName, s);
-		if (bugPositions.length == 1) {
-			int bugPosition = bugPositions[0];
+		double[] scores = new double[bugPositions.length];
+		for (int i = 0; i < bugPositions.length; i++) {
+			int bugPosition = bugPositions[i];
 			if (bugPosition >= 0) {//how to deal with the case when bugPosition == -1?
 				if (scoreType == ScoreType.PERCENTAGE)
-					percentageOfRulesInspected(bugPosition);
+					scores[i] = percentageOfRulesInspected(bugPosition);
 				else {
 					if (debuggingStyle == null) {
-						numberOfRulesInspected(bugPosition);
+						scores[i] = numberOfRulesInspected(bugPosition);
 					} else {
 						if (debuggingStyle == DebuggingStyle.TOPDOWN)
-							topdownDebuggingSaving(bugPosition);
+							scores[i] = topdownDebuggingSaving(bugPosition);
 						else
-							bottomupDebuggingSaving(bugPosition);
+							scores[i] = bottomupDebuggingSaving(bugPosition);
 					}
 				}
 			}
 		}
+		score = 0;
+		for (double item: scores) {
+			score += item;
+		}
+		score /= scores.length;
 	}
 
 	/**
@@ -91,48 +97,45 @@ public class SpectrumBasedDiagnosisResults {
 	/**
 	 * set score for scoreType == ScoreType.PERCENTAGE
 	 * @param bugPosition
+	 * @return 
 	 */
-	private void percentageOfRulesInspected(int bugPosition){
+	private double percentageOfRulesInspected(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
 			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
-				score = ((double)(ruleCoefficients[index].getRank()))/ruleCoefficients.length;
-//System.out.println("\nCalculated accuracy: "+accuracy);				
-				return;
+				return ((double)(ruleCoefficients[index].getRank()))/ruleCoefficients.length;
 			}
 		}
+		return 0;
 	}
 	/**
 	 * set score for scoreType == ScoreType.COUNT and debuggingStyle ==null
 	 * @param bugPosition
 	 */
-	private void numberOfRulesInspected(int bugPosition){
+	private int numberOfRulesInspected(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
 			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
-				score = ruleCoefficients[index].getRank();
-//System.out.println("\nCalculated accuracy: "+accuracy);				
-				return;
+				return ruleCoefficients[index].getRank();
 			}
 		}
+		return 0;
 	}
 
-	private void bottomupDebuggingSaving(int bugPosition){
+	private double bottomupDebuggingSaving(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
 			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
-				score = (ruleCoefficients.length - bugPosition+1) - ruleCoefficients[index].getRank() ;
-//System.out.println("\nCalculated accuracy: "+accuracy);				
-				return;
+				return (ruleCoefficients.length - bugPosition+1) - ruleCoefficients[index].getRank() ;
 			}
 		}
+		return 0;
 	}
 
-	private void topdownDebuggingSaving(int bugPosition){
+	private double topdownDebuggingSaving(int bugPosition){
 		for (int index=0; index < ruleCoefficients.length; index++){
 			if (ruleCoefficients[index].getElementIndex()==bugPosition) { 
-				score = bugPosition - ruleCoefficients[index].getRank();
-//System.out.println("\nCalculated accuracy: "+accuracy);				
-				return;
+				return bugPosition - ruleCoefficients[index].getRank();
 			}
 		}
+		return 0;
 	}
 
 	

@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -147,6 +149,14 @@ public class PolicyMutator {
 		createRemoveParallelTargetElementMutants(); // RPTE
 		createRemoveParallelConditionElementMutants(); // RPCE // TODO
 		//=====================================================	
+	}
+
+	public void createSelectedMutants(List<String> selectedMutants) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Class<?> cls = this.getClass();
+		for (String methodName: selectedMutants) {
+			Method method = cls.getDeclaredMethod(methodName);
+			method.invoke(this);
+		}
 	}
 
 	public void createOneMutant() {

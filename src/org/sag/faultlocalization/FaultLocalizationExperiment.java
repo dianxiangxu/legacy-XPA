@@ -1,8 +1,10 @@
 package org.sag.faultlocalization;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -11,19 +13,47 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.sag.coverage.PolicySpreadSheetTestRecord;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.mutation.PolicyMutant;
+import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
 
 
 public class FaultLocalizationExperiment {
 	
-	private ArrayList<PolicyMutant> policyMutants; 
+	private List<PolicyMutant> policyMutants; 
 	//one dimension for different policy mutants, the other for different fault localizers
 	private ArrayList<ArrayList<SpectrumBasedDiagnosisResults>> experimentResults;
 	
-	public FaultLocalizationExperiment(String testSuiteSpreadSheetFile, String policyMutantSpreadsheetFile, String experimentResultFileName) throws Exception{
-		ArrayList<PolicySpreadSheetTestRecord> testSuite = PolicySpreadSheetTestSuite.readTestSuite(testSuiteSpreadSheetFile);
+	public FaultLocalizationExperiment(String testSuiteSpreadSheetFile,
+			String policyMutantSpreadsheetFile, String experimentResultFileName)
+			throws Exception {
 		experimentResults = new ArrayList<ArrayList<SpectrumBasedDiagnosisResults>>();
-		policyMutants = PolicySpreadSheetMutantSuite.readMutantSuite(policyMutantSpreadsheetFile);
+		policyMutants = PolicySpreadSheetMutantSuite
+				.readMutantSuite(policyMutantSpreadsheetFile);
+		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileName);
+	}
+	
+	public FaultLocalizationExperiment(String policyFile,
+			String testSuiteSpreadSheetFile, int numFaults,
+			List<String> createMutantMethods, String experimentResultFileNam) throws Exception {
+		List<List<PolicyMutant>> mutantLists = new ArrayList<List<PolicyMutant>>();
+		PolicyMutant baseMutant = new PolicyMutant("", policyFile, new int[] {});
+		mutantLists.add(new ArrayList<PolicyMutant>());
+		mutantLists.get(0).add(baseMutant);
+		for (int i = 1; i <= numFaults; i++) {
+			mutantLists.add(new ArrayList<PolicyMutant>());
+			for (PolicyMutant mutant : mutantLists.get(i - 1)) {
+				PolicyMutator mutator = new PolicyMutator(mutant);
+				mutator.createSelectedMutants(createMutantMethods);
+				mutantLists.get(i).addAll(mutator.getMutantList());
+			}
+		}
+		experimentResults = new ArrayList<ArrayList<SpectrumBasedDiagnosisResults>>();
+		policyMutants = mutantLists.get(numFaults);
+		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileNam);
+	}
+	
+	private void runExperiment (String testSuiteSpreadSheetFile,  String experimentResultFileName) throws Exception {
+		ArrayList<PolicySpreadSheetTestRecord> testSuite = PolicySpreadSheetTestSuite.readTestSuite(testSuiteSpreadSheetFile);
 		for (PolicyMutant policyMutant: policyMutants ){
 			try {
 				experimentResults.add(policyMutant.run(testSuite));
@@ -114,10 +144,34 @@ public class FaultLocalizationExperiment {
 		int policyNumber = 0;
 		int testsuiteNumber = 6;
 		
-		new FaultLocalizationExperiment("Experiments//" + policy[policyNumber]+ "//test_suites//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + ".xls",
-				"Experiments//" + policy[policyNumber] + "//mutants//" + policy[policyNumber] + "_mutants.xls",
-				"Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.xls");
+		String testSuiteSpreadSheetFile = "Experiments//" + policy[policyNumber]+ "//test_suites//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + ".xls";
+		String policyMutantSpreadsheetFil = "Experiments//" + policy[policyNumber] + "//mutants//" + policy[policyNumber] + "_mutants.xls";
+		String experimentResultFileNam = "Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.xls";
+//		new FaultLocalizationExperiment(testSuiteSpreadSheetFile, policyMutantSpreadsheetFil, experimentResultFileNam);
 		
+		//multiple faults
+		List<String> createMutantMethods = new ArrayList<String>();
+		createMutantMethods.add("createPolicyTargetTrueMutants");//PTT
+		createMutantMethods.add("createPolicyTargetFalseMutants");//PTF
+		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC
+		createMutantMethods.add("createRuleEffectFlippingMutants");//CRE
+		createMutantMethods.add("createRemoveRuleMutants");//RER
+//		createMutantMethods.add("createAddNewRuleMutants");//ANR
+		createMutantMethods.add("createRuleTargetTrueMutants");//RTT
+		createMutantMethods.add("createRuleTargetFalseMutants");//RTF
+		createMutantMethods.add("createRuleConditionTrueMutants");//RCT
+		createMutantMethods.add("createRuleConditionFalseMutants");//RCF
+		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
+		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
+//		createMutantMethods.add("createRuleTypeReplacedMutants");//RTR
+		createMutantMethods.add("createAddNotFunctionMutants");//ANF
+		createMutantMethods.add("createRemoveNotFunctionMutants");//RNF
+		createMutantMethods.add("createRemoveParallelTargetElementMutants");//RPTE
+//		createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
+		
+		String policyFile = "Experiments" + File.separator + policy[policyNumber] + File.separator + policy[policyNumber] + ".xml";
+		int numFaults = 2;
+		new FaultLocalizationExperiment(policyFile, testSuiteSpreadSheetFile, numFaults, createMutantMethods, experimentResultFileNam);
 	}
 	
 
