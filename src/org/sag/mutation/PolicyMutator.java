@@ -187,7 +187,7 @@ public class PolicyMutator {
 				policy.encode(builder);
 				String mutantFileName = getMutantFileName("PTT"+mutantIndex);
 				int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTT"+mutantIndex, mutantFileName, bugPositions);
+				PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTT"+mutantIndex, mutantFileName, bugPositions);
 				mutants.add(mutant);
 				mutantList.add(mutant);
 				saveStringToTextFile(builder.toString(), mutantFileName);
@@ -231,7 +231,7 @@ public class PolicyMutator {
 			builder.replace(policyTargetStartingIndex, targetEndingIndex, falseTarget);
 			String mutantFileName = getMutantFileName("PTF"+mutantIndex);
 			int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTF"+mutantIndex, mutantFileName, bugPositions);
+			PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" PTF"+mutantIndex, mutantFileName, bugPositions);
 			mutants.add(mutant);
 			mutantList.add(mutant);					
 			saveStringToTextFile(builder.toString(), mutantFileName);				
@@ -261,7 +261,7 @@ public class PolicyMutator {
 				String mutantFileName = getMutantFileName("CRC"+mutantIndex);
 				int bugPosition = -1;
 				int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CRC"+mutantIndex, mutantFileName, bugPositions);
+				PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CRC"+mutantIndex, mutantFileName, bugPositions);
 				mutants.add(mutant);
 				mutantList.add(mutant);
 				saveStringToTextFile(builder.toString(), mutantFileName);
@@ -302,7 +302,7 @@ public class PolicyMutator {
 		String mutantFileName = getMutantFileName("CRE"+mutantIndex);
 		int bugPosition = mutantIndex;
 		int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CRE"+mutantIndex, mutantFileName, bugPositions);
+		PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CRE"+mutantIndex, mutantFileName, bugPositions);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);
@@ -327,7 +327,7 @@ public class PolicyMutator {
 //				StringBuilder builder = new StringBuilder();
 //				policy.encode(builder);
 //				String mutantFileName = getMutantFileName("RER"+ruleIndex);
-//				mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RER"+ ruleIndex, mutantFileName, ruleIndex));
+//				mutantList.add(new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RER"+ ruleIndex, mutantFileName, ruleIndex));
 //				
 //				saveStringToTextFile(builder.toString(), mutantFileName);
 //				policy.getChildElements().add(ruleIndex, rule);
@@ -368,7 +368,7 @@ public class PolicyMutator {
 		String mutantFileName = getMutantFileName("RER"+mutantIndex);
 		int bugPosition = maxRules;
 		int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RER"+mutantIndex, mutantFileName, bugPositions);
+		PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RER"+mutantIndex, mutantFileName, bugPositions);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 //		policy.getChildElements().add(mutantIndex, rule);
@@ -436,7 +436,7 @@ public class PolicyMutator {
 		String mutantFileName1 = getMutantFileName("ANR"+ruleIndex + "_" + mutantIndex);
 		int bugPosition = ruleIndex;
 		int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANR"+ruleIndex + "_" + mutantIndex, mutantFileName1, bugPositions);
+		PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANR"+ruleIndex + "_" + mutantIndex, mutantFileName1, bugPositions);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder1.toString(), mutantFileName1);
@@ -454,7 +454,7 @@ public class PolicyMutator {
 			String mutantFileName2 = getMutantFileName("ANR"+ruleIndex+"_"+mutantIndex);
 			bugPosition = ruleIndex;
 			bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-			mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANR"+ruleIndex+"_"+mutantIndex, mutantFileName2, bugPositions);
+			mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANR"+ruleIndex+"_"+mutantIndex, mutantFileName2, bugPositions);
 			mutantList.add(mutant);
 			mutants.add(mutant);
 			saveStringToTextFile(builder2.toString(), mutantFileName2);
@@ -552,7 +552,7 @@ public class PolicyMutator {
 			String mutantFileName = getMutantFileName("FPR"+MUTANTINDEX);
 			int bugPosition = 0;
 			int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FPR"+MUTANTINDEX, mutantFileName, bugPositions);
+			PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FPR"+MUTANTINDEX, mutantFileName, bugPositions);
 			mutantList.add(mutant);
 			mutants.add(mutant);
 			saveStringToTextFile(builder.toString(), mutantFileName);
@@ -650,7 +650,7 @@ public class PolicyMutator {
 			String mutantFileName = getMutantFileName("FDR"+MUTANTINDEX);
 			int bugPosition = 0;
 			int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FDR"+MUTANTINDEX, mutantFileName, bugPositions);
+			PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FDR"+MUTANTINDEX, mutantFileName, bugPositions);
 			mutantList.add(mutant);
 			mutants.add(mutant);
 			saveStringToTextFile(builder.toString(), mutantFileName);
@@ -696,7 +696,7 @@ public class PolicyMutator {
 			String mutantFileName = getMutantFileName("RTT"+ruleIndex+"_"+mutantIndex);
 			int bugPosition = ruleIndex;
 			int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTT"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+			PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTT"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 			mutantList.add(mutant);
 			mutants.add(mutant);
 			saveStringToTextFile(builder.toString(), mutantFileName);
@@ -758,7 +758,7 @@ public class PolicyMutator {
 		String mutantFileName = getMutantFileName("RTF"+ruleIndex);
 		int bugPosition = ruleIndex;
 		int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+ruleIndex, mutantFileName, bugPositions);
+		PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RTF"+ruleIndex, mutantFileName, bugPositions);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);
@@ -795,7 +795,7 @@ public class PolicyMutator {
 				String mutantFileName = getMutantFileName("RCT"+ruleIndex+"_"+mutantIndex);
 				int bugPosition = ruleIndex;
 				int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCT"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+				PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCT"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 				mutantList.add(mutant);
 				mutants.add(mutant);
 				saveStringToTextFile(builder.toString(), mutantFileName);
@@ -870,7 +870,7 @@ public class PolicyMutator {
 		String mutantFileName = getMutantFileName("RCF"+ruleIndex);
 		int bugPosition = ruleIndex;
 		int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-		PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+ruleIndex, mutantFileName, bugPositions);
+		PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RCF"+ruleIndex, mutantFileName, bugPositions);
 		mutantList.add(mutant);
 		mutants.add(mutant);
 		saveStringToTextFile(builder.toString(), mutantFileName);
@@ -974,7 +974,7 @@ public class PolicyMutator {
 			String mutantFileName = getMutantFileName("ANF"+ruleIndex+"_"+mutantIndex);
 			int bugPosition = ruleIndex;
 			int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-			PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+			PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ANF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 			mutantList.add(mutant);
 			mutants.add(mutant);
 			saveStringToTextFile(builder.toString(), mutantFileName);
@@ -1041,7 +1041,7 @@ public class PolicyMutator {
 				String mutantFileName = getMutantFileName("RNF"+ruleIndex+"_"+mutantIndex);
 				int bugPosition = ruleIndex;
 				int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-				PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RNF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+				PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RNF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 				mutantList.add(mutant);
 				mutants.add(mutant);
 				saveStringToTextFile(builder.toString(), mutantFileName);
@@ -1112,7 +1112,7 @@ public class PolicyMutator {
 //						if (builder_str.substring(str_func_occur, func_end).equals(strFunc[i])) {
 //							builder_str.replace(str_func_occur, func_end, strFunc[3-i]);
 //							String mutantFileName = getMutantFileName("FCF"+mutantIndex);
-//							mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FCF"+mutantIndex, mutantFileName, ruleIndex));					
+//							mutantList.add(new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FCF"+mutantIndex, mutantFileName, ruleIndex));					
 //							saveStringToTextFile(builder_str.toString(), mutantFileName);
 //							mutantIndex++;
 //							break;
@@ -1136,7 +1136,7 @@ public class PolicyMutator {
 							String mutantFileName = getMutantFileName("FCF"+ruleIndex+"_"+mutantIndex);
 							int bugPosition = ruleIndex;
 							int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-							PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FCF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+							PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" FCF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 							mutantList.add(mutant);		
 							mutants.add(mutant);
 							saveStringToTextFile(builder_int.toString(), mutantFileName);
@@ -1209,7 +1209,7 @@ public class PolicyMutator {
 					String mutantFileName = getMutantFileName("CCF"+ruleIndex+"_"+mutantIndex);
 					int bugPosition = ruleIndex;
 					int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+					PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 					mutantList.add(mutant);
 					mutants.add(mutant);
 					saveStringToTextFile(builder_str.toString(), mutantFileName);
@@ -1227,7 +1227,7 @@ public class PolicyMutator {
 					String mutantFileName = getMutantFileName("CCF"+mutantIndex);
 					int bugPosition = ruleIndex;
 					int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, bugPositions);
+					PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" CCF"+mutantIndex, mutantFileName, bugPositions);
 					mutantList.add(mutant);					
 					mutants.add(mutant);
 					saveStringToTextFile(builder_int.toString(), mutantFileName);
@@ -1279,7 +1279,7 @@ public class PolicyMutator {
 					String mutantFileName = getMutantFileName("RPTE"+ruleIndex+"_"+mutantIndex);
 					int bugPosition = ruleIndex;
 					int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-					PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+					PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 					mutantList.add(mutant);
 					mutants.add(mutant);
 					saveStringToTextFile(builder.toString(), mutantFileName);
@@ -1301,7 +1301,7 @@ public class PolicyMutator {
 							String mutantFileName = getMutantFileName("RPTE"+ruleIndex+"_"+mutantIndex);
 							int bugPosition = ruleIndex;
 							int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-							PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+							PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 							mutantList.add(mutant);
 							mutants.add(mutant);
 							saveStringToTextFile(builder.toString(), mutantFileName);
@@ -1323,7 +1323,7 @@ public class PolicyMutator {
 									String mutantFileName = getMutantFileName("RPTE"+ruleIndex+"_"+mutantIndex);
 									int bugPosition = ruleIndex;
 									int[] bugPositions = appendArray(this.baseMutant.getFaultLocation(), bugPosition);
-									PolicyMutant mutant = new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
+									PolicyMutant mutant = new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" RPTE"+ruleIndex+"_"+mutantIndex, mutantFileName, bugPositions);
 									mutantList.add(mutant);
 									mutants.add(mutant);
 									saveStringToTextFile(builder.toString(), mutantFileName);
@@ -1506,7 +1506,7 @@ public class PolicyMutator {
 			StringBuilder builder = new StringBuilder();
 			policy.encode(builder);
 			String mutantFileName = getMutantFileName("ORG");
-			//mutantList.add(new PolicyMutant(PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ORG", mutantFileName, 0));
+			//mutantList.add(new PolicyMutant(this.baseMutant.getNumber() + " " + PolicySpreadSheetMutantSuite.MUTANT_KEYWORD+" ORG", mutantFileName, 0));
 			saveStringToTextFile(builder.toString(), mutantFileName);
 	}
 	
