@@ -153,7 +153,7 @@ public class FaultLocalizationExperiment {
 		List<String> createMutantMethods = new ArrayList<String>();
 		createMutantMethods.add("createPolicyTargetTrueMutants");//PTT
 		createMutantMethods.add("createPolicyTargetFalseMutants");//PTF
-		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC
+//		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC //comment out because cannot localize
 		createMutantMethods.add("createRuleEffectFlippingMutants");//CRE
 		createMutantMethods.add("createRemoveRuleMutants");//RER
 //		createMutantMethods.add("createAddNewRuleMutants");//ANR
