@@ -56,7 +56,7 @@ public class PolicyMutator {
 	String int_value2 = "-987654321";
 		
 	public PolicyMutator(String policyFilePath) throws Exception {
-		this.policyFilePath = policyFilePath;;
+		this.policyFilePath = policyFilePath;
 		policy = loadPolicy(policyFilePath);
 		File policyFile = new File(policyFilePath);
 		File mutantsFolder = new File(policyFile.getParent()+File.separator+"mutants");
