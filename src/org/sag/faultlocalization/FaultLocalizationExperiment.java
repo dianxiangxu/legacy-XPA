@@ -109,8 +109,8 @@ public class FaultLocalizationExperiment {
 		
 		// General
 		String[] policy = {"conference3", "fedora-rule3", "itrust3", "kmarket-blue-policy", "obligation3", "pluto3"};
-		String[] testsuite = {"Basic", "Exclusive", "Pair", "PDpair", "RuleCoverage", "RuleLevel", "MCDCCoverage"};
-		int policyNumber = 0;
+		String[] testsuite = {"Basic", "Exclusive", "Pair", "PDpair", "DecisionCoverage", "RuleLevel", "MCDCCoverage"};
+		int policyNumber = 3;
 		int testsuiteNumber = 6;
 		
 		new FaultLocalizationExperiment("Experiments//" + policy[policyNumber]+ "//test_suites//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + ".xls",
