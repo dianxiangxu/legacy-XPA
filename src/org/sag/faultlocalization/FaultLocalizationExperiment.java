@@ -1,32 +1,25 @@
 package org.sag.faultlocalization;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.sag.coverage.PolicySpreadSheetTestRecord;
 import org.sag.coverage.PolicySpreadSheetTestSuite;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
 
+import com.opencsv.CSVWriter;
+
 
 public class FaultLocalizationExperiment {
-	
 	private List<PolicyMutant> policyMutants; 
-	//one dimension for different policy mutants, the other for different fault localizers
-	private ArrayList<ArrayList<SpectrumBasedDiagnosisResults>> experimentResults;
 	
 	public FaultLocalizationExperiment(String testSuiteSpreadSheetFile,
 			String policyMutantSpreadsheetFile, String experimentResultFileName)
 			throws Exception {
-		experimentResults = new ArrayList<ArrayList<SpectrumBasedDiagnosisResults>>();
 		policyMutants = PolicySpreadSheetMutantSuite
 				.readMutantSuite(policyMutantSpreadsheetFile);
 		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileName);
@@ -47,7 +40,6 @@ public class FaultLocalizationExperiment {
 				mutantLists.get(i).addAll(mutator.getMutantList());
 			}
 		}
-		experimentResults = new ArrayList<ArrayList<SpectrumBasedDiagnosisResults>>();
 		policyMutants = mutantLists.get(numFaults);
 		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileNam);
 	}
@@ -55,81 +47,64 @@ public class FaultLocalizationExperiment {
 	private void runExperiment (String testSuiteSpreadSheetFile,  String experimentResultFileName) throws Exception {
 
 		ArrayList<PolicySpreadSheetTestRecord> testSuite = PolicySpreadSheetTestSuite.readTestSuite(testSuiteSpreadSheetFile);
-		for (PolicyMutant policyMutant: policyMutants ){
-			try {
-				ArrayList<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults = policyMutant.run(testSuite);
-				if (spectrumBasedDiagnosisResults!=null)
-					experimentResults.add(spectrumBasedDiagnosisResults);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}		
-
-		}
-		if (experimentResults.size()>0) {
-			writeExperimentResult(experimentResultFileName);
-		}
-	}
-
-	public void writeExperimentResult(String fileName){
-		HSSFWorkbook workBook = new HSSFWorkbook();
-		workBook.createSheet("mutation testing results");
-		Sheet sheet = workBook.getSheetAt(0);
-		Row row = sheet.createRow(0);
-		writeTitleRow(row, experimentResults.get(0));
-		for (int mutantIndex =0; mutantIndex<experimentResults.size(); mutantIndex++){
-			row = sheet.createRow(mutantIndex+1);
-			writeMutantResultsRow(row, policyMutants.get(mutantIndex).getNumber(), experimentResults.get(mutantIndex)); 
-		}
-		writeAverageRow(sheet.createRow(experimentResults.size()+2));
-		try {
-			FileOutputStream out = new FileOutputStream(fileName);
-			workBook.write(out);
-			out.close();
-		}
-		catch (IOException ioe){
-			ioe.printStackTrace();
-		}
-	}
-
-	private void writeMutantResultsRow(Row row,String mutantNumber, ArrayList<SpectrumBasedDiagnosisResults> results){
-		Cell cell = row.createCell(0);
-		cell.setCellValue(mutantNumber);
-		for (int i=0; i<results.size(); i++){
-			cell = row.createCell(i+1);
-			cell.setCellValue(results.get(i).getScore());
-		}		
-	}
-
-	private void writeAverageRow(Row row){
-		double[] totals = new double[(experimentResults.get(0).size())];
-		for (int i=0; i<totals.length; i++){
-			totals[i]=0.0;
-		}
-		for (int mutantIndex =0; mutantIndex<experimentResults.size(); mutantIndex++){
-			ArrayList<SpectrumBasedDiagnosisResults> results = experimentResults.get(mutantIndex);
-			for (int i=0; i<results.size(); i++){
-				totals[i]+= results.get(i).getScore();
+		CSVWriter writer = new CSVWriter(new FileWriter("test.csv"), ',');
+		ArrayList<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults = null;
+		int validResults = 0;
+		int index = 0;
+		do {
+			spectrumBasedDiagnosisResults = policyMutants.get(index).run(testSuite);
+			index++;
+		} while (spectrumBasedDiagnosisResults == null);
+		int numFaultlocalizers = spectrumBasedDiagnosisResults.size();
+		double[] totals = new double[numFaultlocalizers];
+		//writing title row
+		writeCSVTitleRow(writer, spectrumBasedDiagnosisResults);
+		//writing each result row
+		for (int i = 0; i < policyMutants.size(); i++) {
+			PolicyMutant mutant = policyMutants.get(i);
+			spectrumBasedDiagnosisResults = mutant.run(testSuite);
+			if (spectrumBasedDiagnosisResults!=null) {
+				validResults++;
+				writeCSVResultRow(writer, spectrumBasedDiagnosisResults, mutant, totals);
 			}
 		}
-		Cell cell = row.createCell(0);
-		cell.setCellValue("Average");
-		for (int i=0; i<totals.length; i++){
-			cell = row.createCell(i+1);
-			if (experimentResults.size()>0){
-				cell.setCellValue(String.format( "%.3f", totals[i]/experimentResults.size()));
-			}
-		}		
+		//writing average row
+		writeCSVAverageRow(writer, totals, validResults);
+		writer.close();
 	}
 
-	private void writeTitleRow(Row row, ArrayList<SpectrumBasedDiagnosisResults> results){
-		Cell cell = row.createCell(0);
-		cell.setCellValue("");
-		for (int i=0; i<results.size(); i++){
-			cell = row.createCell(i+1);
-			cell.setCellValue(results.get(i).getMethodName());
-		}		
+	private static void writeCSVTitleRow(CSVWriter writer, List<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults) {
+		int numFaultlocalizers = spectrumBasedDiagnosisResults.size();
+		String[] titles = new String[numFaultlocalizers + 1];
+		titles[0] = "mutant number";
+		for (int i = 0; i < spectrumBasedDiagnosisResults.size(); i++)
+			titles[i + 1] = spectrumBasedDiagnosisResults.get(i).getMethodName();
+		writer.writeNext(titles);
 	}
+	
+	private static void writeCSVResultRow(CSVWriter writer, List<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults, PolicyMutant mutant, double[] totals) {
+		int numFaultlocalizers = spectrumBasedDiagnosisResults.size();
+		String[] entries = new String[numFaultlocalizers + 1];
+		entries[0] = mutant.getNumber();
+		for (int i = 0; i < spectrumBasedDiagnosisResults.size(); i++) {
+			double score = spectrumBasedDiagnosisResults.get(i).getScore();
+			entries[i + 1] = String.format("%f", score);
+			totals[i] += score;
+		}
+		writer.writeNext(entries);
+	}
+	
+	private static void writeCSVAverageRow(CSVWriter writer, double[] totals, int validResults) {
+		String[] entries = new String[totals.length + 1];
+		entries[0] = "average";
+		for(int i = 0; i < totals.length; i++) {
+			double average = totals[i]/validResults;
+			entries[i + 1] = String.format("%.3f", average);
+		}
+		writer.writeNext(entries);
+	}
+	
+
 	
 	public static void main(String[] args) throws Exception{
 		
