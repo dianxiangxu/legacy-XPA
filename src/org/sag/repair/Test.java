@@ -1,11 +1,6 @@
 package org.sag.repair;
 
-import java.util.List;
-
-
 import org.sag.coverage.PolicySpreadSheetTestSuite;
-import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
-import org.sag.faultlocalization.SpectrumBasedFaultLocalizer;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
