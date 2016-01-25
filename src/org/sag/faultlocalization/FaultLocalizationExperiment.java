@@ -47,7 +47,7 @@ public class FaultLocalizationExperiment {
 	private void runExperiment (String testSuiteSpreadSheetFile,  String experimentResultFileName) throws Exception {
 
 		ArrayList<PolicySpreadSheetTestRecord> testSuite = PolicySpreadSheetTestSuite.readTestSuite(testSuiteSpreadSheetFile);
-		CSVWriter writer = new CSVWriter(new FileWriter("test.csv"), ',');
+		CSVWriter writer = new CSVWriter(new FileWriter(experimentResultFileName), ',');
 		ArrayList<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults = null;
 		int validResults = 0;
 		int index = 0;
@@ -125,7 +125,7 @@ public class FaultLocalizationExperiment {
 		
 		String testSuiteSpreadSheetFile = "Experiments//" + policy[policyNumber]+ "//test_suites//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + ".xls";
 		String policyMutantSpreadsheetFil = "Experiments//" + policy[policyNumber] + "//mutants//" + policy[policyNumber] + "_mutants.xls";
-		String experimentResultFileNam = "Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.xls";
+		String experimentResultFileNam = "Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.csv";
 //		new FaultLocalizationExperiment(testSuiteSpreadSheetFile, policyMutantSpreadsheetFil, experimentResultFileNam);
 		
 		//multiple faults
