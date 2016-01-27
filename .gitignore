@@ -5,6 +5,7 @@
 /Z3_output
 /bin
 Z3-str/str
+*.xml
 
 #ignore cpp temporary files
 # Compiled Object files

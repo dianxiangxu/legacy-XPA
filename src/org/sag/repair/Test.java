@@ -1,11 +1,6 @@
 package org.sag.repair;
 
-import java.util.List;
-
-
 import org.sag.coverage.PolicySpreadSheetTestSuite;
-import org.sag.faultlocalization.SpectrumBasedDiagnosisResults;
-import org.sag.faultlocalization.SpectrumBasedFaultLocalizer;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
@@ -41,9 +36,10 @@ public class Test {
 		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage_NoError//conference3_MCDCCoverage_NoError.xls";
 		String policyFileToRepair = "Experiments//conference3//mutants//conference3_ANR4.xml";
 		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
+		PolicyMutant mutant = new PolicyMutant("ANR4", policyFileToRepair, new int[]{4});
 //		PolicyMutant correctedPolicy = repairer.repair(policyFileToRepair);
 //		PolicyMutant correctedPolicy = repairer.repairOneByOne_new(policyFileToRepair);
-		PolicyMutant correctedPolicy = repairer.repairRandomOrder(policyFileToRepair);
+		PolicyMutant correctedPolicy = repairer.repairRandomOrder(mutant);
 		showRepairResult(correctedPolicy, policyFileToRepair);
 	}
 	
@@ -112,8 +108,9 @@ public class Test {
 //			PolicyMutant correctedPolicy = repairer.repairBySuspicionRank(policyFileToRepair, suspicionRank);
 //			showRepairResult(correctedPolicy, policyFileToRepair);
 //		}
-		
-		PolicyMutant correctedPolicy = repairer.repairSmartly(policyFileToRepair, "sokal");
+		PolicyMutant mutant = new PolicyMutant("ANR4", policyFileToRepair,
+				new int[] { 4 });
+		PolicyMutant correctedPolicy = repairer.repairSmartly(mutant, "sokal");
 		showRepairResult(correctedPolicy, policyFileToRepair);
 		
 	}
