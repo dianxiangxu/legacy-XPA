@@ -22,8 +22,8 @@ public class PolicyRepairer {
 	@SuppressWarnings("serial")
 	static private List<List<String>> repairMethodPairList = new ArrayList<List<String>>() {
 		{
-//			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
-//			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
+			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
+			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "jaccard")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "tarantula")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai")));
@@ -31,13 +31,13 @@ public class PolicyRepairer {
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "cbi")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "hamann")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "simpleMatching")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
 			
 		}
 	};

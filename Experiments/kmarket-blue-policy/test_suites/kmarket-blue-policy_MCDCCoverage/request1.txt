@@ -1,7 +1,0 @@
-<Request xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17" CombinedDecision="false" ReturnPolicyIdList="false">
-<Attributes Category="y5n2a0rec8">
-<Attribute AttributeId="vkootlnech" IncludeInResult = "false">
-<AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">Indeterminate</AttributeValue>
-</Attribute>
-</Attributes>
-</Request>
