@@ -1,8 +1,11 @@
 package org.sag.faultlocalization;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.sag.coverage.PolicySpreadSheetTestRecord;
@@ -11,23 +14,22 @@ import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.sag.mutation.PolicySpreadSheetMutantSuite;
 
+import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 
 public class FaultLocalizationExperiment {
 	private List<PolicyMutant> policyMutants; 
 	
-	public FaultLocalizationExperiment(String testSuiteSpreadSheetFile,
-			String policyMutantSpreadsheetFile, String experimentResultFileName)
-			throws Exception {
-		policyMutants = PolicySpreadSheetMutantSuite
-				.readMutantSuite(policyMutantSpreadsheetFile);
-		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileName);
+	public FaultLocalizationExperiment(String testSuiteSpreadSheetFile, String MutantsCSVFileName
+			, String experimentResultFileNam) throws Exception {
+
+		policyMutants = readMutantsCSVFile(MutantsCSVFileName);
+		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileNam);
 	}
 	
-	public FaultLocalizationExperiment(String policyFile,
-			String testSuiteSpreadSheetFile, int numFaults,
-			List<String> createMutantMethods, String experimentResultFileNam) throws Exception {
+	private static List<PolicyMutant> createMultiFaultMutants(String policyFile, int numFaults,
+			List<String> createMutantMethods) throws Exception {
 		List<List<PolicyMutant>> mutantLists = new ArrayList<List<PolicyMutant>>();
 		PolicyMutant baseMutant = new PolicyMutant("", policyFile, new int[] {});
 		mutantLists.add(new ArrayList<PolicyMutant>());
@@ -40,8 +42,38 @@ public class FaultLocalizationExperiment {
 				mutantLists.get(i).addAll(mutator.getMutantList());
 			}
 		}
-		policyMutants = mutantLists.get(numFaults);
-		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileNam);
+		return mutantLists.get(numFaults);
+	}
+	
+	private static String createMutantsCSVFile(List<PolicyMutant> mutantList) throws IOException {
+		if (mutantList == null || mutantList.size() == 0)
+			return "";
+		String directoryName = new File(mutantList.get(0).getMutantFilePath()).getParent();
+		String mutantsCSVFileName = directoryName + File.separator + "mutants.csv";
+		CSVWriter writer = new CSVWriter(new FileWriter(mutantsCSVFileName), ',');
+		for (PolicyMutant mutant: mutantList) {
+			String[] entry = new String[3];
+			entry[0] = mutant.getNumber();
+			entry[1] = new File(mutant.getMutantFilePath()).getName();
+			entry[2] = Arrays.toString(mutant.getFaultLocation());
+			writer.writeNext(entry);
+		}
+		writer.close();
+		return mutantsCSVFileName;
+	}
+	
+	private List<PolicyMutant> readMutantsCSVFile(String mutantsCSVFileName) throws IOException {
+		CSVReader reader = new CSVReader(new FileReader(mutantsCSVFileName));
+		List<String[]> entries = reader.readAll();
+		reader.close();
+		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
+		for (String[] entry: entries) {
+			String mutantNumber = entry[0];
+			String fileName = new File(mutantsCSVFileName).getParent() + File.separator + entry[1];
+			int[] bugPositions = PolicySpreadSheetMutantSuite.fromString(entry[2]);
+			mutantList.add(new PolicyMutant(mutantNumber, fileName, bugPositions));
+		}
+		return mutantList;
 	}
 	
 	private void runExperiment (String testSuiteSpreadSheetFile,  String experimentResultFileName) throws Exception {
@@ -84,14 +116,14 @@ public class FaultLocalizationExperiment {
 	
 	private static void writeCSVResultRow(CSVWriter writer, List<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults, PolicyMutant mutant, double[] totals) {
 		int numFaultlocalizers = spectrumBasedDiagnosisResults.size();
-		String[] entries = new String[numFaultlocalizers + 1];
-		entries[0] = mutant.getNumber();
+		String[] entry = new String[numFaultlocalizers + 1];
+		entry[0] = mutant.getNumber();
 		for (int i = 0; i < spectrumBasedDiagnosisResults.size(); i++) {
 			double score = spectrumBasedDiagnosisResults.get(i).getScore();
-			entries[i + 1] = String.format("%f", score);
+			entry[i + 1] = String.format("%f", score);
 			totals[i] += score;
 		}
-		writer.writeNext(entries);
+		writer.writeNext(entry);
 	}
 	
 	private static void writeCSVAverageRow(CSVWriter writer, double[] totals, int validResults) {
@@ -125,7 +157,7 @@ public class FaultLocalizationExperiment {
 		
 		String testSuiteSpreadSheetFile = "Experiments//" + policy[policyNumber]+ "//test_suites//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + ".xls";
 		String policyMutantSpreadsheetFil = "Experiments//" + policy[policyNumber] + "//mutants//" + policy[policyNumber] + "_mutants.xls";
-		String experimentResultFileNam = "Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.csv";
+		String experimentResultFileName = "Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.csv";
 //		new FaultLocalizationExperiment(testSuiteSpreadSheetFile, policyMutantSpreadsheetFil, experimentResultFileNam);
 		
 		//multiple faults
@@ -147,10 +179,14 @@ public class FaultLocalizationExperiment {
 		createMutantMethods.add("createRemoveNotFunctionMutants");//RNF
 		createMutantMethods.add("createRemoveParallelTargetElementMutants");//RPTE
 //		createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
-		
+
 		String policyFile = "Experiments" + File.separator + policy[policyNumber] + File.separator + policy[policyNumber] + ".xml";
 		int numFaults = 2;
-		new FaultLocalizationExperiment(policyFile, testSuiteSpreadSheetFile, numFaults, createMutantMethods, experimentResultFileNam);
+		List<PolicyMutant> mutantList = createMultiFaultMutants(policyFile, numFaults, createMutantMethods);	
+		String MutantsCSVFileName = createMutantsCSVFile(mutantList);
+
+		new FaultLocalizationExperiment( testSuiteSpreadSheetFile,  MutantsCSVFileName
+				, experimentResultFileName);
 	}
 	
 

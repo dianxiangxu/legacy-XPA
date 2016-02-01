@@ -77,11 +77,11 @@ public class PolicySpreadSheetMutantSuite {
 		mutantSuite.add(new PolicyMutant(keyword, mutantFileName, bugPositions));
 	}
 	
-	private static int[] fromString(String str) {
+	public static int[] fromString(String str) {
 		String[] strs = str.replace("[", "").replace("]", "").split(",");
 		int results[] = new int[strs.length];
 		for (int i = 0; i < strs.length; i++) {
-			results[i] = Integer.parseInt(strs[i]);
+			results[i] = Integer.parseInt(strs[i].trim());
 		}
 		return results;
 	}
