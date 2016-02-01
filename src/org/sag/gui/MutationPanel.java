@@ -155,9 +155,13 @@ public class MutationPanel extends JPanel {
 	public void setUpMutantPanel(){
 		removeAll();
 		setLayout(new BorderLayout());
+		String[] columnNames = { "No", "Mutant Name", "Mutant File", "Bug Position", "Test Result" };
 		try {
-			String[] columnNames = { "No", "Mutant Name", "Mutant File", "Bug Position", "Test Result" };
 			data = mutantSuite.getMutantData();
+			if (data.size() == 0) {
+				JOptionPane.showMessageDialog(xpa, "There is no mutant!");
+				return;
+			}
 			System.out.println(data.size() + " data size");
 			System.out.println(data.toString());
 			tablePanel = new GeneralTablePanel(data, columnNames, 5);
@@ -182,7 +186,7 @@ public class MutationPanel extends JPanel {
 			File mutantSuiteFile = fileChooser.getSelectedFile();
 			if (!mutantSuiteFile.toString().endsWith(".xls")) {
 					JOptionPane.showMessageDialog(xpa,
-							"The open File is not a test suite *.xls",
+							"The open File is not a mutant spreadsheet *.xls",
 							"Error of Selection",
 							JOptionPane.WARNING_MESSAGE);
 			} else {

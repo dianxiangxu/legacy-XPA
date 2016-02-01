@@ -151,7 +151,8 @@ public class FaultLocalizationExperiment {
 		
 		// General
 		String[] policy = {"conference3", "fedora-rule3", "itrust3", "kmarket-blue-policy", "obligation3", "pluto3"};
-		String[] testsuite = {"Basic", "Exclusive", "Pair", "PDpair", "RuleCoverage", "RuleLevel", "MCDCCoverage"};
+
+		String[] testsuite = {"Basic", "Exclusive", "Pair", "PDpair", "DecisionCoverage", "RuleLevel", "MCDCCoverage"};
 		int policyNumber = 0;
 		int testsuiteNumber = 6;
 		
