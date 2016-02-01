@@ -15,6 +15,7 @@ public class SpectrumBasedDiagnosisResults {
 	private double score;
 	private String methodName;
 	private List<Integer> ruleIndexRankedBySuspicion;
+	private PolicyElementCoefficient[] ruleCoefficients;
 	/**
 	 * @return the rule indexes ranked by their suspicion
 	 */
@@ -22,7 +23,7 @@ public class SpectrumBasedDiagnosisResults {
 		return ruleIndexRankedBySuspicion;
 	}
 
-	private PolicyElementCoefficient[] init(String methodName, double[] s) {
+	private void init(String methodName, double[] s) {
 		this.methodName = methodName;
 		PolicyElementCoefficient[] ruleCoefficients = new PolicyElementCoefficient[s.length];
 		for (int index=0; index<s.length; index++) {
@@ -34,7 +35,7 @@ public class SpectrumBasedDiagnosisResults {
 		for(PolicyElementCoefficient coefficient: ruleCoefficients) {
 			ruleIndexRankedBySuspicion.add(coefficient.getElementIndex());
 		}
-		return ruleCoefficients; 
+		this.ruleCoefficients = ruleCoefficients;
 	}
 	
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s){
@@ -48,7 +49,7 @@ public class SpectrumBasedDiagnosisResults {
 	 */
 	public SpectrumBasedDiagnosisResults(String methodName, double[] s,
 			int[] bugPositions) {
-		PolicyElementCoefficient[] ruleCoefficients = init(methodName, s);
+		init(methodName, s);
 		double[] scores = new double[bugPositions.length];
 		for (int i = 0; i < bugPositions.length; i++) {
 			int bugPosition = bugPositions[i];
@@ -176,7 +177,10 @@ public class SpectrumBasedDiagnosisResults {
 
 	public void printCoefficients(){
 		System.out.println(methodName);
-		// coefficients is no longer a member variable thus cannot be printed
+		for (PolicyElementCoefficient coefficient: this.ruleCoefficients) {
+			System.out.println("rule " + coefficient.getElementIndex() + " : " + coefficient.getCoefficient());
+		}
+		System.out.println();
 	}
 		
 }
