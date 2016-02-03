@@ -167,14 +167,14 @@ public class FaultLocalizationExperiment {
 		createMutantMethods.add("createPolicyTargetFalseMutants");//PTF
 //		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC //comment out because cannot localize
 		createMutantMethods.add("createRuleEffectFlippingMutants");//CRE
-		createMutantMethods.add("createRemoveRuleMutants");//RER
+//		createMutantMethods.add("createRemoveRuleMutants");//RER
 //		createMutantMethods.add("createAddNewRuleMutants");//ANR
 		createMutantMethods.add("createRuleTargetTrueMutants");//RTT
 		createMutantMethods.add("createRuleTargetFalseMutants");//RTF
 		createMutantMethods.add("createRuleConditionTrueMutants");//RCT
 		createMutantMethods.add("createRuleConditionFalseMutants");//RCF
-		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
-		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
+//		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
+//		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
 //		createMutantMethods.add("createRuleTypeReplacedMutants");//RTR
 		createMutantMethods.add("createAddNotFunctionMutants");//ANF
 		createMutantMethods.add("createRemoveNotFunctionMutants");//RNF
