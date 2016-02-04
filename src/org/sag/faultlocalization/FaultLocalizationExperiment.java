@@ -48,6 +48,7 @@ public class FaultLocalizationExperiment {
 
 		ArrayList<PolicySpreadSheetTestRecord> testSuite = PolicySpreadSheetTestSuite.readTestSuite(testSuiteSpreadSheetFile);
 		CSVWriter writer = new CSVWriter(new FileWriter(experimentResultFileName), ',');
+		writer.flush();
 		ArrayList<SpectrumBasedDiagnosisResults> spectrumBasedDiagnosisResults = null;
 		int validResults = 0;
 		int index = 0;
@@ -129,20 +130,20 @@ public class FaultLocalizationExperiment {
 		String experimentResultFileNam = "Experiments//" + policy[policyNumber] + "//fault-localization//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "_fault-localiazation.csv";
 //		new FaultLocalizationExperiment(testSuiteSpreadSheetFile, policyMutantSpreadsheetFil, experimentResultFileNam);
 		
-		//multiple faults
+		//multiple faults 10 types
 		List<String> createMutantMethods = new ArrayList<String>();
 		createMutantMethods.add("createPolicyTargetTrueMutants");//PTT
 		createMutantMethods.add("createPolicyTargetFalseMutants");//PTF
 //		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC //comment out because cannot localize
 		createMutantMethods.add("createRuleEffectFlippingMutants");//CRE
-		createMutantMethods.add("createRemoveRuleMutants");//RER
+//		createMutantMethods.add("createRemoveRuleMutants");//RER
 //		createMutantMethods.add("createAddNewRuleMutants");//ANR
 		createMutantMethods.add("createRuleTargetTrueMutants");//RTT
 		createMutantMethods.add("createRuleTargetFalseMutants");//RTF
 		createMutantMethods.add("createRuleConditionTrueMutants");//RCT
 		createMutantMethods.add("createRuleConditionFalseMutants");//RCF
-		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
-		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
+//		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
+//		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
 //		createMutantMethods.add("createRuleTypeReplacedMutants");//RTR
 		createMutantMethods.add("createAddNotFunctionMutants");//ANF
 		createMutantMethods.add("createRemoveNotFunctionMutants");//RNF
@@ -150,7 +151,7 @@ public class FaultLocalizationExperiment {
 //		createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
 		
 		String policyFile = "Experiments" + File.separator + policy[policyNumber] + File.separator + policy[policyNumber] + ".xml";
-		int numFaults = 2;
+		int numFaults = 1;
 		new FaultLocalizationExperiment(policyFile, testSuiteSpreadSheetFile, numFaults, createMutantMethods, experimentResultFileNam);
 	}
 	
