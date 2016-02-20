@@ -11,10 +11,11 @@ public class PolicyElementCoefficient implements Comparable<PolicyElementCoeffic
 	}
 	
  	public int compareTo(PolicyElementCoefficient other){
- 		if (approximateEqual(this.coefficient, other.coefficient))
- 			return 0;
- 		else  // to sort in reverse order
- 			return this.coefficient > other.coefficient? -1: 1;
+ 		return Double.compare(other.coefficient, this.coefficient);
+// 		if (approximateEqual(this.coefficient, other.coefficient))
+// 			return 0;
+// 		else  // to sort in reverse order
+// 			return this.coefficient > other.coefficient? -1: 1;
   	}
  	
  	public double getCoefficient(){

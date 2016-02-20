@@ -31,8 +31,15 @@ public class ExperimentOnRepair {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		String PolicyFilePath = "Experiments//conference3//conference3.xml";
-		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
+//		String PolicyFilePath = "Experiments//conference3//conference3.xml";
+//		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
+//		String resultsFileName = "Experiments//conference3//conference3_repair_statistics.xls";
+//		String PolicyFilePath = "Experiments//fedora-rule3//fedora-rule3.xml";
+//		String testSuiteSpreadSheetFile = "Experiments//fedora-rule3//test_suites//fedora-rule3_MCDCCoverage//fedora-rule3_MCDCCoverage.xls";
+//		String resultsFileName = "Experiments//fedora-rule3//fedora-rule3_repair_statistics.xls";
+		String PolicyFilePath = "Experiments//itrust3//itrust3.xml";
+		String testSuiteSpreadSheetFile = "Experiments//itrust3//test_suites//itrust3_MCDCCoverage//itrust3_MCDCCoverage.xls";
+		String resultsFileName = "Experiments//itrust3//itrust3_repair_statistics.xls";
 		ExperimentOnRepair experiment = new ExperimentOnRepair(PolicyFilePath,
 				testSuiteSpreadSheetFile);
 		List<List<String>> repairMethodPairList = PolicyRepairer.getRepairMethodPairList();
@@ -55,8 +62,7 @@ public class ExperimentOnRepair {
 		}
 
 		
-		String fileName = "Experiments//conference3//conference3_repair_statistics.xls";
-		writeToExcelFile(fileName, repairMethodPairList, 
+		writeToExcelFile(resultsFileName, repairMethodPairList, 
 				experiment.mutantList, allCorrectedPolicyLists, 
 				durationList, allNumTiresLists);
 //		System.out.printf("running time: %03d milliseconds\n", duration);
@@ -128,8 +134,8 @@ public class ExperimentOnRepair {
 		policyMutator.createPolicyTargetFalseMutants();
 		policyMutator.createCombiningAlgorithmMutants();
 		policyMutator.createRuleEffectFlippingMutants();
-		policyMutator.createRemoveRuleMutants();
-		policyMutator.createAddNewRuleMutants();
+//		policyMutator.createRemoveRuleMutants();
+//		policyMutator.createAddNewRuleMutants();
 		//policyMutator.createRuleTargetTrueMutants();
 		policyMutator.createRuleTargetFalseMutants();
 		policyMutator.createRuleConditionTrueMutants();

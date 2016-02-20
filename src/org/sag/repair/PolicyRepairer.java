@@ -307,12 +307,12 @@ public class PolicyRepairer {
 		if(correctMutant != null) {
 			return correctMutant;
 		}
-		//ANR
-		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
-		correctMutant = find1stCorrectMutant(mutantList);
-		if(correctMutant != null) {
-			return correctMutant;
-		}
+//		//ANR
+//		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
+//		correctMutant = find1stCorrectMutant(mutantList);
+//		if(correctMutant != null) {
+//			return correctMutant;
+//		}
 		//RTT
 		mutantList = mutator.createRuleTargetTrueMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
