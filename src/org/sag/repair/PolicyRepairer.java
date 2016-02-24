@@ -137,8 +137,13 @@ public class PolicyRepairer {
 	 * to repair
 	 */
 	public PolicyMutant repairSmartly(PolicyMutant policyFileToRepair, String faultLocalizeMethod) throws Exception {
+		List<Integer> suspicionRank = getSuspicionRank(policyFileToRepair, faultLocalizeMethod, this.testSuiteFile); 
+		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
+	}
+
+	 static List<Integer> getSuspicionRank(PolicyMutant policyFileToRepair, String faultLocalizeMethod, String testSuiteFile) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
-		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(this.testSuiteFile,
+		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile,
 				policyFileToRepair.getMutantFilePath());
 		PolicyCoverageFactory.init();
 		testSuite.runAllTests();//we need to run tests to get coverage information, which is in turn used to get suspicion rank
@@ -146,16 +151,15 @@ public class PolicyRepairer {
 				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);
 		suspicionRank = diagnosisResults.getRuleIndexRankedBySuspicion();
 		suspicionRank.add(0, -1);// a temporary solution for fault in combining algorithms
-		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
+		return suspicionRank;
 	}
-
 
 	
 	public PolicyMutant repairRandomOrder(PolicyMutant policyFileToRepair) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
-		for(int bugPosition = -1; bugPosition <= this.getRuleList(mutator).size(); bugPosition++) {
+		for(int bugPosition = -1; bugPosition <= mutator.getRuleList().size(); bugPosition++) {
 			suspicionRank.add(bugPosition);
 		}
 		suspicionRank.add(maxRules);
@@ -172,7 +176,7 @@ public class PolicyRepairer {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
-		for(int bugPosition = -1; bugPosition <= this.getRuleList(mutator).size(); bugPosition++) {
+		for(int bugPosition = -1; bugPosition <= mutator.getRuleList().size(); bugPosition++) {
 			suspicionRank.add(bugPosition);
 		}
 		suspicionRank.add(maxRules);
@@ -182,7 +186,7 @@ public class PolicyRepairer {
 	public PolicyMutant repairBySuspicionRank(PolicyMutant policyFileToRepair, List<Integer> suspicionRank) throws Exception {
 		PolicyMutant correctMutant = null;
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
-		List<Rule> ruleList = getRuleList(mutator);
+		List<Rule> ruleList = mutator.getRuleList();
 		int maxRules = mutator.getPolicy().getChildElements().size();
 		//bugPosition equals to -1 indicates fault in combining algorithm
 		int bugPosition = Integer.MAX_VALUE;
@@ -228,16 +232,6 @@ public class PolicyRepairer {
 		this.numTriesBeforSucceed = numTriesBeforSucceed;
 	}
 
-	private List<Rule> getRuleList(PolicyMutator mutator) {
-		List<Rule> ruleList = new ArrayList<Rule>();
-		for (CombinerElement rule : mutator.getPolicy().getChildElements()) {
-			PolicyTreeElement tree = rule.getElement();
-			if (tree instanceof Rule) {
-				ruleList.add((Rule)tree);
-			}
-		}
-		return ruleList;
-	}
 	
 	private PolicyMutant repairBugPositionCombiningAlgorithm(PolicyMutator mutator) throws Exception {
 		//create mutant methods who's bugPosition == -1
@@ -280,7 +274,7 @@ public class PolicyRepairer {
 	
 	private PolicyMutant repairBugPositionMaxRules(PolicyMutator mutator
 			) throws Exception {
-		List<Rule> ruleList = getRuleList(mutator);
+		List<Rule> ruleList = mutator.getRuleList();
 		List<PolicyMutant> mutantList = null;
 		PolicyMutant correctMutant = null;
 		int maxRules = mutator.getPolicy().getChildElements().size();

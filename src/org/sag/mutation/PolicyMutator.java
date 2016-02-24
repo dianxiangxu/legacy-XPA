@@ -1613,4 +1613,15 @@ public class PolicyMutator {
 		return this.mutantList;
 	}
 
+	public List<Rule> getRuleList() {
+		List<Rule> ruleList = new ArrayList<Rule>();
+		for (CombinerElement rule : this.getPolicy().getChildElements()) {
+			PolicyTreeElement tree = rule.getElement();
+			if (tree instanceof Rule) {
+				ruleList.add((Rule)tree);
+			}
+		}
+		return ruleList;
+	}
+
 }

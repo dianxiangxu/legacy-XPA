@@ -28,7 +28,7 @@ public class FaultLocalizationExperiment {
 		this.runExperiment(testSuiteSpreadSheetFile, experimentResultFileNam);
 	}
 	
-	private static List<PolicyMutant> createMultiFaultMutants(String policyFile, int numFaults,
+	public static List<PolicyMutant> createMultiFaultMutants(String policyFile, int numFaults,
 			List<String> createMutantMethods) throws Exception {
 		List<List<PolicyMutant>> mutantLists = new ArrayList<List<PolicyMutant>>();
 		PolicyMutant baseMutant = new PolicyMutant("", policyFile, new int[] {});
