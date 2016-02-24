@@ -134,8 +134,8 @@ public class ExperimentOnRepair {
 		policyMutator.createPolicyTargetFalseMutants();
 		policyMutator.createCombiningAlgorithmMutants();
 		policyMutator.createRuleEffectFlippingMutants();
-//		policyMutator.createRemoveRuleMutants();
-//		policyMutator.createAddNewRuleMutants();
+		policyMutator.createRemoveRuleMutants();
+		policyMutator.createAddNewRuleMutants();
 		//policyMutator.createRuleTargetTrueMutants();
 		policyMutator.createRuleTargetFalseMutants();
 		policyMutator.createRuleConditionTrueMutants();
