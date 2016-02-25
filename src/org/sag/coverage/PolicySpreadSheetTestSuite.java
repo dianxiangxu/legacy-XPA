@@ -157,6 +157,7 @@ public class PolicySpreadSheetTestSuite {
 	
 	// 11/1/15 Change return type from boolean[] to TestCellResult[].
 	public TestCellResult[] runAllTestsOnMutant() throws Exception {
+		PolicyCoverageFactory.init();
 		try {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);
 			
@@ -193,6 +194,7 @@ public class PolicySpreadSheetTestSuite {
 	}
 	
 	public boolean runAllTests() throws Exception {
+		PolicyCoverageFactory.init();
 		boolean allPass = true;
 		try {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);

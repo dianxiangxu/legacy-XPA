@@ -145,7 +145,6 @@ public class PolicyRepairer {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile,
 				policyFileToRepair.getMutantFilePath());
-		PolicyCoverageFactory.init();
 		testSuite.runAllTests();//we need to run tests to get coverage information, which is in turn used to get suspicion rank
 		SpectrumBasedDiagnosisResults diagnosisResults = 
 				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);

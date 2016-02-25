@@ -32,7 +32,6 @@ public class PolicyMutant {
 		this.faultLocation = bugPositions;
 	}
 	public ArrayList<SpectrumBasedDiagnosisResults> run(ArrayList<PolicySpreadSheetTestRecord> testCases) throws Exception{
-		PolicyCoverageFactory.init();
 		// Test
 			//System.out.println(mutantFilePath);
 		if (!new PolicySpreadSheetTestSuite(testCases, mutantFilePath).runAllTests()) // not all tests passed (i.e., at least one test failed, otherwise fault localization is meaningless)
