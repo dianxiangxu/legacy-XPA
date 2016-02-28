@@ -10,12 +10,15 @@ import org.sag.mutation.PolicyMutator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
 import org.sag.mutation.PolicyMutant;
+
+import com.opencsv.CSVWriter;
 
 /**
  * @author speng
@@ -33,7 +36,7 @@ public class ExperimentOnRepair {
 	public static void main(String[] args) throws Exception {
 //		String PolicyFilePath = "Experiments//conference3//conference3.xml";
 //		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
-//		String resultsFileName = "Experiments//conference3//conference3_repair_statistics.xls";
+//		String resultsFileName = "Experiments//conference3//conference3_repair_statistics.csv";
 //		String PolicyFilePath = "Experiments//fedora-rule3//fedora-rule3.xml";
 //		String testSuiteSpreadSheetFile = "Experiments//fedora-rule3//test_suites//fedora-rule3_MCDCCoverage//fedora-rule3_MCDCCoverage.xls";
 //		String resultsFileName = "Experiments//fedora-rule3//fedora-rule3_repair_statistics.xls";
@@ -46,7 +49,8 @@ public class ExperimentOnRepair {
 		List<List<Integer>> allNumTiresLists = new ArrayList<List<Integer>>();
 		List<List<PolicyMutant>> allCorrectedPolicyLists  = new ArrayList<List<PolicyMutant>>();
 		List<Long> durationList = new ArrayList<Long>();
-
+		CSVWriter writer = new CSVWriter(new FileWriter(resultsFileName), ',');
+		writeCSVTitleRow(writer, experiment.mutantList);
 		for(List<String> repairMethodPair: repairMethodPairList) {
 			long startTime = System.currentTimeMillis();
 //			experiment.startExperiment("repairRandomOrder", null);
@@ -59,16 +63,56 @@ public class ExperimentOnRepair {
 			long duration = endTime - startTime;
 			System.out.printf("running time: " + duration + " milliseconds\n");
 			durationList.add(duration);
+			writeCSVResultRow(writer, repairMethodPair, correctedPolicyList,
+					numTriesList, duration);
 		}
-
-		
-		writeToExcelFile(resultsFileName, repairMethodPairList, 
-				experiment.mutantList, allCorrectedPolicyLists, 
-				durationList, allNumTiresLists);
+		writer.close();
+//		writeToExcelFile(resultsFileName, repairMethodPairList, 
+//				experiment.mutantList, allCorrectedPolicyLists, 
+//				durationList, allNumTiresLists);
 //		System.out.printf("running time: %03d milliseconds\n", duration);
 		// System.out.printf("%d:%02d:%02d.%d\n", duration/1e3/3600,
 		// duration/1e3%3600/60, duration/1e3%60, duration%1e3);
 
+	}
+
+		private static void writeCSVTitleRow(CSVWriter writer, List<PolicyMutant> mutantList) {
+			String[] titles = new String[mutantList.size() + 5];
+			titles[0] = "repair method";
+			titles[1] = "fault localizer";
+			titles[2] = "time spent(ms)";
+			titles[3] = "repaired/total";
+			titles[4] = "total tries";
+			int index = 5;
+			for (PolicyMutant mutant: mutantList) {
+				titles[index] = mutant.getNumber();
+				index ++;
+			}
+			writer.writeNext(titles);
+		}
+
+	private static void writeCSVResultRow(CSVWriter writer, List<String> repairMethodPair,
+			List<PolicyMutant> correctedPolicyList, List<Integer> numTriesList,
+			long duration) {
+		String[] entry = new String[correctedPolicyList.size() + 5];
+		entry[0] = repairMethodPair.get(0);
+		entry[1] = repairMethodPair.get(1);
+		entry[2] = Long.toString(duration);
+		int repaired = 0;
+		for (PolicyMutant mutant: correctedPolicyList)
+			if (mutant != null)
+				repaired ++;
+		entry[3] = repaired + "/" + correctedPolicyList.size();
+		int numTriesTotal = 0;
+		for (int numTries: numTriesList)
+			numTriesTotal += numTries;
+		entry[4] = Integer.toString(numTriesTotal);
+		int index = 5;
+		for (int numTries: numTriesList) {
+			entry[index] = Integer.toString(numTries);
+			index ++;
+		}
+		writer.writeNext(entry);
 	}
 
 	/**
