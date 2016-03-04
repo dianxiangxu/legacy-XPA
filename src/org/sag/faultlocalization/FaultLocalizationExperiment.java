@@ -150,10 +150,12 @@ public class FaultLocalizationExperiment {
 //				"Experiments//conference3//fault-localization//conference3_Basic_Fault-localiazation.xls");
 		
 		// General
-		String[] policy = {"conference3", "fedora-rule3", "itrust3", "kmarket-blue-policy", "obligation3", "pluto3"};
+		String[] policy = { "conference3", "fedora-rule3", "itrust3",
+				"kmarket-blue-policy", "obligation3", "pluto3", "itrust3-5",
+				"itrust3-10", "itrust3-20" };
 
 		String[] testsuite = {"Basic", "Exclusive", "Pair", "PDpair", "DecisionCoverage", "RuleLevel", "MCDCCoverage"};
-		int policyNumber = 0;
+		int policyNumber = 6;
 		int testsuiteNumber = 6;
 		
 		String testSuiteSpreadSheetFile = "Experiments//" + policy[policyNumber]+ "//test_suites//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + "//" + policy[policyNumber] + "_" + testsuite[testsuiteNumber] + ".xls";
@@ -182,7 +184,7 @@ public class FaultLocalizationExperiment {
 //		createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
 
 		String policyFile = "Experiments" + File.separator + policy[policyNumber] + File.separator + policy[policyNumber] + ".xml";
-		int numFaults = 2;
+		int numFaults = 1;
 		List<PolicyMutant> mutantList = createMultiFaultMutants(policyFile, numFaults, createMutantMethods);	
 		String MutantsCSVFileName = createMutantsCSVFile(mutantList);
 

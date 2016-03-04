@@ -52,18 +52,23 @@ public class PolicyRepairer {
 		}
 		for(PolicyMutant mutant: mutantList) {
 			//System.out.println(mutant.getMutantFilePath() + "\n");
-			PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant.getMutantFilePath());
-			TestCellResult[] testCellResults = testSuite.runAllTestsOnMutant();
-			List<Boolean> testResults = new ArrayList<Boolean>();
-			for(TestCellResult res : testCellResults) {
-				testResults.add(res.getVerdict());
-			}
+			List<Boolean> testResults = getTestResults(testSuiteFile, mutant.getMutantFilePath());
 			boolean is_repaired = booleanListAnd(testResults);
 			if(is_repaired) {
 				return mutant;
 			}
 		}
 		return null;
+	}
+	
+	static List<Boolean> getTestResults(String testSuiteFile, String mutantFile) throws Exception {
+		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutantFile);
+		TestCellResult[] testCellResults = testSuite.runAllTestsOnMutant();
+		List<Boolean> testResults = new ArrayList<Boolean>();
+		for(TestCellResult res : testCellResults) {
+			testResults.add(res.getVerdict());
+		}	
+		return testResults;
 	}
 	
 	private List<PolicyMutant> findAllCorrectMutants(List<PolicyMutant> mutantList) throws Exception	{
@@ -120,7 +125,7 @@ public class PolicyRepairer {
 	 * @param booleanList
 	 * @return result of logical AND on all elements of the boolean array
 	 */
-	private boolean booleanListAnd(List<Boolean> booleanList) {
+	static boolean booleanListAnd(List<Boolean> booleanList) {
 		boolean result = true;
 		for(boolean b: booleanList) {
 			result = result && b;

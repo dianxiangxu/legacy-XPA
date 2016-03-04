@@ -3,6 +3,8 @@ package org.sag.repair;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import org.sag.faultlocalization.FaultLocalizationExperiment;
 import org.sag.mutation.PolicyMutant;
@@ -66,14 +68,67 @@ public class ExperimentMultiFault {
 
 	ExperimentMultiFault(PolicyMutant policyToRepair,
 			String faultLocalizeMethod, String testSuiteFile) throws Exception {
-
-		List<Integer> suspicionRank = PolicyRepairer.getSuspicionRank(
-				policyToRepair, faultLocalizeMethod, testSuiteFile);
-		for (int bugPosition : suspicionRank) {
+		
+		Queue<MutantNode> queue = new PriorityQueue<MutantNode>();
+		queue.add(new MutantNode(null, policyToRepair, testSuiteFile, faultLocalizeMethod, 0));
+		while (!queue.isEmpty()) {
+			MutantNode node = queue.poll();
+			List<Boolean> testResults = node.getTestResult();
+			if (PolicyRepairer.booleanListAnd(testResults)) {
+				break;//found a repair
+			}
+			if (!isPromsing(node)) {
+				continue;
+			}
+			List<Integer> suspicionRank = node.getSuspicionRank();
 			PolicyMutator mutator = new PolicyMutator(policyToRepair);
 			List<Rule> ruleList = mutator.getRuleList();
-
+			int rank = 1;
+			for (int bugPosition : suspicionRank) {
+				Rule rule = ruleList.get(bugPosition - 1);
+				List<PolicyMutant> mutantList = generateMutants(mutator, rule,  bugPosition);
+				for (PolicyMutant mutant: mutantList) {
+					queue.add(new MutantNode(node, mutant, testSuiteFile, faultLocalizeMethod, rank));
+				}
+				rank ++;
+			}
 		}
+	}
+	
+	private boolean isPromsing(MutantNode node) {
+		//TODO
+		return false;
+	}
+	
+	private List<PolicyMutant> generateMutants(PolicyMutator mutator, Rule myrule, int ruleIndex) throws Exception {
+		List<PolicyMutant> mutantList = null;
+		//CRE
+		mutantList = mutator.createRuleEffectFlippingMutants(myrule, ruleIndex);
+//		//ANR
+//		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
+//		correctMutant = find1stCorrectMutant(mutantList);
+//		if(correctMutant != null) {
+//			return correctMutant;
+//		}
+		//RTT
+		mutantList = mutator.createRuleTargetTrueMutants(myrule, ruleIndex);
+		//RTF
+		mutantList = mutator.createRuleTargetFalseMutants(myrule, ruleIndex);
+		//RCT
+		mutantList = mutator.createRuleConditionTrueMutants(myrule, ruleIndex);
+		//RCF
+		mutantList = mutator.createRuleConditionFalseMutants(myrule, ruleIndex);
+		//ANF
+		mutantList = mutator.createAddNotFunctionMutants(myrule, ruleIndex);
+		//RNF
+		mutantList = mutator.createRemoveNotFunctionMutants(myrule,  ruleIndex);
+		//FCF
+		mutantList = mutator.createFlipComparisonFunctionMutants(myrule, ruleIndex);
+		//CCF
+		mutantList = mutator.createChangeComparisonFunctionMutants(myrule, ruleIndex);
+		//RPTE
+		mutantList = mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex);
+		return mutantList;
 	}
 
 }
