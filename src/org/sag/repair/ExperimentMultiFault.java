@@ -90,9 +90,10 @@ public class ExperimentMultiFault {
 		int numFaults = 2;
 //		String number = "MUTANT CRE5_CCF3_2";
 //		String filename = "Experiments//conference3//mutants//mutants//conference3_CRE5_CCF3_2.xml";
+//		int[] bugPositions = new int[] {5, 3};
 		String number = "MUTANT RTF4_RCF2";//cannot rpair, takes 40 minutes for each run of start() 
 		String filename = "Experiments//conference3//mutants//mutants//conference3_RTF4_RCF2.xml";
-		int[] bugPositions = new int[] {5, 3};
+		int[] bugPositions = new int[] {4, 2};
 		PolicyMutant policyToRepair = new PolicyMutant(number, filename, bugPositions);
 		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
 		mutantList.add(policyToRepair);
