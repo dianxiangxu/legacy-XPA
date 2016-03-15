@@ -10,8 +10,9 @@ public class MutantNode implements Comparable<MutantNode> {
 	private String faultLocalizaMethod;
 	private MutantNode parent;
 	private int totalRank;
+	private int layer;
 	
-	MutantNode(MutantNode parent, PolicyMutant mutant, String testSuiteFile, String faultLocalizaMethod, int rank) {
+	MutantNode(MutantNode parent, PolicyMutant mutant, String testSuiteFile, String faultLocalizaMethod, int rank, int layer) {
 		this.setMutant(mutant);
 		this.testSuiteFile = testSuiteFile;
 		this.faultLocalizaMethod = faultLocalizaMethod;
@@ -20,6 +21,11 @@ public class MutantNode implements Comparable<MutantNode> {
 			this.totalRank = parent.getTotalRank() + rank;
 		else
 			this.totalRank = rank;
+		this.layer = layer;
+	}
+	
+	int getLayer() {
+		return layer;
 	}
 
 	PolicyMutant getMutant() {
@@ -41,13 +47,11 @@ public class MutantNode implements Comparable<MutantNode> {
 
 	@Override
 	public int compareTo(MutantNode other) {
-		// TODO Auto-generated method stub
 		return this.getTotalRank() - other.getTotalRank();
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		// TODO Auto-generated method stub
 		MutantNode other = (MutantNode) obj;
 		return this.getTotalRank() == other.getTotalRank();
 	}
@@ -56,13 +60,26 @@ public class MutantNode implements Comparable<MutantNode> {
 		return totalRank;
 	}
 	
-	boolean isPromising() {
-		//TODO
-		return false;
+	boolean isPromising() throws Exception {
+		if (parent == null)
+			return true;
+		return failedTestsIsSubset();
 	}
 	
-	private boolean failedTestsIsSubset() {
-		//TODO
-		return false;
+	private boolean failedTestsIsSubset() throws Exception {
+		List<Boolean> result = getTestResult();
+		List<Boolean> parentResult = parent.getTestResult();
+		for (int i = 0; i < result.size(); i++) 
+			if (!result.get(i) && parentResult.get(i))
+				return false;
+		return true;
+	}
+	
+	void clear() {
+		mutant.clear();
+		mutant = null;
+		testSuiteFile = null;
+		faultLocalizaMethod = null;
+		parent = null;
 	}
 }
