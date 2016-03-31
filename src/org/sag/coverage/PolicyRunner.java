@@ -47,6 +47,8 @@ public class PolicyRunner {
 		// Test	
 			//System.out.println(policyFilePath);
 		this.policy = loadpolicy.getPolicy(policyFilePath);
+		if (this.policy == null)
+			throw new Exception("load policy failed");
 		
 	}
 	
