@@ -77,9 +77,5 @@ public class MutantNode implements Comparable<MutantNode> {
 	
 	void clear() {
 		mutant.clear();
-		mutant = null;
-		testSuiteFile = null;
-		faultLocalizaMethod = null;
-		parent = null;
 	}
 }
