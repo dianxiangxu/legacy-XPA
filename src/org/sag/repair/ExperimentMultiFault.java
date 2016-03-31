@@ -11,6 +11,7 @@ import org.sag.faultlocalization.FaultLocalizationExperiment;
 import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.wso2.balana.Rule;
+import org.apache.commons.io.FileUtils;
 
 import com.opencsv.CSVWriter;
 
@@ -18,10 +19,10 @@ public class ExperimentMultiFault {
 
 	public static void main(String[] args) throws Exception {
 		String[] policy = { "conference3", "fedora-rule3", "itrust3",
-				"kmarket-blue-policy", "obligation3", "pluto3" };
+				"kmarket-blue-policy", "obligation3", "pluto3", "itrust3-5", "itrust3-10", "itrust3-20", "itrust3-40"};
 		String[] testsuite = { "Basic", "Exclusive", "Pair", "PDpair",
 				"DecisionCoverage", "RuleLevel", "MCDCCoverage" };
-		int policyNumber = 2;
+		int policyNumber = 6;
 		int testsuiteNumber = 6;
 
 		String testSuiteSpreadSheetFile = "Experiments" + File.separator
@@ -45,78 +46,108 @@ public class ExperimentMultiFault {
 				+ policy[policyNumber] + File.separator + policy[policyNumber]
 				+ ".xml";
 		List<String> faultLocalizeMethods = new ArrayList<String>();
-		faultLocalizeMethods.add("jaccard");
-		faultLocalizeMethods.add("tarantula");
-		faultLocalizeMethods.add("ochiai");
-		faultLocalizeMethods.add("ochiai2");
+//		faultLocalizeMethods.add("jaccard");
+//		faultLocalizeMethods.add("tarantula");
+//		faultLocalizeMethods.add("ochiai");
+//		faultLocalizeMethods.add("ochiai2");
+//		faultLocalizeMethods.add("hamann");
+//		faultLocalizeMethods.add("simpleMatching");
+//		faultLocalizeMethods.add("sokal");
+//		faultLocalizeMethods.add("goodman");
+//		faultLocalizeMethods.add("sorensenDice");
+//		faultLocalizeMethods.add("rogersTanimoto");
+		
+		
 		faultLocalizeMethods.add("cbi");
-		faultLocalizeMethods.add("hamann");
-		faultLocalizeMethods.add("simpleMatching");
-		faultLocalizeMethods.add("sokal");
 		faultLocalizeMethods.add("naish2");
-		faultLocalizeMethods.add("goodman");
-		faultLocalizeMethods.add("sorensenDice");
 		faultLocalizeMethods.add("anderberg");
 		faultLocalizeMethods.add("euclid");
-		faultLocalizeMethods.add("rogersTanimoto");
+		
+		int numFaults = 1;
+		// multiple faults
+		List<String> createMutantMethods = new ArrayList<String>();
+		createMutantMethods.add("createPolicyTargetTrueMutants");// PTT
+		createMutantMethods.add("createPolicyTargetFalseMutants");// PTF
+		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC
+		// //comment out because cannot localize
+		createMutantMethods.add("createRuleEffectFlippingMutants");// CRE
+		// createMutantMethods.add("createRemoveRuleMutants");//RER
+		// createMutantMethods.add("createAddNewRuleMutants");//ANR
+		createMutantMethods.add("createRuleTargetTrueMutants");// RTT  //cannot repair???
+		createMutantMethods.add("createRuleTargetFalseMutants");// RTF
+		createMutantMethods.add("createRuleConditionTrueMutants");// RCT
+		createMutantMethods.add("createRuleConditionFalseMutants");// RCF
+		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
+		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
+		// createMutantMethods.add("createRuleTypeReplacedMutants");//RTR
+		createMutantMethods.add("createAddNotFunctionMutants");// ANF
+		createMutantMethods.add("createRemoveNotFunctionMutants");// RNF
+//		createMutantMethods.add("createRemoveParallelTargetElementMutants");// RPTE
+		// createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
+		createMutantMethods.add("createFlipComparisonFunctionMutants");// FCF
+		createMutantMethods.add("createChangeComparisonFunctionMutants");// CCF
+
+		List<PolicyMutant> mutantList = FaultLocalizationExperiment
+				.createMultiFaultMutants(policyFile, numFaults,
+						createMutantMethods);
+		// String MutantsCSVFileName = createMutantsCSVFile(mutantList);
 		
 //		int numFaults = 1;
-//		// multiple faults
-//		List<String> createMutantMethods = new ArrayList<String>();
-//		createMutantMethods.add("createPolicyTargetTrueMutants");// PTT
-//		createMutantMethods.add("createPolicyTargetFalseMutants");// PTF
-//		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC
-//		// //comment out because cannot localize
-//		createMutantMethods.add("createRuleEffectFlippingMutants");// CRE
-//		// createMutantMethods.add("createRemoveRuleMutants");//RER
-//		// createMutantMethods.add("createAddNewRuleMutants");//ANR
-////		createMutantMethods.add("createRuleTargetTrueMutants");// RTT
-//		createMutantMethods.add("createRuleTargetFalseMutants");// RTF
-//		createMutantMethods.add("createRuleConditionTrueMutants");// RCT
-//		createMutantMethods.add("createRuleConditionFalseMutants");// RCF
-//		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
-//		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
-//		// createMutantMethods.add("createRuleTypeReplacedMutants");//RTR
-//		createMutantMethods.add("createAddNotFunctionMutants");// ANF
-//		createMutantMethods.add("createRemoveNotFunctionMutants");// RNF
-////		createMutantMethods.add("createRemoveParallelTargetElementMutants");// RPTE
-//		// createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
-//
-//		List<PolicyMutant> mutantList = FaultLocalizationExperiment
-//				.createMultiFaultMutants(policyFile, numFaults,
-//						createMutantMethods);
-//		// String MutantsCSVFileName = createMutantsCSVFile(mutantList);
-		
-		int numFaults = 2;
 //		String number = "MUTANT CRE5_CCF3_2";
 //		String filename = "Experiments//conference3//mutants//mutants//conference3_CRE5_CCF3_2.xml";
-		String number = "MUTANT RTF4_RCF2";//cannot rpair, takes 40 minutes for each run of start() 
-		String filename = "Experiments//conference3//mutants//mutants//conference3_RTF4_RCF2.xml";
-		int[] bugPositions = new int[] {5, 3};
-		PolicyMutant policyToRepair = new PolicyMutant(number, filename, bugPositions);
-		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
-		mutantList.add(policyToRepair);
+//		int[] bugPositions = new int[] {5, 3};
+//		int numFaults = 2;
+//		String number = "MUTANT RTF4_RCF2";//cannot rpair, takes 40 minutes for each run of start() 
+//		String filename = "Experiments//conference3//mutants//mutants//conference3_RTF4_RCF2.xml";
+//		int[] bugPositions = new int[] {4, 2};
+//		int numFaults = 2;
+//		String number = "MUTANT CRE5_RTF3"; 
+//		String filename = "Experiments//conference3//mutants//mutants//conference3_CRE5_RTF3.xml";
+//		int[] bugPositions = new int[] {5, 3};
+//		PolicyMutant policyToRepair = new PolicyMutant(number, filename, bugPositions);
+//		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
+//		mutantList.add(policyToRepair);
 		
 		CSVWriter timingWriter = new CSVWriter(new FileWriter(timingFileName), ',');
 		CSVWriter repairResultWriter = new CSVWriter(new FileWriter(repairResultFileName), ',');
 		writeCSVTitleRow(timingWriter, faultLocalizeMethods);
 		writeCSVTitleRow(repairResultWriter, faultLocalizeMethods);
+		long startTime = System.currentTimeMillis();
+		int outerCnt = 0;
 		for (PolicyMutant mutant: mutantList) {
 			List<String> durationList = new ArrayList<String>();
 			List<String> repairedFileList = new ArrayList<String>();
+			int innerCnt = 0;
 			for (String faultLocalizeMethod: faultLocalizeMethods) {
+				innerCnt++;
 				long start = System.currentTimeMillis();
 				String repaired = start(mutant, testSuiteSpreadSheetFile, faultLocalizeMethod, numFaults);
 				long end = System.currentTimeMillis();
+				System.out.println("mutant: " + mutant.getNumber() + ", faultlocalizer: " + faultLocalizeMethod);
+				long currentTime = System.currentTimeMillis();
+				long elapsedSeconds = (currentTime - startTime)/1000;
+				long[] time = timeUtile(elapsedSeconds);
+				System.out.println("elapsed time: " + time[0] + " hours, " + time[1] + " minutes, " + time[2] + " seconds");
+				double ratio = ((double)innerCnt + outerCnt*faultLocalizeMethods.size())/faultLocalizeMethods.size()/mutantList.size();
+				System.out.println("finished " + ratio*100 + "%");
+				long estimatedRemainingSeconds =  (long) (elapsedSeconds*(1/ratio - 1));
+				time = timeUtile(estimatedRemainingSeconds);
+				System.out.println("estimated remaining time: " + time[0] + " hours, " + time[1] + " minutes, " + time[2] + " seconds");
 				durationList.add(Long.toString(end - start));
 				if (repaired != null) {
 					repairedFileList.add(repaired);
 				} else {
 					repairedFileList.add("cannot repair");
 				}
+				String mutantsFolder = "Experiments" + File.separator
+						+ policy[policyNumber] + File.separator + "mutants";
+				for (int i = 0; i < numFaults; i++)
+					mutantsFolder += File.separator + "mutants";
+				FileUtils.deleteQuietly(new File(mutantsFolder));
 			}
 			writeCSVResultRow(timingWriter, mutant.getNumber(), durationList);
 			writeCSVResultRow(repairResultWriter, mutant.getNumber(), repairedFileList);
+			outerCnt++;
 		}
 		timingWriter.close();
 		repairResultWriter.close();
@@ -135,7 +166,7 @@ public class ExperimentMultiFault {
 	}
 
 	private static void writeCSVResultRow(CSVWriter writer, String mutantNumber,
-			List<String> durationList) {
+			List<String> durationList)  {
 		
 		String[] entry = new String[durationList.size() + 1];
 		entry[0] = mutantNumber;
@@ -145,6 +176,7 @@ public class ExperimentMultiFault {
 			index ++;
 		}
 		writer.writeNext(entry);
+		writer.flushQuietly();
 	}
 
 	ExperimentMultiFault(PolicyMutant policyToRepair,
@@ -158,7 +190,8 @@ public class ExperimentMultiFault {
 		boolean foundRepair = false;
 		while (!queue.isEmpty()) {
 			node = queue.poll();
-			System.out.println("queue size: " + queue.size());
+//			System.out.println("queue size: " + queue.size());
+//			System.out.println();
 			List<Boolean> testResults = node.getTestResult();
 			if (PolicyRepairer.booleanListAnd(testResults)) {
 				foundRepair = true;
@@ -228,6 +261,7 @@ public class ExperimentMultiFault {
 		mutantList.addAll(mutator.createChangeComparisonFunctionMutants(myrule, ruleIndex));
 		//RPTE
 		mutantList.addAll(mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex));
+
 		return mutantList;
 	}
 	
@@ -242,7 +276,16 @@ public class ExperimentMultiFault {
 		mutantList.addAll(mutator.createFirstPermitRuleMutants());
 		//FDR
 		mutantList.addAll(mutator.createFirstDenyRuleMutants());
+		//CRC
+		mutantList.addAll(mutator.createCombiningAlgorithmMutants());
 		return mutantList;
+	}
+	
+	static private long[] timeUtile(long totalSeconds) {
+		long hours = totalSeconds / 60 / 60;
+		long minutes = totalSeconds / 60 - 60 * hours;
+		long seconds = totalSeconds % 60;
+		return new long[] {hours, minutes, seconds};
 	}
 
 }
