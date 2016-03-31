@@ -12,6 +12,7 @@ import org.sag.mutation.PolicyMutant;
 import org.sag.mutation.PolicyMutator;
 import org.wso2.balana.Rule;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import com.opencsv.CSVWriter;
 
@@ -58,10 +59,10 @@ public class ExperimentMultiFault {
 //		faultLocalizeMethods.add("rogersTanimoto");
 		
 		
-		faultLocalizeMethods.add("cbi");
+//		faultLocalizeMethods.add("cbi");
 		faultLocalizeMethods.add("naish2");
-		faultLocalizeMethods.add("anderberg");
-		faultLocalizeMethods.add("euclid");
+//		faultLocalizeMethods.add("anderberg");
+//		faultLocalizeMethods.add("euclid");
 		
 		int numFaults = 1;
 		// multiple faults
@@ -108,6 +109,8 @@ public class ExperimentMultiFault {
 //		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
 //		mutantList.add(policyToRepair);
 		
+		FileUtils.forceMkdir(new File(FilenameUtils.getPath(timingFileName)));
+		FileUtils.forceMkdir(new File(FilenameUtils.getPath(repairResultFileName)));
 		CSVWriter timingWriter = new CSVWriter(new FileWriter(timingFileName), ',');
 		CSVWriter repairResultWriter = new CSVWriter(new FileWriter(repairResultFileName), ',');
 		writeCSVTitleRow(timingWriter, faultLocalizeMethods);
