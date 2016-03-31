@@ -200,7 +200,7 @@ public class PolicySpreadSheetTestSuite {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);
 			for (PolicySpreadSheetTestRecord test : policyTestSuite) {
 				PolicyCoverageFactory.currentTestID = test.getNumber();
-				System.out.print("\n" + test.getNumber());
+//				System.out.print("\n" + test.getNumber());
 				if (test.getOracle().equals("")) {
 					System.out.print(": no test oracle");
 					
@@ -208,11 +208,11 @@ public class PolicySpreadSheetTestSuite {
 							test.getRequest());
 				} else {
 					if (policyTester.runTest(test.getNumber(),
-							test.getRequest(), test.getOracle()))
-						System.out.print(": pass");
-					else {
+							test.getRequest(), test.getOracle())) {
+//						System.out.print(": pass");
+					} else {
 						allPass = false;
-						System.out.print(": fail");
+//						System.out.print(": fail");
 					}
 				}
 			}

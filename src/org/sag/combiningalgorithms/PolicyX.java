@@ -2230,7 +2230,7 @@ public class PolicyX {
 				z3.getValue(localcollector, nameMap);
 				localcollector.add(invalidAttr());
 				String request = f.print(localcollector);
-				System.out.println();
+//				System.out.println();
 				return request;
 			}
 		}
