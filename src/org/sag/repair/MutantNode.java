@@ -11,6 +11,7 @@ public class MutantNode implements Comparable<MutantNode> {
 	private MutantNode parent;
 	private int totalRank;
 	private int layer;
+	private List<Boolean> testResult;
 	
 	MutantNode(MutantNode parent, PolicyMutant mutant, String testSuiteFile, String faultLocalizaMethod, int rank, int layer) {
 		this.setMutant(mutant);
@@ -37,7 +38,9 @@ public class MutantNode implements Comparable<MutantNode> {
 	}
 	
 	List<Boolean> getTestResult() throws Exception {
-		return PolicyRepairer.getTestResults(testSuiteFile, mutant.getMutantFilePath());
+		if (testResult == null)
+			testResult = PolicyRepairer.getTestResults(testSuiteFile, mutant.getMutantFilePath());
+		return testResult;
 	}
 	
 	List<Integer> getSuspicionRank() throws Exception {
