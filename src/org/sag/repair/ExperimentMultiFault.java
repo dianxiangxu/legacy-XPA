@@ -88,10 +88,13 @@ public class ExperimentMultiFault {
 		createMutantMethods.add("createFlipComparisonFunctionMutants");// FCF
 		createMutantMethods.add("createChangeComparisonFunctionMutants");// CCF
 
+		long createMutantStart = System.currentTimeMillis();
 		List<PolicyMutant> mutantList = FaultLocalizationExperiment
 				.createMultiFaultMutants(policyFile, numFaults,
 						createMutantMethods);
-		// String MutantsCSVFileName = createMutantsCSVFile(mutantList);
+		 String MutantsCSVFileName = FaultLocalizationExperiment.createMutantsCSVFile(mutantList);
+		long createMutantEnd = System.currentTimeMillis();
+		System.out.println("it took " + (createMutantEnd - createMutantStart)/1000 + " seconds to create mutants");
 		
 //		int numFaults = 1;
 //		String number = "MUTANT CRE5_CCF3_2";
@@ -115,6 +118,7 @@ public class ExperimentMultiFault {
 		CSVWriter repairResultWriter = new CSVWriter(new FileWriter(repairResultFileName), ',');
 		writeCSVTitleRow(timingWriter, faultLocalizeMethods);
 		writeCSVTitleRow(repairResultWriter, faultLocalizeMethods);
+		
 		long startTime = System.currentTimeMillis();
 		int outerCnt = 0;
 		for (PolicyMutant mutant: mutantList) {
@@ -290,5 +294,5 @@ public class ExperimentMultiFault {
 		long seconds = totalSeconds % 60;
 		return new long[] {hours, minutes, seconds};
 	}
-
+	
 }
