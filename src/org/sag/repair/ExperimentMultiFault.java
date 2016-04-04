@@ -67,24 +67,28 @@ public class ExperimentMultiFault {
 		int numFaults = 1;
 		// multiple faults
 		List<String> createMutantMethods = new ArrayList<String>();
-		createMutantMethods.add("createPolicyTargetTrueMutants");// PTT
-		createMutantMethods.add("createPolicyTargetFalseMutants");// PTF
-		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC
+//		createMutantMethods.add("createPolicyTargetTrueMutants");// PTT
+//		createMutantMethods.add("createPolicyTargetFalseMutants");// PTF
 		// //comment out because cannot localize
-		createMutantMethods.add("createRuleEffectFlippingMutants");// CRE
+
 		// createMutantMethods.add("createRemoveRuleMutants");//RER
 		// createMutantMethods.add("createAddNewRuleMutants");//ANR
-		createMutantMethods.add("createRuleTargetTrueMutants");// RTT  //cannot repair???
-		createMutantMethods.add("createRuleTargetFalseMutants");// RTF
-		createMutantMethods.add("createRuleConditionTrueMutants");// RCT
-		createMutantMethods.add("createRuleConditionFalseMutants");// RCF
-		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
-		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
+//		createMutantMethods.add("createRuleTargetTrueMutants");// RTT  //cannot repair???
+//		createMutantMethods.add("createRuleTargetFalseMutants");// RTF
+//		createMutantMethods.add("createRuleConditionTrueMutants");// RCT
+//		createMutantMethods.add("createRuleConditionFalseMutants");// RCF
+//		createMutantMethods.add("createFirstPermitRuleMutants");//FPR
+//		createMutantMethods.add("createFirstDenyRuleMutants");//FDR
 		// createMutantMethods.add("createRuleTypeReplacedMutants");//RTR
-		createMutantMethods.add("createAddNotFunctionMutants");// ANF
-		createMutantMethods.add("createRemoveNotFunctionMutants");// RNF
+
 //		createMutantMethods.add("createRemoveParallelTargetElementMutants");// RPTE
 		// createMutantMethods.add("createRemoveParallelConditionElementMutants");//RPCE
+
+		//definitely can be repaired
+		createMutantMethods.add("createCombiningAlgorithmMutants");//CRC
+		createMutantMethods.add("createRuleEffectFlippingMutants");// CRE
+		createMutantMethods.add("createAddNotFunctionMutants");// ANF
+		createMutantMethods.add("createRemoveNotFunctionMutants");// RNF
 		createMutantMethods.add("createFlipComparisonFunctionMutants");// FCF
 		createMutantMethods.add("createChangeComparisonFunctionMutants");// CCF
 
