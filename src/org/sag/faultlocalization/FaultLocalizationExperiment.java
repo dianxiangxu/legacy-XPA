@@ -45,7 +45,7 @@ public class FaultLocalizationExperiment {
 		return mutantLists.get(numFaults);
 	}
 	
-	private static String createMutantsCSVFile(List<PolicyMutant> mutantList) throws IOException {
+	public static String createMutantsCSVFile(List<PolicyMutant> mutantList) throws IOException {
 		if (mutantList == null || mutantList.size() == 0)
 			return "";
 		String directoryName = new File(mutantList.get(0).getMutantFilePath()).getParent();
