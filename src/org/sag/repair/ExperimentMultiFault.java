@@ -63,6 +63,7 @@ public class ExperimentMultiFault {
 		faultLocalizeMethods.add("naish2");
 //		faultLocalizeMethods.add("anderberg");
 //		faultLocalizeMethods.add("euclid");
+		faultLocalizeMethods.add("random");
 		
 		int numFaults = 1;
 		// multiple faults

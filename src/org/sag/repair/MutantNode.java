@@ -41,6 +41,9 @@ public class MutantNode implements Comparable<MutantNode> {
 	}
 	
 	List<Integer> getSuspicionRank() throws Exception {
+		if (faultLocalizaMethod.equals("random")) {
+			return PolicyRepairer.getRandomSuspicionRank(mutant);
+		}
 		return PolicyRepairer.getSuspicionRank(mutant, faultLocalizaMethod, testSuiteFile);
 	}
 

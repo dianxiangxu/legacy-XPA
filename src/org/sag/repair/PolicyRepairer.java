@@ -158,8 +158,7 @@ public class PolicyRepairer {
 		return suspicionRank;
 	}
 
-	
-	public PolicyMutant repairRandomOrder(PolicyMutant policyFileToRepair) throws Exception {
+	 public static List<Integer> getRandomSuspicionRank(PolicyMutant policyFileToRepair) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
@@ -168,6 +167,11 @@ public class PolicyRepairer {
 		}
 		suspicionRank.add(maxRules);
 		Collections.shuffle(suspicionRank);
+		return suspicionRank;
+	 }
+	
+	public PolicyMutant repairRandomOrder(PolicyMutant policyFileToRepair) throws Exception {
+		List<Integer> suspicionRank = getRandomSuspicionRank(policyFileToRepair);
 		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
 	}
 	/**
