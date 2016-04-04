@@ -15,6 +15,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.sag.combiningalgorithms.TruthTable.ConRecord;
 import org.sag.combiningalgorithms.TruthTable.PolicyTable;
 import org.sag.combiningalgorithms.TruthTable.RuleRecord;
@@ -4188,6 +4190,8 @@ public class PolicyX {
 						String path = testPanel
 								.getTestOutputDestination(foldName)
 								+ File.separator + "request" + count + ".txt";
+						FileUtils.forceMkdir(new File(FilenameUtils
+								.getFullPath(path)));
 						FileWriter fw = new FileWriter(path);
 						BufferedWriter bw = new BufferedWriter(fw);
 						bw.write(request);
@@ -4445,6 +4449,10 @@ public class PolicyX {
 													+ "request"
 													+ count
 													+ ".txt";
+											FileUtils
+													.forceMkdir(new File(
+															FilenameUtils
+																	.getFullPath(path)));
 											FileWriter fw = new FileWriter(path);
 											BufferedWriter bw = new BufferedWriter(
 													fw);
