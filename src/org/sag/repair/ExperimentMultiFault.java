@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 
 import org.sag.faultlocalization.FaultLocalizationExperiment;
 import org.sag.mutation.PolicyMutant;
@@ -48,12 +49,12 @@ public class ExperimentMultiFault {
 				+ ".xml";
 		List<String> faultLocalizeMethods = new ArrayList<String>();
 //		faultLocalizeMethods.add("jaccard");
-//		faultLocalizeMethods.add("tarantula");
+//		faultLocalizeMethods.add("euclid");
 //		faultLocalizeMethods.add("ochiai");
 //		faultLocalizeMethods.add("ochiai2");
 //		faultLocalizeMethods.add("hamann");
 //		faultLocalizeMethods.add("simpleMatching");
-//		faultLocalizeMethods.add("sokal");
+//		faultLocalizeMethods.add("anderberg");
 //		faultLocalizeMethods.add("goodman");
 //		faultLocalizeMethods.add("sorensenDice");
 //		faultLocalizeMethods.add("rogersTanimoto");
@@ -61,8 +62,8 @@ public class ExperimentMultiFault {
 		
 //		faultLocalizeMethods.add("cbi");
 		faultLocalizeMethods.add("naish2");
-//		faultLocalizeMethods.add("anderberg");
-//		faultLocalizeMethods.add("euclid");
+//		faultLocalizeMethods.add("sokal");
+//		faultLocalizeMethods.add("tarantula");
 		faultLocalizeMethods.add("random");
 		
 		int numFaults = 1;
@@ -113,6 +114,9 @@ public class ExperimentMultiFault {
 //		String number = "MUTANT CRE5_RTF3"; 
 //		String filename = "Experiments//conference3//mutants//mutants//conference3_CRE5_RTF3.xml";
 //		int[] bugPositions = new int[] {5, 3};
+//		String number = "MUTANT CCF12_3"; 
+//		String filename = "Experiments//itrust3-5//mutants//itrust3-5_CCF12_3.xml";
+//		int[] bugPositions = new int[] {12};
 //		PolicyMutant policyToRepair = new PolicyMutant(number, filename, bugPositions);
 //		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
 //		mutantList.add(policyToRepair);
@@ -126,7 +130,15 @@ public class ExperimentMultiFault {
 		
 		long startTime = System.currentTimeMillis();
 		int outerCnt = 0;
+		long seed = 1;
+		Random rn = new Random();
+		rn.setSeed(seed);
 		for (PolicyMutant mutant: mutantList) {
+			double probability = 0.1;
+			if (rn.nextDouble() > probability) {
+				outerCnt ++;
+				continue;
+			}
 			List<String> durationList = new ArrayList<String>();
 			List<String> repairedFileList = new ArrayList<String>();
 			int innerCnt = 0;
