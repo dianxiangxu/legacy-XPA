@@ -227,7 +227,7 @@ public class ExperimentMultiFault {
 			if (node.getLayer() + 1 > maxSearchLayer)
 				continue;
 			List<Integer> suspicionRank = node.getSuspicionRank();
-			PolicyMutator mutator = new PolicyMutator(policyToRepair);
+			PolicyMutator mutator = new PolicyMutator(node.getMutant());
 			int rank = 1;
 			for (int bugPosition : suspicionRank) {
 				List<PolicyMutant> mutantList = generateMutants(mutator, bugPosition);
@@ -261,20 +261,6 @@ public class ExperimentMultiFault {
 		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
 		//CRE
 		mutantList.addAll(mutator.createRuleEffectFlippingMutants(myrule, ruleIndex));
-//		//ANR
-//		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
-//		correctMutant = find1stCorrectMutant(mutantList);
-//		if(correctMutant != null) {
-//			return correctMutant;
-//		}
-		//RTT
-		mutantList.addAll(mutator.createRuleTargetTrueMutants(myrule, ruleIndex));
-		//RTF
-		mutantList.addAll(mutator.createRuleTargetFalseMutants(myrule, ruleIndex));
-		//RCT
-		mutantList.addAll(mutator.createRuleConditionTrueMutants(myrule, ruleIndex));
-		//RCF
-		mutantList.addAll(mutator.createRuleConditionFalseMutants(myrule, ruleIndex));
 		//ANF
 		mutantList.addAll(mutator.createAddNotFunctionMutants(myrule, ruleIndex));
 		//RNF
@@ -283,8 +269,19 @@ public class ExperimentMultiFault {
 		mutantList.addAll(mutator.createFlipComparisonFunctionMutants(myrule, ruleIndex));
 		//CCF
 		mutantList.addAll(mutator.createChangeComparisonFunctionMutants(myrule, ruleIndex));
-		//RPTE
-		mutantList.addAll(mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex));
+
+//		//ANR
+//		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
+//		//RTT
+//		mutantList.addAll(mutator.createRuleTargetTrueMutants(myrule, ruleIndex));
+//		//RTF
+//		mutantList.addAll(mutator.createRuleTargetFalseMutants(myrule, ruleIndex));
+//		//RCT
+//		mutantList.addAll(mutator.createRuleConditionTrueMutants(myrule, ruleIndex));
+//		//RCF
+//		mutantList.addAll(mutator.createRuleConditionFalseMutants(myrule, ruleIndex));
+//		//RPTE
+//		mutantList.addAll(mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex));
 
 		return mutantList;
 	}
@@ -292,16 +289,17 @@ public class ExperimentMultiFault {
 	private static List<PolicyMutant> generateMutantsPolicyTarget(PolicyMutator mutator) {
 		List<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
 		//create mutant methods who's bugPosition == 0
-		// PTT
-		mutantList.addAll(mutator.createPolicyTargetTrueMutants());
-		// PTF
-		mutantList.addAll(mutator.createPolicyTargetTrueMutants());
-		//FPR
-		mutantList.addAll(mutator.createFirstPermitRuleMutants());
-		//FDR
-		mutantList.addAll(mutator.createFirstDenyRuleMutants());
 		//CRC
 		mutantList.addAll(mutator.createCombiningAlgorithmMutants());
+
+//		// PTT
+//		mutantList.addAll(mutator.createPolicyTargetTrueMutants());
+//		// PTF
+//		mutantList.addAll(mutator.createPolicyTargetTrueMutants());
+//		//FPR
+//		mutantList.addAll(mutator.createFirstPermitRuleMutants());
+//		//FDR
+//		mutantList.addAll(mutator.createFirstDenyRuleMutants());
 		return mutantList;
 	}
 	
