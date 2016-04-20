@@ -24,8 +24,8 @@ public class SpectrumBasedFaultLocalizer {
             int numberOfCoveredRules = policyCoverage.getRuleCoverages().size();
             for (int ruleNo=1; ruleNo<numberOfRules+1; ruleNo++) {
                 if (ruleNo<numberOfCoveredRules+1){
-                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo-1).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable
-//                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo-1).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
+//                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo-1).getRuleDecisionCoverage()!=RuleDecisionCoverage.INDETERMINATE? 1: 0; // Reachable
+                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo-1).getRuleDecisionCoverage()==RuleDecisionCoverage.EFFECT? 1: 0; // Firable
 //                    ruleMatrix[testNo][ruleNo] = policyCoverage.getRuleCoverages().get(ruleNo-1).getTargetConditionCoverage(); // Target/Condition Coverage. 0/1/2
                     //System.out.println("Test Number " + testNo + " Rule Number " + ruleNo + " Score = " + ruleMatrix[testNo][ruleNo]);
                 } else {
