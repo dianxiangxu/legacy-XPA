@@ -102,6 +102,10 @@ public class ExperimentMultiFault {
 		long createMutantEnd = System.currentTimeMillis();
 		System.out.println("it took " + (createMutantEnd - createMutantStart)/1000 + " seconds to create mutants");
 		
+//		numFaults = 2;
+//		String number = "MUTANT CRE1 MUTANT CCF2_1";//cannot rpair, takes 40 minutes for each run of start() 
+//		String filename = "Experiments//kmarket-blue-policy//mutants//mutants//kmarket-blue-policy_CRE1_CCF2_1.xml";
+//		int[] bugPositions = new int[] {1, 2};
 //		int numFaults = 1;
 //		String number = "MUTANT CRE5_CCF3_2";
 //		String filename = "Experiments//conference3//mutants//mutants//conference3_CRE5_CCF3_2.xml";
