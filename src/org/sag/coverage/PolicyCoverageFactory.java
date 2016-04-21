@@ -25,7 +25,6 @@ public class PolicyCoverageFactory {
 	public static void startNewPolicyCoverage(String policyID, int numberOfRules, int targetMatchResult){
 		flush();
 		currentPolicyCoverage = new PolicyCoverage(currentTestID, currentTestOracle, policyID, numberOfRules, targetMatchResult); 
-		flush();// call flush() after, so that the coverage of the last test won't be lost
 	}
 	
 	public static void flush(){
