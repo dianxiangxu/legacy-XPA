@@ -142,15 +142,15 @@ public class PolicyRepairer {
 	 * to repair
 	 */
 	public PolicyMutant repairSmartly(PolicyMutant policyFileToRepair, String faultLocalizeMethod) throws Exception {
-		List<Integer> suspicionRank = getSuspicionRank(policyFileToRepair, faultLocalizeMethod, this.testSuiteFile); 
-		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
-	}
-
-	 static List<Integer> getSuspicionRank(PolicyMutant policyFileToRepair, String faultLocalizeMethod, String testSuiteFile) throws Exception {
-		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile,
 				policyFileToRepair.getMutantFilePath());
 		testSuite.runAllTests();//we need to run tests to get coverage information, which is in turn used to get suspicion rank
+		List<Integer> suspicionRank = getSuspicionRank(policyFileToRepair, faultLocalizeMethod); 
+		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
+	}
+
+	 static List<Integer> getSuspicionRank(PolicyMutant policyFileToRepair, String faultLocalizeMethod) throws Exception {
+		List<Integer> suspicionRank = new ArrayList<Integer>();
 		SpectrumBasedDiagnosisResults diagnosisResults = 
 				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);
 		suspicionRank = diagnosisResults.getRuleIndexRankedBySuspicion();
