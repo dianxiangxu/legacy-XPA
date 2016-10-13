@@ -2,7 +2,6 @@ package org.sag.coverage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sag.policyUtils.PolicyLoader;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.Balana;
 import org.wso2.balana.ParsingException;
@@ -11,9 +10,6 @@ import org.wso2.balana.ctx.AbstractResult;
 import org.wso2.balana.ctx.RequestCtxFactory;
 import org.wso2.balana.ctx.xacml3.RequestCtx;
 import org.wso2.balana.ctx.xacml3.XACML3EvaluationCtx;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * Created by shuaipeng on 9/8/16.
@@ -60,12 +56,4 @@ public class PolicyRunner {
         return AbstractResult.DECISION_INDETERMINATE;
     }
 
-    public static void main(String[] args) {
-        File csvFile = new File("experiments/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv");
-        TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
-        String fileName = "org/sag/policies/conference3.xml";
-        File file = new File("/media/shuaipeng/data/XPA/xpa/src/main/resources/org/sag/policies/conference3.xml");
-        AbstractPolicy policy = PolicyLoader.loadPolicy(file);
-        List<Boolean> results = testSuite.runTests(policy);
-    }
 }
