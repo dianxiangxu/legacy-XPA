@@ -27,7 +27,7 @@ public class TestSuite {
         this.oracles = oracles;
     }
 
-    static TestSuite loadTestSuite(File csvFile) {
+    public static TestSuite loadTestSuite(File csvFile) {
         try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
             List<String[]> myEntries = reader.readAll();
             List<String> requests = new ArrayList<>();
