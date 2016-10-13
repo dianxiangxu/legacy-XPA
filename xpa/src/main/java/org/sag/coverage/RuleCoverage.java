@@ -6,8 +6,15 @@ package org.sag.coverage;
 public class RuleCoverage extends Coverage {
     private CombinedCoverage combined;
     private RuleDecisionCoverage ruleDecisionCoverage;
+    private String ruleId;
 
     public RuleCoverage(IntermediateCoverage targetResult,
+                        IntermediateCoverage conditionResult, int ruleResult, String ruleId) {
+        this(targetResult, conditionResult, ruleResult);
+        this.ruleId = ruleId;
+    }
+
+    private RuleCoverage(IntermediateCoverage targetResult,
                         IntermediateCoverage conditionResult, int ruleResult) {
         // get combine coverage
         if ((targetResult == IntermediateCoverage.TRUE || targetResult == IntermediateCoverage.EMPTY)
@@ -31,12 +38,16 @@ public class RuleCoverage extends Coverage {
             ruleDecisionCoverage = RuleDecisionCoverage.INDETERMINATE;
     }
 
-    CombinedCoverage getCombinedCoverage() {
+    public CombinedCoverage getCombinedCoverage() {
         return combined;
     }
 
-    RuleDecisionCoverage getRuleDecisionCoverage() {
+    public RuleDecisionCoverage getRuleDecisionCoverage() {
         return ruleDecisionCoverage;
+    }
+
+    public String getRuleId() {
+        return ruleId;
     }
 
     public enum IntermediateCoverage {
@@ -47,7 +58,7 @@ public class RuleCoverage extends Coverage {
         BOTHTRUE, FALSETARGET, FALSECONDITION, ERRORTARGET, ERRORCONDITION
     }
 
-    enum RuleDecisionCoverage {
+    public enum RuleDecisionCoverage {
         EFFECT, NA, INDETERMINATE
     }
 
