@@ -135,7 +135,7 @@ public class ConvertToPostfix {
 		//System.out.println("Postfix in function");
 		//for(int i=0;i<postfix.size();i++)
 		//	System.out.print(": "+postfix.get(i));
-		System.out.println();
+//		System.out.println();
 		for(int i=postfix.size()-1;i>=0;i--)
 		{
 			//System.out.print(": "+postfix.get(i));

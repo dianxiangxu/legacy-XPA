@@ -157,6 +157,7 @@ public class PolicySpreadSheetTestSuite {
 	
 	// 11/1/15 Change return type from boolean[] to TestCellResult[].
 	public TestCellResult[] runAllTestsOnMutant() throws Exception {
+		PolicyCoverageFactory.init();
 		try {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);
 			
@@ -193,12 +194,13 @@ public class PolicySpreadSheetTestSuite {
 	}
 	
 	public boolean runAllTests() throws Exception {
+		PolicyCoverageFactory.init();
 		boolean allPass = true;
 		try {
 			PolicyRunner policyTester = new PolicyRunner(policyUnderTest);
 			for (PolicySpreadSheetTestRecord test : policyTestSuite) {
 				PolicyCoverageFactory.currentTestID = test.getNumber();
-				System.out.print("\n" + test.getNumber());
+//				System.out.print("\n" + test.getNumber());
 				if (test.getOracle().equals("")) {
 					System.out.print(": no test oracle");
 					
@@ -206,11 +208,11 @@ public class PolicySpreadSheetTestSuite {
 							test.getRequest());
 				} else {
 					if (policyTester.runTest(test.getNumber(),
-							test.getRequest(), test.getOracle()))
-						System.out.print(": pass");
-					else {
+							test.getRequest(), test.getOracle())) {
+//						System.out.print(": pass");
+					} else {
 						allPass = false;
-						System.out.print(": fail");
+//						System.out.print(": fail");
 					}
 				}
 			}

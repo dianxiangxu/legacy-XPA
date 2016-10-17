@@ -11,6 +11,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -38,6 +41,7 @@ import org.wso2.balana.xacml3.AllOfSelection;
 import org.wso2.balana.xacml3.AnyOfSelection;
 import org.wso2.balana.xacml3.Target;
 
+
 public class PolicyMutator {
     
 	private String policyFilePath;
@@ -47,6 +51,7 @@ public class PolicyMutator {
 	private String mutantFileNameBase;
 	private String mutantSpreadSheetNameBase;
 	private ArrayList<PolicyMutant> mutantList = new ArrayList<PolicyMutant>();
+	private static Pattern ruleIdPattern = Pattern.compile("<Rule\\s+RuleId\\s*=\\s*\"([^\"]+)\"");
 	
 	// so far only string and integer are considered.					
 	String int_function = "urn:oasis:names:tc:xacml:1.0:function:integer-equal";
@@ -429,6 +434,15 @@ public class PolicyMutator {
 			mutantRule1 = theRule.replace("Effect=\"" + "Permit", "Effect=\"" + "Deny"); 
 		} else {
 			mutantRule1 = theRule.replace("Effect=\"" + "Deny", "Effect=\"" + "Permit");
+		}
+		//replace rule id with a random long string to avoid duplicate rule id
+		Matcher m = PolicyMutator.ruleIdPattern.matcher(mutantRule1);
+		if (m.find()) {
+			int ruleIdStart = m.start(1);
+			int ruleIdEnd = m.end(1);
+			String randStr = UUID.randomUUID().toString();
+			mutantRule1 = new StringBuilder(mutantRule1).replace(ruleIdStart,
+					ruleIdEnd, randStr).toString();
 		}
 		// Append the mutant rule to the end of the rule.
 		builder1.replace(ruleEndingIndex, ruleEndingIndex, mutantRule1);
@@ -1611,6 +1625,17 @@ public class PolicyMutator {
 	public ArrayList<PolicyMutant> getMutantList()
 	{
 		return this.mutantList;
+	}
+
+	public List<Rule> getRuleList() {
+		List<Rule> ruleList = new ArrayList<Rule>();
+		for (CombinerElement rule : this.getPolicy().getChildElements()) {
+			PolicyTreeElement tree = rule.getElement();
+			if (tree instanceof Rule) {
+				ruleList.add((Rule)tree);
+			}
+		}
+		return ruleList;
 	}
 
 }

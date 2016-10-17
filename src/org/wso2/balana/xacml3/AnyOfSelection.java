@@ -77,7 +77,7 @@ public class AnyOfSelection {
             Node child = children.item(i);
             if ("AllOf".equals(DOMHelper.getLocalName(child))) {
                 allOfSelections.add(AllOfSelection.getInstance(child, metaData));
-                System.out.println();
+//                System.out.println();
             }
         }
 

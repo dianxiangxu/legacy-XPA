@@ -159,6 +159,7 @@ Condition condition = rule.getCondition();
     // record the result of policy evaluation
     after() returning(AbstractResult result): call(* AbstractPolicy.evaluate(*))  {
     	PolicyCoverageFactory.currentPolicyCoverage.setDecision(result.getDecision());
+    	PolicyCoverageFactory.flush();// call flush() after, so that the coverage of the last test won't be lost
 	}
 
 }
