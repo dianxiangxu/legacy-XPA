@@ -1,6 +1,7 @@
 package org.sag.mutation;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
@@ -32,7 +33,6 @@ public class PolicyMutant {
 		this.faultLocation = bugPositions;
 	}
 	public ArrayList<SpectrumBasedDiagnosisResults> run(ArrayList<PolicySpreadSheetTestRecord> testCases) throws Exception{
-		PolicyCoverageFactory.init();
 		// Test
 			//System.out.println(mutantFilePath);
 		if (!new PolicySpreadSheetTestSuite(testCases, mutantFilePath).runAllTests()) // not all tests passed (i.e., at least one test failed, otherwise fault localization is meaningless)
@@ -81,5 +81,9 @@ public class PolicyMutant {
 		vector.add(testResult);	
 //		vector.add(mutantString);
 		return vector;
+	}
+	
+	public void clear() {
+		new File(mutantFilePath).delete();
 	}
 }

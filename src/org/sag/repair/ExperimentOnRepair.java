@@ -3,19 +3,17 @@
  */
 package org.sag.repair;
 
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.sag.mutation.PolicyMutator;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
 import org.sag.mutation.PolicyMutant;
+
+import com.opencsv.CSVWriter;
 
 /**
  * @author speng
@@ -31,38 +29,81 @@ public class ExperimentOnRepair {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		String PolicyFilePath = "Experiments//conference3//conference3.xml";
-		String testSuiteSpreadSheetFile = "Experiments//conference3//test_suites//conference3_MCDCCoverage//conference3_MCDCCoverage.xls";
-		ExperimentOnRepair experiment = new ExperimentOnRepair(PolicyFilePath,
+		String[] policy = { "conference3", "fedora-rule3", "itrust3",
+				"kmarket-blue-policy", "obligation3", "pluto3" };
+		String[] testsuite = { "Basic", "Exclusive", "Pair", "PDpair",
+				"DecisionCoverage", "RuleLevel", "MCDCCoverage" };
+		int policyNumber = 0;
+		int testsuiteNumber = 6;
+
+		String testSuiteSpreadSheetFile = "Experiments" + File.separator
+				+ policy[policyNumber] + File.separator + "test_suites"
+				+ File.separator + policy[policyNumber] + "_"
+				+ testsuite[testsuiteNumber] + File.separator
+				+ policy[policyNumber] + "_" + testsuite[testsuiteNumber]
+				+ ".xls";
+		String policyMutantSpreadsheetFile = "Experiments" + File.separator
+				+ policy[policyNumber] + File.separator + "mutants"
+				+ File.separator + policy[policyNumber] + "_mutants.xls";
+		String experimentResultFileName = "Experiments" + File.separator
+				+ policy[policyNumber] + File.separator + "repair"
+				+ File.separator + policy[policyNumber] + "_"
+				+ testsuite[testsuiteNumber] + "_repair.csv";
+		ExperimentOnRepair experiment = new ExperimentOnRepair(policyMutantSpreadsheetFile,
 				testSuiteSpreadSheetFile);
 		List<List<String>> repairMethodPairList = PolicyRepairer.getRepairMethodPairList();
-		List<List<Integer>> allNumTiresLists = new ArrayList<List<Integer>>();
-		List<List<PolicyMutant>> allCorrectedPolicyLists  = new ArrayList<List<PolicyMutant>>();
-		List<Long> durationList = new ArrayList<Long>();
-
+		CSVWriter writer = new CSVWriter(new FileWriter(experimentResultFileName), ',');
+		writeCSVTitleRow(writer, experiment.mutantList);
 		for(List<String> repairMethodPair: repairMethodPairList) {
 			long startTime = System.currentTimeMillis();
-//			experiment.startExperiment("repairRandomOrder", null);
 			List<PolicyMutant> correctedPolicyList = experiment.startExperiment(repairMethodPair.get(0), 
 					repairMethodPair.get(1));
-			allCorrectedPolicyLists.add(correctedPolicyList);
-			allNumTiresLists.add(numTriesList);
-//			experiment.startExperiment("repairSmartly", "sokal");
 			long endTime = System.currentTimeMillis();
 			long duration = endTime - startTime;
 			System.out.printf("running time: " + duration + " milliseconds\n");
-			durationList.add(duration);
+			writeCSVResultRow(writer, repairMethodPair, correctedPolicyList,
+					numTriesList, duration);
+		}
+		writer.close();
+	}
+
+		private static void writeCSVTitleRow(CSVWriter writer, List<PolicyMutant> mutantList) {
+			String[] titles = new String[mutantList.size() + 5];
+			titles[0] = "repair method";
+			titles[1] = "fault localizer";
+			titles[2] = "time spent(ms)";
+			titles[3] = "repaired/total";
+			titles[4] = "total tries";
+			int index = 5;
+			for (PolicyMutant mutant: mutantList) {
+				titles[index] = mutant.getNumber();
+				index ++;
+			}
+			writer.writeNext(titles);
 		}
 
-		
-		String fileName = "Experiments//conference3//conference3_repair_statistics.xls";
-		writeToExcelFile(fileName, repairMethodPairList, 
-				experiment.mutantList, allCorrectedPolicyLists, 
-				durationList, allNumTiresLists);
-//		System.out.printf("running time: %03d milliseconds\n", duration);
-		// System.out.printf("%d:%02d:%02d.%d\n", duration/1e3/3600,
-		// duration/1e3%3600/60, duration/1e3%60, duration%1e3);
-
+	private static void writeCSVResultRow(CSVWriter writer, List<String> repairMethodPair,
+			List<PolicyMutant> correctedPolicyList, List<Integer> numTriesList,
+			long duration) {
+		String[] entry = new String[correctedPolicyList.size() + 5];
+		entry[0] = repairMethodPair.get(0);
+		entry[1] = repairMethodPair.get(1);
+		entry[2] = Long.toString(duration);
+		int repaired = 0;
+		for (PolicyMutant mutant: correctedPolicyList)
+			if (mutant != null)
+				repaired ++;
+		entry[3] = repaired + "/" + correctedPolicyList.size();
+		int numTriesTotal = 0;
+		for (int numTries: numTriesList)
+			numTriesTotal += numTries;
+		entry[4] = Integer.toString(numTriesTotal);
+		int index = 5;
+		for (int numTries: numTriesList) {
+			entry[index] = Integer.toString(numTries);
+			index ++;
+		}
+		writer.writeNext(entry);
 	}
 
 	/**
@@ -105,22 +146,6 @@ public class ExperimentOnRepair {
 	}
 	
 	
-	private List<PolicyMutant> debug() throws Exception {
-		PolicyRepairer repairer = new PolicyRepairer(testSuiteSpreadSheetFile);
-
-		List<PolicyMutant> correctedPolicyList = new ArrayList<PolicyMutant>();
-		numTriesList = new ArrayList<Integer>();
-		PolicyMutant correctedPolicy;
-		
-		for (PolicyMutant mutant : this.mutantList) {
-			correctedPolicy = repairer.repairRandomOrder(mutant);
-			correctedPolicyList.add(correctedPolicy);
-			numTriesList.add(repairer.getNumTriesBeforSucceed());
-		}
-		return correctedPolicyList;
-	}
-	
-
 	private List<PolicyMutant> createSelectedMutants() throws Exception {
 		//comment out some mutants that cannot be repaired
 		PolicyMutator policyMutator = new PolicyMutator(this.policyFilePath);
@@ -145,80 +170,5 @@ public class ExperimentOnRepair {
 		return policyMutator.getMutantList();
 	}
 	
-	public static void writeToExcelFile(String fileName, List<List<String>> repairMethodPairList, 
-			List<PolicyMutant> mutantList, List<List<PolicyMutant>> allCorrectedPolicyLists, 
-			List<Long> durationList, List<List<Integer>> allNumTiresLists) {
-		HSSFWorkbook workBook = new HSSFWorkbook();
-		workBook.createSheet("experiment on repair");
-		Sheet sheet = workBook.getSheetAt(0);
-		writeTitleRow(sheet, 0, mutantList);
-		int rowIndex = 1;
-		for (int i = 0; i < allCorrectedPolicyLists.size(); i++) {
-			writeTestRow(sheet, rowIndex, repairMethodPairList.get(i), mutantList, 
-					allCorrectedPolicyLists.get(i), durationList.get(i), allNumTiresLists.get(i));
-			rowIndex++;
-		}
-		try {
-			FileOutputStream out = new FileOutputStream(fileName);
-			workBook.write(out);
-			out.close();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		}
-	}
 	
-	private static void writeTitleRow(Sheet sheet, int rowIndex, List<PolicyMutant> mutantList) {
-		Row titleRow = sheet.createRow(rowIndex);
-		
-		Row testRow = sheet.createRow(rowIndex);
-		int colIndex = 0;
-		titleRow.createCell(colIndex).setCellValue("repair method");
-		colIndex++;
-		titleRow.createCell(colIndex).setCellValue("fault localizer");
-		colIndex++;
-		titleRow.createCell(colIndex).setCellValue("time spent(ms)");
-		colIndex++;
-		titleRow.createCell(colIndex).setCellValue("repaired/total");
-		colIndex++;
-		for(PolicyMutant mutant: mutantList) {
-			testRow.createCell(colIndex).setCellValue(new File(mutant.getMutantFilePath()).getName());
-			colIndex++;
-		}
-	}
-	
-	private static void writeTestRow(Sheet sheet, int rowIndex, List<String> repairMethodPair, 
-			List<PolicyMutant> mutantList, List<PolicyMutant> correctedPolicyList, 
-			long duration, List<Integer> numTiresList) {
-		Row testRow = sheet.createRow(rowIndex);
-		int colIndex = 0;
-		for(String str: repairMethodPair) {
-			testRow.createCell(colIndex).setCellValue(str);
-			colIndex++;
-		}
-
-		testRow.createCell(colIndex).setCellValue(duration);
-		colIndex++;
-		
-		int numRepaired = 0, total = 0;
-		for(PolicyMutant correctedPolicy: correctedPolicyList) {
-			if(correctedPolicy != null) {
-				numRepaired++;
-			}
-			total++;
-		}
-		testRow.createCell(colIndex).setCellValue(numRepaired + "/" + total);
-		colIndex++;
-		
-		for(int i = 0; i < correctedPolicyList.size(); i++) {
-			PolicyMutant correctedPolicy = correctedPolicyList.get(i);
-			int numTries = numTiresList.get(i);
-			testRow.createCell(colIndex).setCellValue( correctedPolicy == null ? "cannot repair" : numTries + " tries");
-			colIndex++;
-		}
-		int sum = 0;
-		for(int numTries: numTiresList) {
-			sum += numTries;
-		}
-		testRow.createCell(colIndex).setCellValue(sum + " total tries");
-	}
 }

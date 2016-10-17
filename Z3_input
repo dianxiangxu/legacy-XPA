@@ -1,6 +1,0 @@
-(declare-variable nmfgk String)
-(declare-variable dptda String)
-(declare-variable itbmp String)
-(assert (and (= itbmp "Patient") (= nmfgk "My Demographics") (= dptda "Edit") ))
-(check-sat)
-(get-model)

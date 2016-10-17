@@ -38,8 +38,8 @@ public class SpectrumBasedFaultLocalizer {
             PolicyCoverage policyCoverage = policyCoverages.get(testNo);
             verdicts[testNo] = policyCoverage.getDecision() == policyCoverage.getOracle()? 0: 1;
         }
-        printMatrix(ruleMatrix);
-        System.out.println("verdict: " + Arrays.toString(verdicts));
+//        printMatrix(ruleMatrix);
+//        System.out.println("verdict: " + Arrays.toString(verdicts));
         s = new double[numberOfRules+1];
     }
 	
@@ -115,7 +115,7 @@ public class SpectrumBasedFaultLocalizer {
 		Method method = cls.getDeclaredMethod(faultLocalizeMethod);
 		method.invoke(faultLocalizer);
 		SpectrumBasedDiagnosisResults res = new SpectrumBasedDiagnosisResults(faultLocalizeMethod, faultLocalizer.s);
-		System.out.println(Arrays.toString(faultLocalizer.s));
+//		System.out.println(Arrays.toString(faultLocalizer.s));
 		return res;
 	}
 
@@ -126,20 +126,20 @@ public class SpectrumBasedFaultLocalizer {
 
 	private void cbi(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
 			s[j] = a11+a10!=0? ((double)a11) / ((double)(a11+a10)) - ((double)(a11+a01))/((double)a11+a10+a01+a00): 0;
 		}
 	}
 
 	private void hamann(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
 			double d = (double)a11+a10+a01+a00;
 			s[j] = d!=0? (a11+a00-a01-a10)/d: 0;
 		}
@@ -147,10 +147,10 @@ public class SpectrumBasedFaultLocalizer {
 
 	private void simpleMatching(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
 			double d = (double)a11+a10+a01+a00;
 			s[j] = d!=0? (a11+a00)/d: 0;
 		}
@@ -158,59 +158,59 @@ public class SpectrumBasedFaultLocalizer {
 
 	private void sokal(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
-			int n = 2*(a11+a00);
-			int d = n+a10+a01;
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
+			double n = 2*(a11+a00);
+			double d = n+a10+a01;
 			s[j] = d!=0? ((double)n)/((double)d): 0;
 		}
 	}
 
 	private void rogersTanimoto(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
-			int n = a11+a00;
-			int d = n+2*(a10+a01);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
+			double n = a11+a00;
+			double d = n+2*(a10+a01);
 			s[j] = d!=0? ((double)n)/((double)d): 0;
 		}
 	}
 
 	private void euclid(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a00 = apq(0,0,j);
 			s[j] = Math.sqrt(a11+a00);
 		}
 	}
 
 	private void anderberg(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
 			s[j] = a11+2*a01+2*a10!=0 ? ((double)a11) / ((double)(a11+2*a01+2*a10)): 0;
 		}
 	}
 
 	private void sorensenDice(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
 			s[j] = 2*a11+a01+a10!=0 ? ((double)a11) / ((double)(2*a11+a01+a10)): 0;
 		}
 	}
 
 	private void goodman(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
 			double d = (double)(2*a11+a01+a10);
 			s[j] = d!=0 ? ((double)2*a11-a01-a10) / d: 0;
 		}
@@ -218,28 +218,28 @@ public class SpectrumBasedFaultLocalizer {
 
 	private void jaccard(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
 			s[j] = a11+a01+a10!=0 ? ((double)a11) / ((double)(a11+a01+a10)): 0;
 		}
 	}
 
 	private void naish2(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
 			s[j] = a11-((double)a10/((double)a10+a00+1));
 		}
 	}
 
 	private void tarantula(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
 			double x =  a11+a01!=0 ? ((double)a11) / ((double)(a11+a01)): 0;
 			double y = a10+a00!=0? ((double)a10) / ((double)(a10+a00)): 0;
 			s[j] = x+y!=0 ? x/ (x+y): 0;
@@ -248,9 +248,9 @@ public class SpectrumBasedFaultLocalizer {
 
 	private void ochiai(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
 			double d = Math.sqrt((a11+a01)*(a11+a10));
 			s[j] = d!=0 ? ((double)a11)/d: 0;
 		}
@@ -258,10 +258,10 @@ public class SpectrumBasedFaultLocalizer {
 
 	private void ochiai2(){
 		for (int j=0; j<ruleMatrix[0].length; j++) {
-			int a11 = apq(1,1,j);
-			int a01 = apq(0,1,j);
-			int a10 = apq(1,0,j);
-			int a00 = apq(0,0,j);
+			double a11 = apq(1,1,j);
+			double a01 = apq(0,1,j);
+			double a10 = apq(1,0,j);
+			double a00 = apq(0,0,j);
 			double d = Math.sqrt((a11+a10)*(a00+a01)*(a11+a01)*(a10+a00));
 			s[j] = d!=0 ? ((double)a11*a00)/d: 0;
 		}

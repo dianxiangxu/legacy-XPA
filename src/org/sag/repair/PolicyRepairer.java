@@ -22,8 +22,8 @@ public class PolicyRepairer {
 	@SuppressWarnings("serial")
 	static private List<List<String>> repairMethodPairList = new ArrayList<List<String>>() {
 		{
-//			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
-//			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
+			add(new ArrayList<String>(Arrays.asList("repairRandomOrder", null)));
+			add(new ArrayList<String>(Arrays.asList("repairOneByOne", null)));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "jaccard")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "tarantula")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "ochiai")));
@@ -31,13 +31,13 @@ public class PolicyRepairer {
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "cbi")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "hamann")));
 			add(new ArrayList<String>(Arrays.asList("repairSmartly", "simpleMatching")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
-//			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sokal")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "naish2")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "goodman")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "sorensenDice")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "anderberg")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "euclid")));
+			add(new ArrayList<String>(Arrays.asList("repairSmartly", "rogersTanimoto")));
 			
 		}
 	};
@@ -52,18 +52,23 @@ public class PolicyRepairer {
 		}
 		for(PolicyMutant mutant: mutantList) {
 			//System.out.println(mutant.getMutantFilePath() + "\n");
-			PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutant.getMutantFilePath());
-			TestCellResult[] testCellResults = testSuite.runAllTestsOnMutant();
-			List<Boolean> testResults = new ArrayList<Boolean>();
-			for(TestCellResult res : testCellResults) {
-				testResults.add(res.getVerdict());
-			}
+			List<Boolean> testResults = getTestResults(testSuiteFile, mutant.getMutantFilePath());
 			boolean is_repaired = booleanListAnd(testResults);
 			if(is_repaired) {
 				return mutant;
 			}
 		}
 		return null;
+	}
+	
+	static List<Boolean> getTestResults(String testSuiteFile, String mutantFile) throws Exception {
+		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile, mutantFile);
+		TestCellResult[] testCellResults = testSuite.runAllTestsOnMutant();
+		List<Boolean> testResults = new ArrayList<Boolean>();
+		for(TestCellResult res : testCellResults) {
+			testResults.add(res.getVerdict());
+		}	
+		return testResults;
 	}
 	
 	private List<PolicyMutant> findAllCorrectMutants(List<PolicyMutant> mutantList) throws Exception	{
@@ -120,7 +125,7 @@ public class PolicyRepairer {
 	 * @param booleanList
 	 * @return result of logical AND on all elements of the boolean array
 	 */
-	private boolean booleanListAnd(List<Boolean> booleanList) {
+	static boolean booleanListAnd(List<Boolean> booleanList) {
 		boolean result = true;
 		for(boolean b: booleanList) {
 			result = result && b;
@@ -137,29 +142,36 @@ public class PolicyRepairer {
 	 * to repair
 	 */
 	public PolicyMutant repairSmartly(PolicyMutant policyFileToRepair, String faultLocalizeMethod) throws Exception {
-		List<Integer> suspicionRank = new ArrayList<Integer>();
-		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(this.testSuiteFile,
+		PolicySpreadSheetTestSuite testSuite = new PolicySpreadSheetTestSuite(testSuiteFile,
 				policyFileToRepair.getMutantFilePath());
-		PolicyCoverageFactory.init();
 		testSuite.runAllTests();//we need to run tests to get coverage information, which is in turn used to get suspicion rank
+		List<Integer> suspicionRank = getSuspicionRank(policyFileToRepair, faultLocalizeMethod); 
+		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
+	}
+
+	 static List<Integer> getSuspicionRank(PolicyMutant policyFileToRepair, String faultLocalizeMethod) throws Exception {
+		List<Integer> suspicionRank = new ArrayList<Integer>();
 		SpectrumBasedDiagnosisResults diagnosisResults = 
 				SpectrumBasedFaultLocalizer.applyOneFaultLocalizerToPolicyMutant(faultLocalizeMethod);
 		suspicionRank = diagnosisResults.getRuleIndexRankedBySuspicion();
 		suspicionRank.add(0, -1);// a temporary solution for fault in combining algorithms
-		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
+		return suspicionRank;
 	}
 
-
-	
-	public PolicyMutant repairRandomOrder(PolicyMutant policyFileToRepair) throws Exception {
+	 public static List<Integer> getRandomSuspicionRank(PolicyMutant policyFileToRepair) throws Exception {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
-		for(int bugPosition = -1; bugPosition <= this.getRuleList(mutator).size(); bugPosition++) {
+		for(int bugPosition = -1; bugPosition <= mutator.getRuleList().size(); bugPosition++) {
 			suspicionRank.add(bugPosition);
 		}
 		suspicionRank.add(maxRules);
 		Collections.shuffle(suspicionRank);
+		return suspicionRank;
+	 }
+	
+	public PolicyMutant repairRandomOrder(PolicyMutant policyFileToRepair) throws Exception {
+		List<Integer> suspicionRank = getRandomSuspicionRank(policyFileToRepair);
 		return repairBySuspicionRank(policyFileToRepair, suspicionRank);
 	}
 	/**
@@ -172,7 +184,7 @@ public class PolicyRepairer {
 		List<Integer> suspicionRank = new ArrayList<Integer>();
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
 		int maxRules = mutator.getPolicy().getChildElements().size();
-		for(int bugPosition = -1; bugPosition <= this.getRuleList(mutator).size(); bugPosition++) {
+		for(int bugPosition = -1; bugPosition <= mutator.getRuleList().size(); bugPosition++) {
 			suspicionRank.add(bugPosition);
 		}
 		suspicionRank.add(maxRules);
@@ -182,7 +194,7 @@ public class PolicyRepairer {
 	public PolicyMutant repairBySuspicionRank(PolicyMutant policyFileToRepair, List<Integer> suspicionRank) throws Exception {
 		PolicyMutant correctMutant = null;
 		PolicyMutator mutator = new PolicyMutator(policyFileToRepair);
-		List<Rule> ruleList = getRuleList(mutator);
+		List<Rule> ruleList = mutator.getRuleList();
 		int maxRules = mutator.getPolicy().getChildElements().size();
 		//bugPosition equals to -1 indicates fault in combining algorithm
 		int bugPosition = Integer.MAX_VALUE;
@@ -228,15 +240,12 @@ public class PolicyRepairer {
 		this.numTriesBeforSucceed = numTriesBeforSucceed;
 	}
 
-	private List<Rule> getRuleList(PolicyMutator mutator) {
-		List<Rule> ruleList = new ArrayList<Rule>();
-		for (CombinerElement rule : mutator.getPolicy().getChildElements()) {
-			PolicyTreeElement tree = rule.getElement();
-			if (tree instanceof Rule) {
-				ruleList.add((Rule)tree);
+	private void deleteMutantFile(List<PolicyMutant> mutantList, PolicyMutant correctMutant) {
+		for (PolicyMutant mutant: mutantList) {
+			if (mutant != correctMutant) {
+				mutant.clear();
 			}
 		}
-		return ruleList;
 	}
 	
 	private PolicyMutant repairBugPositionCombiningAlgorithm(PolicyMutator mutator) throws Exception {
@@ -244,6 +253,7 @@ public class PolicyRepairer {
 		// CRC
 		List<PolicyMutant> mutantList = mutator.createCombiningAlgorithmMutants();
 		PolicyMutant correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		return correctMutant;
 	}
 	
@@ -254,24 +264,28 @@ public class PolicyRepairer {
 		// PTT
 		mutantList = mutator.createPolicyTargetTrueMutants();
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		// PTF
 		mutantList = mutator.createPolicyTargetTrueMutants();
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//FPR
 		mutantList = mutator.createFirstPermitRuleMutants();
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//FDR
 		mutantList = mutator.createFirstDenyRuleMutants();
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
@@ -280,7 +294,7 @@ public class PolicyRepairer {
 	
 	private PolicyMutant repairBugPositionMaxRules(PolicyMutator mutator
 			) throws Exception {
-		List<Rule> ruleList = getRuleList(mutator);
+		List<Rule> ruleList = mutator.getRuleList();
 		List<PolicyMutant> mutantList = null;
 		PolicyMutant correctMutant = null;
 		int maxRules = mutator.getPolicy().getChildElements().size();
@@ -290,6 +304,7 @@ public class PolicyRepairer {
 			//take care, ruleIndex begins from one
 			mutantList = mutator.createRemoveRuleMutants(ruleList.get(ruleIndex-1), ruleIndex, maxRules);
 			correctMutant = find1stCorrectMutant(mutantList);
+			deleteMutantFile(mutantList, correctMutant);
 			if(correctMutant != null) {
 				return correctMutant;
 			}
@@ -304,66 +319,77 @@ public class PolicyRepairer {
 		//CRE
 		mutantList = mutator.createRuleEffectFlippingMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
-		//ANR
-		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
-		correctMutant = find1stCorrectMutant(mutantList);
-		if(correctMutant != null) {
-			return correctMutant;
-		}
+//		//ANR
+//		mutantList = mutator.createAddNewRuleMutants(myrule, ruleIndex);
+//		correctMutant = find1stCorrectMutant(mutantList);
+//		deleteMutantFile(mutantList, correctMutant);
+//		if(correctMutant != null) {
+//			return correctMutant;
+//		}
 		//RTT
 		mutantList = mutator.createRuleTargetTrueMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//RTF
 		mutantList = mutator.createRuleTargetFalseMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//RCT
 		mutantList = mutator.createRuleConditionTrueMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//RCF
 		mutantList = mutator.createRuleConditionFalseMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//ANF
 		mutantList = mutator.createAddNotFunctionMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//RNF
 		mutantList = mutator.createRemoveNotFunctionMutants(myrule,  ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//FCF
 		mutantList = mutator.createFlipComparisonFunctionMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//CCF
 		mutantList = mutator.createChangeComparisonFunctionMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
 		//RPTE
 		mutantList = mutator.createRemoveParallelTargetElementMutants(myrule, ruleIndex);
 		correctMutant = find1stCorrectMutant(mutantList);
+		deleteMutantFile(mutantList, correctMutant);
 		if(correctMutant != null) {
 			return correctMutant;
 		}
