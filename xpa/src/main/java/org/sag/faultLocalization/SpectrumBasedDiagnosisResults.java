@@ -43,4 +43,30 @@ public class SpectrumBasedDiagnosisResults {
             indexRankedBySuspicion.add(coefficient.getIndex());
         return Collections.unmodifiableList(indexRankedBySuspicion);
     }
+
+    /**
+     * @param bugPosition
+     */
+    private int getNumberOfElementsToInspect(int bugPosition) {
+        if (coefficientList.size() == 0)
+            throw new RuntimeException("coefficientList is empty");
+        for (PolicyElementCoefficient coefficient : coefficientList) {
+            if (coefficient.getIndex() == bugPosition) {
+                return coefficient.getRank();
+            }
+        }
+        throw new RuntimeException("bugPosition " + bugPosition + " is not in coefficientList");
+    }
+
+    double getAverageNumberOfElementsToInspect(List<Integer> bugPositions) {
+        List<Double> scores = new ArrayList<>();
+        for (int bugPosition : bugPositions) {
+            scores.add((double) getNumberOfElementsToInspect(bugPosition));
+        }
+        double average = 0;
+        for (double score : scores)
+            average += score;
+        average /= scores.size();
+        return average;
+    }
 }
