@@ -1,7 +1,10 @@
 package org.sag.policyUtils;
 
+import com.opencsv.CSVReader;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sag.mutation.Mutant;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.balana.*;
@@ -10,10 +13,9 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * this class loads a <code>Policy</code> or a <code>PolicySet</code> from a file
@@ -68,6 +70,31 @@ public class PolicyLoader {
             logger.error(e);
         }
         return null;
+    }
+
+    public static List<AbstractPolicy> readMutantsCSVFile(String mutantsCSVFileName) throws IOException {
+        CSVReader reader = new CSVReader(new FileReader(mutantsCSVFileName));
+        List<String[]> entries = reader.readAll();
+        reader.close();
+        List<AbstractPolicy> mutantList = new ArrayList<>();
+        for (String[] entry : entries) {
+            String mutantName = entry[0];
+            String fileName = new File(mutantsCSVFileName).getParent() + File.separator + entry[1];
+            List<Integer> bugPositions = StringToIntList(entry[2]);
+            mutantList.add(new Mutant(PolicyLoader.loadPolicy(new File(fileName)), bugPositions, mutantName));
+        }
+        return mutantList;
+    }
+
+    private static List<Integer> StringToIntList(String str) {
+        List<Integer> results = new ArrayList<>();
+        if (StringUtils.isEmpty(str))
+            return results;
+        String[] strs = str.replace("[", "").replace("]", "").split(",");
+        for (String str1 : strs) {
+            results.add(Integer.parseInt(str1.trim()));
+        }
+        return results;
     }
 
 }
