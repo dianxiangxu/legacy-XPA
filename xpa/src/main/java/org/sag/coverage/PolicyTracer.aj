@@ -31,7 +31,7 @@ public aspect PolicyTracer {
 		// parent policy, so we skip the matching step assuming we wouldn't
 		// be here unless the parent matched
 		MatchResult match = null;
-		logger.info("around Rule.evaluate(*)");
+		logger.debug("evaluating rule " + rule.getId().toString());
 
 		// start of changes
 		// xacmlVersion, processObligations, processAdvices have been changed to
@@ -213,7 +213,7 @@ public aspect PolicyTracer {
 
 	// record the entry of policy evaluation
 	before(AbstractPolicy policy, EvaluationCtx context): target(policy) && call(* AbstractPolicy.evaluate(*)) && args(context) {
-//		logger.info("enter Policy ID: " + policy.getId());
+		logger.debug("enter Policy ID: " + policy.getId());
     	AbstractTarget policyTarget = policy.getTarget();
     	int result = MatchResult.MATCH; // assume that there is no policy target (considered a match)
         if (policyTarget != null) {
@@ -225,26 +225,26 @@ public aspect PolicyTracer {
 
 	// record the result of policy evaluation
 	after(AbstractPolicy policy) returning(AbstractResult result): target(policy) && call(* AbstractPolicy.evaluate(*))  {
-//		logger.info("leave Policy ID:" + policy.getId());
+		logger.debug("leave Policy ID:" + policy.getId());
 	}
 
 	pointcut runNewTest(AbstractPolicy policy, String request,
 			String oracleString): call(boolean PolicyRunner.runTest(AbstractPolicy, String, String)) && args(policy, request, oracleString);
 
 	before(AbstractPolicy policy, String request, String oracleString) : runNewTest(policy, request, oracleString) {
-		logger.info("start running a test on " + policy.getId());
+		logger.debug("start running a test on " + policy.getId());
 		PolicyCoverageFactory.newRow();
 	}
 
 	pointcut runNewTestSuite(TestSuite testSuite, AbstractPolicy policy): call(List<Boolean> TestSuite.runTests(AbstractPolicy)) && target(testSuite) && args(policy);
 
 	before(TestSuite testSuite, AbstractPolicy policy): runNewTestSuite(testSuite, policy) {
-		logger.info("start running test suite on " + policy.getId());
+		logger.debug("start running test suite on " + policy.getId());
 		PolicyCoverageFactory.init();
 	}
 	
 	after(TestSuite testSuite, AbstractPolicy policy) returning(List<Boolean> results): runNewTestSuite(testSuite, policy) {
-		logger.info("finished running test suite on " + policy.getId());
+		logger.debug("finished running test suite on " + policy.getId());
 		PolicyCoverageFactory.setResults(results);
 	}
 
