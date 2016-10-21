@@ -5,6 +5,8 @@ import org.sag.coverage.PolicyCoverageFactory;
 import org.sag.coverage.RuleCoverage;
 import org.sag.coverage.TargetCoverage;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,10 +42,23 @@ public class SpectrumBasedFaultLocalizer {
             verdicts[i] = results.get(i) ? 0 : 1;
     }
 
+    /**
+     * for debugging
+     *
+     * @param matrix coverage matrix
+     */
     private static void printMatrix(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++)
             System.out.println(i + ": " + Arrays.toString(matrix[i]));
     }
+
+    public double[] applyFaultLocalizeMethod(String faultLocalizeMethod)
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Class<?> cls = this.getClass();
+        Method method = cls.getDeclaredMethod(faultLocalizeMethod);
+        return (double[]) method.invoke(this);
+    }
+
 
     private int apq(int p, int q, int j) {
         int sum = 0;
