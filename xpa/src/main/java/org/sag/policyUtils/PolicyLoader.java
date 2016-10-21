@@ -72,17 +72,16 @@ public class PolicyLoader {
         return null;
     }
 
-    public static List<AbstractPolicy> readMutantsCSVFile(String mutantsCSVFileName) throws IOException {
+    public static List<Mutant> readMutantsCSVFile(String mutantsCSVFileName) throws IOException {
         CSVReader reader = new CSVReader(new FileReader(mutantsCSVFileName));
-        List<String[]> entries = reader.readAll();
-        reader.close();
-        List<AbstractPolicy> mutantList = new ArrayList<>();
-        for (String[] entry : entries) {
+        List<Mutant> mutantList = new ArrayList<>();
+        for (String[] entry : reader) {
             String mutantName = entry[0];
             String fileName = new File(mutantsCSVFileName).getParent() + File.separator + entry[1];
             List<Integer> bugPositions = StringToIntList(entry[2]);
             mutantList.add(new Mutant(PolicyLoader.loadPolicy(new File(fileName)), bugPositions, mutantName));
         }
+        reader.close();
         return mutantList;
     }
 
