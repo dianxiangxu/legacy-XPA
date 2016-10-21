@@ -34,6 +34,10 @@ public class Mutant extends AbstractPolicy {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public List<Integer> getFaultLocations() {
         return faultLocations;
     }
