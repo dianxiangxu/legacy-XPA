@@ -4,10 +4,10 @@ import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sag.mutation.Mutant;
 import org.wso2.balana.AbstractPolicy;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,12 +38,9 @@ public class TestSuite {
                 oracles.add(entry[1]);
             }
             return new TestSuite(requests, oracles);
-        } catch (FileNotFoundException e) {
-            logger.error(e);
-            return null;
         } catch (IOException e) {
             logger.error(e);
-            return null;
+            throw new RuntimeException("error loading test suite " + csvFile);
         }
     }
 
@@ -52,5 +49,9 @@ public class TestSuite {
         for (int i = 0; i < requests.size(); i++)
             results.add(PolicyRunner.runTest(policy, requests.get(i), oracles.get(i)));
         return results;
+    }
+
+    public List<Boolean> runTests(Mutant mutant) {
+        return runTests(mutant.getPolicy());
     }
 }
