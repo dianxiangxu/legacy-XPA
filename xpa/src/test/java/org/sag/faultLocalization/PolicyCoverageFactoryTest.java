@@ -5,8 +5,12 @@ import org.junit.Test;
 import org.sag.coverage.*;
 import org.sag.policyUtils.PolicyLoader;
 import org.wso2.balana.AbstractPolicy;
+import org.wso2.balana.ParsingException;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -15,7 +19,7 @@ import java.util.List;
  */
 public class PolicyCoverageFactoryTest {
     @Test
-    public void coverageMatrixTest() {
+    public void coverageMatrixTest() throws ParserConfigurationException, ParsingException, SAXException, IOException {
         File csvFile = new File("experiments/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv");
         TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
         String fileName = "org/sag/policies/conference3.xml";
