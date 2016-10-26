@@ -1,5 +1,5 @@
 default:
-	mvn package assembly:single
+	mvn package
 clean:
 	mvn clean
 javadoc:
