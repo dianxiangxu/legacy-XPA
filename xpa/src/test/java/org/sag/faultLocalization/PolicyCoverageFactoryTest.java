@@ -20,9 +20,10 @@ import java.util.List;
 public class PolicyCoverageFactoryTest {
     @Test
     public void coverageMatrixTest() throws ParserConfigurationException, ParsingException, SAXException, IOException {
-        File csvFile = new File("experiments/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv");
-        TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
-        String fileName = "org/sag/policies/conference3.xml";
+        String testsCSVfileName = "org/sag/policies/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv";
+        File testsCSVfile = new File(faultLocalizationTest.class.getClassLoader().getResource(testsCSVfileName).getFile());
+        TestSuite testSuite = TestSuite.loadTestSuite(testsCSVfile);
+        String fileName = "org/sag/policies/conference3/conference3.xml";
         File file = new File(getClass().getClassLoader().getResource(fileName).getFile());
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         List<Boolean> results = testSuite.runTests(policy);

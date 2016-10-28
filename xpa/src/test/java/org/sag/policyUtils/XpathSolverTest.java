@@ -29,7 +29,7 @@ public class XpathSolverTest {
     @Test
     public void getEntryListAbsoluteXPathTest() throws ParserConfigurationException, IOException, SAXException, ParsingException {
 //        String fileName = "org/sag/policies/conference3.xml";
-        String fileName = "org/sag/policies/HL7.xml";
+        String fileName = "org/sag/policies/HL7/HL7.xml";
         ClassLoader classLoader = XpathSolver.class.getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
         // by load the policy and then encode it back to string, we replace the namespace declaration with default namespace declaration
@@ -73,7 +73,7 @@ public class XpathSolverTest {
 
     @Test
     public void getEntryListRelativeXPathTestConference3() throws ParserConfigurationException, IOException, SAXException, ParsingException {
-        String fileName = "org/sag/policies/conference3.xml";
+        String fileName = "org/sag/policies/conference3/conference3.xml";
 
         String[] expected = new String[]{
                 "//Policy[@PolicyId='conference']/Target[1]",
@@ -99,7 +99,7 @@ public class XpathSolverTest {
 
     @Test
     public void getEntryListRelativeXPathTestHL7() throws ParserConfigurationException, IOException, SAXException, ParsingException {
-        String fileName = "org/sag/policies/HL7.xml";
+        String fileName = "org/sag/policies/HL7/HL7.xml";
 
         String[] expected = new String[]{
                 "//PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Target[1]",
@@ -147,7 +147,7 @@ public class XpathSolverTest {
 
     @Test
     public void evaluateXpathTestConference3() throws ParserConfigurationException, IOException, SAXException, XPathExpressionException, ParsingException {
-        String fileName = "org/sag/policies/conference3.xml";
+        String fileName = "org/sag/policies/conference3/conference3.xml";
         List<String> xpathList = Arrays.asList(
                 "//Policy[@PolicyId='conference']/Target[1]",
                 "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
@@ -189,7 +189,7 @@ public class XpathSolverTest {
 
     @Test
     public void evaluateXpathTestHL7() throws ParserConfigurationException, IOException, SAXException, XPathExpressionException, ParsingException {
-        String fileName = "org/sag/policies/HL7.xml";
+        String fileName = "org/sag/policies/HL7/HL7.xml";
         List<String> xpathList = Arrays.asList(
                 "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
                 "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Target[1]"

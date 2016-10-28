@@ -17,22 +17,10 @@ import static org.junit.Assert.assertTrue;
 public class PolicyRunnerTest {
     @Test
     public void runTestOnPolicyConference() throws Exception {
-        File csvFile = new File("experiments/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv");
-        TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
-        String fileName = "org/sag/policies/conference3.xml";
-        File file = new File(getClass().getClassLoader().getResource(fileName).getFile());
-        AbstractPolicy policy = PolicyLoader.loadPolicy(file);
-        List<Boolean> results = testSuite.runTests(policy);
-        for (boolean result : results)
-            assertTrue(result);
-    }
-
-    @Test
-    @Ignore
-    public void runTestOnPolicyKmarketBlue() throws Exception {
-        File csvFile = new File("experiments/kmarket-blue-policy/test_suites/kmarket-blue-policy_MCDCCoverage/kmarket-blue-policy_MCDCCoverage.csv");
-        TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
-        String fileName = "org/sag/policies/alfa.xml";
+        String testsCSVfileName = "org/sag/policies/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv";
+        File testsCSVfile = new File(PolicyRunnerTest.class.getClassLoader().getResource(testsCSVfileName).getFile());
+        TestSuite testSuite = TestSuite.loadTestSuite(testsCSVfile);
+        String fileName = "org/sag/policies/conference3/conference3.xml";
         File file = new File(getClass().getClassLoader().getResource(fileName).getFile());
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         List<Boolean> results = testSuite.runTests(policy);
@@ -42,9 +30,10 @@ public class PolicyRunnerTest {
 
     @Test
     public void runTestOnPolicySetItrust() throws Exception {
-        File csvFile = new File("experiments/itrust3/test_suites/itrust3_MCDCCoverage/itrust3_MCDCCoverage.csv");
+        String csvFileName = "org/sag/policies/itrust3/test_suites/itrust3_MCDCCoverage/itrust3_MCDCCoverage.csv";
+        File csvFile = new File(PolicyRunnerTest.class.getClassLoader().getResource(csvFileName).getFile());
         TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
-        String fileName = "org/sag/policies/itrustPolicySet.xml";
+        String fileName = "org/sag/policies/itrust3/itrustPolicySet.xml";
         File file = new File(getClass().getClassLoader().getResource(fileName).getFile());
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         List<Boolean> results = testSuite.runTests(policy);
@@ -54,9 +43,10 @@ public class PolicyRunnerTest {
 
     @Test
     public void runTestOnPolicySetHL7() throws Exception {
-        File csvFile = new File("experiments/HL7/test_suites/manual/HL7.csv");
-        TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
-        String fileName = "org/sag/policies/HL7.xml";
+        String testsCSVfileName = "org/sag/policies/HL7/test_suites/manual/HL7.csv";
+        File testsCSVfile = new File(PolicyRunnerTest.class.getClassLoader().getResource(testsCSVfileName).getFile());
+        TestSuite testSuite = TestSuite.loadTestSuite(testsCSVfile);
+        String fileName = "org/sag/policies/HL7/HL7.xml";
         File file = new File(getClass().getClassLoader().getResource(fileName).getFile());
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         List<Boolean> results = testSuite.runTests(policy);
