@@ -5,6 +5,8 @@ import org.sag.coverage.PolicyCoverageFactory;
 import org.sag.coverage.RuleCoverage;
 import org.sag.coverage.TargetCoverage;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,10 +42,23 @@ public class SpectrumBasedFaultLocalizer {
             verdicts[i] = results.get(i) ? 0 : 1;
     }
 
+    /**
+     * for debugging
+     *
+     * @param matrix coverage matrix
+     */
     private static void printMatrix(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++)
             System.out.println(i + ": " + Arrays.toString(matrix[i]));
     }
+
+    public double[] applyFaultLocalizeMethod(String faultLocalizeMethod)
+            throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Class<?> cls = this.getClass();
+        Method method = cls.getDeclaredMethod(faultLocalizeMethod);
+        return (double[]) method.invoke(this);
+    }
+
 
     private int apq(int p, int q, int j) {
         int sum = 0;
@@ -65,7 +80,7 @@ public class SpectrumBasedFaultLocalizer {
         return sum;
     }
 
-    private double[] cbi() {
+    double[] cbi() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -78,7 +93,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] hamann() {
+    double[] hamann() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -92,7 +107,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] simpleMatching() {
+    double[] simpleMatching() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -106,7 +121,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] sokal() {
+    double[] sokal() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -121,7 +136,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] rogersTanimoto() {
+    double[] rogersTanimoto() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -136,7 +151,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] euclid() {
+    double[] euclid() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -147,7 +162,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] anderberg() {
+    double[] anderberg() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -159,7 +174,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] sorensenDice() {
+    double[] sorensenDice() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -171,7 +186,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] goodman() {
+    double[] goodman() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -184,7 +199,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] jaccard() {
+    double[] jaccard() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -196,7 +211,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] naish2() {
+    double[] naish2() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -208,7 +223,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] tarantula() {
+    double[] tarantula() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -223,7 +238,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] ochiai() {
+    double[] ochiai() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {
@@ -236,7 +251,7 @@ public class SpectrumBasedFaultLocalizer {
         return coefficients;
     }
 
-    private double[] ochiai2() {
+    double[] ochiai2() {
         int numElems = matrix[0].length;
         double[] coefficients = new double[numElems];
         for (int j = 0; j < matrix[0].length; j++) {

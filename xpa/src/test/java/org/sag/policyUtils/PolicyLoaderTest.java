@@ -15,7 +15,7 @@ public class PolicyLoaderTest {
     @org.junit.Test
     public void getPolicy() throws Exception {
         //Get file from resources folder
-        String fileName = "org/sag/policies/conference3.xml";
+        String fileName = "org/sag/policies/conference3/conference3.xml";
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
@@ -31,4 +31,12 @@ public class PolicyLoaderTest {
         assertEquals(policy.getId().toString(), "urn:oasis:names:tc:xacml:3.0:example:policysetid:1");
     }
 
+    @Test
+    public void getPolicySetHL7() throws Exception {
+        String fileName = "org/sag/policies/HL7/HL7.xml";
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
+        AbstractPolicy policy = PolicyLoader.loadPolicy(file);
+        assertEquals(policy.getId().toString(), "http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global");
+    }
 }
