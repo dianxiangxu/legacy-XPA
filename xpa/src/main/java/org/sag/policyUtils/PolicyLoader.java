@@ -36,7 +36,7 @@ public class PolicyLoader {
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    static Document getDocument(InputStream inputStream, boolean namespaceAware) throws IOException, SAXException, ParserConfigurationException {
+    public static Document getDocument(InputStream inputStream, boolean namespaceAware) throws IOException, SAXException, ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setIgnoringComments(true);
         factory.setNamespaceAware(namespaceAware);
@@ -70,12 +70,12 @@ public class PolicyLoader {
                         + DOMHelper.getLocalName(root));
     }
 
-    public static List<Mutant> readMutantsCSVFile(String mutantsCSVFileName) throws IOException {
-        CSVReader reader = new CSVReader(new FileReader(mutantsCSVFileName));
+    public static List<Mutant> readMutantsCSVFile(File mutantsCSVFile) throws IOException {
+        CSVReader reader = new CSVReader(new FileReader(mutantsCSVFile));
         List<Mutant> mutantList = new ArrayList<>();
         for (String[] entry : reader) {
             String mutantName = entry[0];
-            String fileName = new File(mutantsCSVFileName).getParent() + File.separator + entry[1];
+            String fileName = mutantsCSVFile.getParent() + File.separator + entry[1];
             List<Integer> bugPositions = StringToIntList(entry[2]);
             try {
                 mutantList.add(new Mutant(PolicyLoader.loadPolicy(new File(fileName)), bugPositions, mutantName));
