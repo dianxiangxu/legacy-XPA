@@ -1,11 +1,8 @@
 package org.sag.faultLocalization;
 
-import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.sag.coverage.*;
 import org.sag.mutation.Mutant;
 import org.sag.policyUtils.PolicyLoader;
@@ -15,7 +12,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -26,10 +22,10 @@ import java.util.List;
 /**
  * Created by shuaipeng on 10/11/16.
  */
-public class faultLocalizationExperiment {
+public class FaultLocalizationExperiment {
     public static void main(String[] args) throws IOException {
-        String mutantsCSVfileName = "org/sag/policies/conference3/mutants/mutants.csv";
-        File mutantsCSVfile = new File(faultLocalizationExperiment.class.getClassLoader().getResource(mutantsCSVfileName).getFile());
+        String mutantsCSVfileName = "experiments/conference3/mutants/mutants.csv";
+        File mutantsCSVfile = new File(mutantsCSVfileName);
         String faultLocalizeResultsFile = "experiments/conference3/fault-localization/conference3_faultLocalization.csv";
         FileUtils.forceMkdir(new File(FilenameUtils.getPath(faultLocalizeResultsFile)));
         CSVWriter writer = new CSVWriter(new FileWriter(faultLocalizeResultsFile), ',');
@@ -72,14 +68,14 @@ public class faultLocalizationExperiment {
         }
     }
 
-    private static boolean booleanListAnd(List<Boolean> booleanList) {
+    static boolean booleanListAnd(List<Boolean> booleanList) {
         for (boolean b: booleanList)
             if (!b)
                 return false;
         return true;
     }
 
-    private static void writeCSVTitleRow(CSVWriter writer, List<String> faultLocalizeMethods) {
+    static void writeCSVTitleRow(CSVWriter writer, List<String> faultLocalizeMethods) {
         String[] titles = new String[faultLocalizeMethods.size() + 1];
         titles[0] = "mutant";
         int index = 1;
@@ -90,7 +86,7 @@ public class faultLocalizationExperiment {
         writer.writeNext(titles);
     }
 
-    private static void writeCSVResultRow(CSVWriter writer, String mutantName, List<String> columnValue)  {
+    static void writeCSVResultRow(CSVWriter writer, String mutantName, List<String> columnValue) {
         String[] entry = new String[columnValue.size() + 1];
         entry[0] = mutantName;
         int index = 1;
