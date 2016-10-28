@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.sag.policyUtils.XpathSolver;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.AbstractTarget;
 import org.wso2.balana.MatchResult;
@@ -30,6 +31,7 @@ public aspect PolicyTracer {
 		// If the Target is null then it's supposed to inherit from the
 		// parent policy, so we skip the matching step assuming we wouldn't
 		// be here unless the parent matched
+		String xPath = XpathSolver.buildRuleXpath(rule);
 		MatchResult match = null;
 		logger.debug("evaluating rule " + rule.getId().toString());
 
@@ -53,7 +55,7 @@ public aspect PolicyTracer {
 						RuleCoverage.IntermediateCoverage.FALSE,
 						RuleCoverage.IntermediateCoverage.NOTEVALUATED,
 						Result.DECISION_NOT_APPLICABLE, rule.getId().toString());
-				PolicyCoverageFactory.addCoverage(ruleCoverage);
+				PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 
 				// end of change
 				return ResultFactory.getFactory().getResult(
@@ -72,7 +74,7 @@ public aspect PolicyTracer {
 								RuleCoverage.IntermediateCoverage.ERROR,
 								RuleCoverage.IntermediateCoverage.NOTEVALUATED,
 								Result.DECISION_INDETERMINATE_PERMIT, rule.getId().toString());
-						PolicyCoverageFactory.addCoverage(ruleCoverage);
+						PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 						// end of change
 
 						return ResultFactory.getFactory().getResult(
@@ -84,7 +86,7 @@ public aspect PolicyTracer {
 								RuleCoverage.IntermediateCoverage.ERROR,
 								RuleCoverage.IntermediateCoverage.NOTEVALUATED,
 								Result.DECISION_INDETERMINATE_DENY, rule.getId().toString());
-						PolicyCoverageFactory.addCoverage(ruleCoverage);
+						PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 						// end of change
 						return ResultFactory.getFactory().getResult(
 								Result.DECISION_INDETERMINATE_DENY,
@@ -96,7 +98,7 @@ public aspect PolicyTracer {
 						RuleCoverage.IntermediateCoverage.ERROR,
 						RuleCoverage.IntermediateCoverage.NOTEVALUATED,
 						Result.DECISION_INDETERMINATE, rule.getId().toString());
-				PolicyCoverageFactory.addCoverage(ruleCoverage);
+				PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 				// end of change
 				return ResultFactory.getFactory().getResult(
 						Result.DECISION_INDETERMINATE, match.getStatus(),
@@ -110,7 +112,7 @@ public aspect PolicyTracer {
 			Coverage ruleCoverage = new RuleCoverage(
 					RuleCoverage.IntermediateCoverage.TRUE,
 					RuleCoverage.IntermediateCoverage.EMPTY, effectAttr, rule.getId().toString());
-			PolicyCoverageFactory.addCoverage(ruleCoverage);
+			PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 			// end of change
 			// if any obligations or advices are defined, evaluates them and
 			// return
@@ -144,7 +146,7 @@ public aspect PolicyTracer {
 							RuleCoverage.IntermediateCoverage.TRUE,
 							RuleCoverage.IntermediateCoverage.ERROR,
 							Result.DECISION_INDETERMINATE_PERMIT, rule.getId().toString());
-					PolicyCoverageFactory.addCoverage(ruleCoverage);
+					PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 					// end of change
 					return ResultFactory.getFactory().getResult(
 							Result.DECISION_INDETERMINATE_PERMIT,
@@ -155,7 +157,7 @@ public aspect PolicyTracer {
 							RuleCoverage.IntermediateCoverage.TRUE,
 							RuleCoverage.IntermediateCoverage.ERROR,
 							Result.DECISION_INDETERMINATE_DENY, rule.getId().toString());
-					PolicyCoverageFactory.addCoverage(ruleCoverage);
+					PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 					// end of change
 					return ResultFactory.getFactory().getResult(
 							Result.DECISION_INDETERMINATE_DENY,
@@ -167,7 +169,7 @@ public aspect PolicyTracer {
 					RuleCoverage.IntermediateCoverage.TRUE,
 					RuleCoverage.IntermediateCoverage.ERROR,
 					Result.DECISION_INDETERMINATE, rule.getId().toString());
-			PolicyCoverageFactory.addCoverage(ruleCoverage);
+			PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 			// end of change
 
 			// if it was INDETERMINATE, then that's what we return
@@ -182,7 +184,7 @@ public aspect PolicyTracer {
 				Coverage ruleCoverage = new RuleCoverage(
 						RuleCoverage.IntermediateCoverage.TRUE,
 						RuleCoverage.IntermediateCoverage.TRUE, effectAttr, rule.getId().toString());
-				PolicyCoverageFactory.addCoverage(ruleCoverage);
+				PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 				// end of change
 				// if any obligations or advices are defined, evaluates them and
 				// return
@@ -202,7 +204,7 @@ public aspect PolicyTracer {
 						RuleCoverage.IntermediateCoverage.TRUE,
 						RuleCoverage.IntermediateCoverage.FALSE,
 						Result.DECISION_NOT_APPLICABLE, rule.getId().toString());
-				PolicyCoverageFactory.addCoverage(ruleCoverage);
+				PolicyCoverageFactory.addCoverage(ruleCoverage, xPath);
 				// end of change
 				return ResultFactory.getFactory().getResult(
 						Result.DECISION_NOT_APPLICABLE, context);
@@ -220,7 +222,8 @@ public aspect PolicyTracer {
         	MatchResult matchResult = policyTarget.match(context);
             result = matchResult.getResult();
         }
-        PolicyCoverageFactory.addCoverage(new TargetCoverage(result));
+        String xpath = XpathSolver.buildTargetXpath(policy);
+        PolicyCoverageFactory.addCoverage(new TargetCoverage(result), xpath);
 	}
 
 	// record the result of policy evaluation
@@ -240,7 +243,7 @@ public aspect PolicyTracer {
 
 	before(TestSuite testSuite, AbstractPolicy policy): runNewTestSuite(testSuite, policy) {
 		logger.debug("start running test suite on " + policy.getId());
-		PolicyCoverageFactory.init();
+		PolicyCoverageFactory.init(policy);
 	}
 	
 	after(TestSuite testSuite, AbstractPolicy policy) returning(List<Boolean> results): runNewTestSuite(testSuite, policy) {
