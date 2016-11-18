@@ -10,7 +10,7 @@
         <XPathVersion>http://www.w3.org/TR/1999/REC-xpath-19991116</XPathVersion>
     </PolicySetDefaults>
     <Target />
-    <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
         PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes"
         RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
         Version="1.0">
@@ -139,7 +139,7 @@
             <Target />
         </Rule>
     </Policy>
-    <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
         PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments"
         RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
         Version="1.0">
@@ -220,7 +220,7 @@
             <Target />
         </Rule>
     </Policy>
-    <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
         PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory"
         RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
         Version="1.0">
@@ -295,7 +295,7 @@
             <Target />
         </Rule>
     </Policy>
-    <PolicySet xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    <PolicySet xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
         PolicySetId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords"
         PolicyCombiningAlgId="urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable"
         Version="1.0">
@@ -319,7 +319,7 @@
                 </AllOf>
             </AnyOf>
         </Target>
-        <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+        <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
             PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords"
             RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides"
             Version="1.0">
@@ -405,7 +405,7 @@
                 </Target>
             </Rule>
         </Policy>
-        <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+        <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
             PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess"
             RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
             Version="1.0">
@@ -451,7 +451,7 @@
                 </Target>
             </Rule>
         </Policy>
-        <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+        <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
             PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess"
             RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides"
             Version="1.0">
@@ -499,7 +499,7 @@
             </Rule>
         </Policy>
     </PolicySet>
-        <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+        <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
             PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess"
             RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
             Version="1.0">
@@ -645,7 +645,7 @@
                 <Target />
             </Rule>
         </Policy>
-    <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
         PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan"
         RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
         Version="1.0">
@@ -721,7 +721,7 @@
             <Target />
         </Rule>
     </Policy>
-    <Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    <Policy xmlns="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
         PolicyId="http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess"
         RuleCombiningAlgId="urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable"
         Version="1.0">
