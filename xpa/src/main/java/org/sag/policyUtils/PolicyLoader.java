@@ -27,19 +27,15 @@ public class PolicyLoader {
     /**
      * read XML from inputStream, and turn it into a Document.
      * @param inputStream
-     * @param namespaceAware when reading from an XACML file, namespaceAware should be true because there may be namespace
-     *                       declaration in it; when reading from the result of AbstractPolicy.encode(), namespaceAware
-     *                       should be false because in Balana implementation Policy.encode() will use default namespace,
-     *                       and PolicySet.encode() even doesn't have namespace.
      * @return
      * @throws IOException
      * @throws SAXException
      * @throws ParserConfigurationException
      */
-    public static Document getDocument(InputStream inputStream, boolean namespaceAware) throws IOException, SAXException, ParserConfigurationException {
+    public static Document getDocument(InputStream inputStream) throws IOException, SAXException, ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setIgnoringComments(true);
-        factory.setNamespaceAware(namespaceAware);
+        factory.setNamespaceAware(true);
             factory.setValidating(false);
             DocumentBuilder db = factory.newDocumentBuilder();
         return db.parse(inputStream);
@@ -54,12 +50,12 @@ public class PolicyLoader {
     public static AbstractPolicy loadPolicy(File file) throws ParserConfigurationException, SAXException, IOException, ParsingException {
         try (InputStream stream = new FileInputStream(file)) {
             // set namespaceAware to true because some XACML files have namespcace declaration
-            Document doc = getDocument(stream, true);
+            Document doc = getDocument(stream);
             return loadPolicy(doc);
         }
     }
 
-    private static AbstractPolicy loadPolicy(Document doc) throws ParsingException {
+    public static AbstractPolicy loadPolicy(Document doc) throws ParsingException {
         Element root = doc.getDocumentElement();
             if (DOMHelper.getLocalName(root).equals("Policy"))
                 return Policy.getInstance(root);
