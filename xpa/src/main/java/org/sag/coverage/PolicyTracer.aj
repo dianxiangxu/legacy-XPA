@@ -8,7 +8,6 @@ import org.sag.policyUtils.XpathSolver;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.AbstractTarget;
 import org.wso2.balana.MatchResult;
-import org.wso2.balana.ObligationResult;
 import org.wso2.balana.Rule;
 import org.wso2.balana.XACMLConstants;
 import org.wso2.balana.attr.BooleanAttribute;
@@ -18,9 +17,9 @@ import org.wso2.balana.ctx.AbstractResult;
 import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.ctx.ResultFactory;
 import org.wso2.balana.ctx.xacml2.Result;
-import org.wso2.balana.xacml3.Advice;
+import org.wso2.balana.PolicySet;
 
-public aspect PolicyTracer {
+public privileged aspect PolicyTracer {
 	private static Log logger = LogFactory.getLog(PolicyTracer.class);
 
 	pointcut ruleEvaluationPointcut(Rule rule, EvaluationCtx context): call(AbstractResult Rule.evaluate(*)) && target(rule) && args(context);
@@ -64,8 +63,7 @@ public aspect PolicyTracer {
 
 			// if the target was indeterminate, we can't go on
 			if (result == MatchResult.INDETERMINATE) {
-				int xacmlVersion = (Integer) ReflectionUtils.getField(rule,
-						"xacmlVersion");
+				int xacmlVersion = rule.xacmlVersion;
 				// defines extended indeterminate results with XACML 3.0
 				if (xacmlVersion == XACMLConstants.XACML_VERSION_3_0) {
 					if (effectAttr == AbstractResult.DECISION_PERMIT) {
@@ -116,14 +114,7 @@ public aspect PolicyTracer {
 			// end of change
 			// if any obligations or advices are defined, evaluates them and
 			// return
-			return ResultFactory.getFactory().getResult(
-					effectAttr,
-					(List<ObligationResult>) ReflectionUtils.invokeMethod(rule,
-							"processObligations", new Object[] { context },
-							new Class<?>[] { EvaluationCtx.class }),
-					(List<Advice>) ReflectionUtils.invokeMethod(rule,
-							"processAdvices", new Object[] { context },
-							new Class<?>[] { EvaluationCtx.class }), context);
+			return ResultFactory.getFactory().getResult(effectAttr, rule.processObligations(context), rule.processAdvices(context), context);
 
 		}
 
@@ -134,10 +125,7 @@ public aspect PolicyTracer {
 		if (result.indeterminate()) {
 
 			// defines extended indeterminate results with XACML 3.0
-			// TODO use apache commons!
-			// TODO use a better than reflection way to access xacmlVersion
-			int xacmlVersion = (Integer) ReflectionUtils.getField(rule,
-					"xacmlVersion");
+			int xacmlVersion = rule.xacmlVersion;
 
 			if (xacmlVersion == XACMLConstants.XACML_VERSION_3_0) {
 				if (effectAttr == AbstractResult.DECISION_PERMIT) {
@@ -188,16 +176,7 @@ public aspect PolicyTracer {
 				// end of change
 				// if any obligations or advices are defined, evaluates them and
 				// return
-				return ResultFactory.getFactory().getResult(
-						effectAttr,
-						(List<ObligationResult>) ReflectionUtils.invokeMethod(
-								rule, "processObligations",
-								new Object[] { context },
-								new Class<?>[] { EvaluationCtx.class }),
-						(List<Advice>) ReflectionUtils.invokeMethod(rule,
-								"processAdvices", new Object[] { context },
-								new Class<?>[] { EvaluationCtx.class }),
-						context);
+				return ResultFactory.getFactory().getResult(effectAttr, rule.processObligations(context), rule.processAdvices(context), context);
 			} else {
 				// start of change
 				Coverage ruleCoverage = new RuleCoverage(
@@ -250,5 +229,28 @@ public aspect PolicyTracer {
 		logger.debug("finished running test suite on " + policy.getId());
 		PolicyCoverageFactory.setResults(results);
 	}
+	
+	pointcut encodePolicySet(PolicySet policySet, StringBuilder builder): call(void AbstractPolicy.encode(StringBuilder)) && target(policySet) && args(builder);
 
+	void around(PolicySet policySet, StringBuilder builder): encodePolicySet(policySet, builder) {
+        String xacmlVersionId = policySet.getMetaData().getXACMLIdentifier();
+        // add xacml version ID
+        builder.append("<PolicySet xmlns=\"" + xacmlVersionId + "\""  + " PolicySetId=\"").
+                append(policySet.getId().toString()).append("\" PolicyCombiningAlgId=\"").
+                append(policySet.getCombiningAlg().getIdentifier().toString()).append("\">\n");
+
+        String description = policySet.getDescription();
+        if (description != null){
+            builder.append("<Description>").append(description).append("</Description>\n");
+        }
+        
+        String version = policySet.getDefaultVersion();
+        if (version != null){
+            builder.append("<PolicySetDefaults><XPathVersion>").append(version).
+                    append("</XPathVersion></PolicySetDefaults>\n");
+        }
+        policySet.getTarget().encode(builder);
+        policySet.encodeCommonElements(builder);
+        builder.append("</PolicySet>\n");
+	}
 }
