@@ -1,4 +1,4 @@
-package org.sag.coverage;
+package org.sag.policyUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -7,10 +7,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-class ReflectionUtils {
+public class ReflectionUtils {
     private static Log logger = LogFactory.getLog(ReflectionUtils.class);
 
-    static Object getField(Object obj, String fieldName) {
+    public static Object getField(Object obj, String fieldName) {
         try {
             Field field = obj.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -22,8 +22,8 @@ class ReflectionUtils {
         }
     }
 
-    static Object invokeMethod(Object obj, String methodName,
-                               Object[] args, Class<?>[] parameterTypes) {
+    public static Object invokeMethod(Object obj, String methodName,
+                                      Object[] args, Class<?>[] parameterTypes) {
         Method method = null;
         Class<?> clazz = obj.getClass();
         // Class.getDeclaredMethod() only look for the method in the methods that is declared in 
