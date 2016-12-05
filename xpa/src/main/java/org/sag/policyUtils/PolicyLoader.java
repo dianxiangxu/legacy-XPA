@@ -34,10 +34,10 @@ public class PolicyLoader {
      */
     public static Document getDocument(InputStream inputStream) throws IOException, SAXException, ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setIgnoringComments(true);
+        factory.setIgnoringComments(true);
         factory.setNamespaceAware(true);
-            factory.setValidating(false);
-            DocumentBuilder db = factory.newDocumentBuilder();
+        factory.setValidating(false);
+        DocumentBuilder db = factory.newDocumentBuilder();
         return db.parse(inputStream);
     }
 
