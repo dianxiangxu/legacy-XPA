@@ -57,7 +57,7 @@ public class Mutator {
         xPath = XPathFactory.newInstance().newXPath();
     }
 
-    static boolean isEmptyTarget(Node node) {
+    static boolean isEmptyNode(Node node) {
         // When the target is empty, it may have one child node that contains only text "\n"; when the target is not empty,
         // it may have three nodes: "\n", AnyOf element and "\n".
         NodeList children = node.getChildNodes();
@@ -73,7 +73,7 @@ public class Mutator {
 
     public static void main(String[] args) throws ParserConfigurationException, ParsingException, SAXException, IOException, XPathExpressionException {
         File file = new File("src/test/resources/org/sag/policies/HL7/HL7.xml");
-        String xpathString = "//*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Target' and 1]";
+        String xpathString = "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.createNoteoo']";
         XPath xPath = XPathFactory.newInstance().newXPath();
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         Document doc = PolicyLoader.getDocument(IOUtils.toInputStream(policy.encode(), Charset.defaultCharset()));
@@ -93,21 +93,23 @@ public class Mutator {
         List<Mutant> list = new ArrayList<>();
         NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         Node node = nodes.item(0);
-        //change doc
-        if (node.getAttributes().getNamedItem("Effect").getTextContent().equals("Deny")) {
-            node.getAttributes().getNamedItem("Effect").setTextContent("Permit");
-        } else {
-            node.getAttributes().getNamedItem("Effect").setTextContent("Deny");
+        if (node != null) {
+            //change doc
+            if (node.getAttributes().getNamedItem("Effect").getTextContent().equals("Deny")) {
+                node.getAttributes().getNamedItem("Effect").setTextContent("Permit");
+            } else {
+                node.getAttributes().getNamedItem("Effect").setTextContent("Deny");
+            }
+            AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+            //restore doc
+            if (node.getAttributes().getNamedItem("Effect").getTextContent().equals("Deny")) {
+                node.getAttributes().getNamedItem("Effect").setTextContent("Permit");
+            } else {
+                node.getAttributes().getNamedItem("Effect").setTextContent("Deny");
+            }
+            int faultLocation = xpathMapping.get(xpathString);
+            list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), "CRE" + faultLocation));
         }
-        AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
-        //restore doc
-        if (node.getAttributes().getNamedItem("Effect").getTextContent().equals("Deny")) {
-            node.getAttributes().getNamedItem("Effect").setTextContent("Permit");
-        } else {
-            node.getAttributes().getNamedItem("Effect").setTextContent("Deny");
-        }
-        int faultLocation = xpathMapping.get(xpathString);
-        list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), "CRE" + faultLocation));
         return list;
     }
 
@@ -120,14 +122,13 @@ public class Mutator {
     public List<Mutant> createRuleTargetTrueMutants(String xpathString) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         int faultLocation = xpathMapping.get(xpathString);
         return createTargetTrueMutants(xpathString + "/*[local-name()='Target' and 1]", "RTT", faultLocation);
-
     }
 
     private List<Mutant> createTargetTrueMutants(String xpathString, String mutantName, int faultLocation) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         List<Mutant> list = new ArrayList<>();
         NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         Node node = nodes.item(0);
-        if (!isEmptyTarget(node)) {
+        if (node != null && !isEmptyNode(node)) {
             //change doc
             List<Node> children = new ArrayList<>();
             while (node.hasChildNodes()) {
@@ -145,4 +146,27 @@ public class Mutator {
         return list;
     }
 
+    /**
+     * We cannot remove all child nodes of Condition as we do to policy target and rule target, because
+     * Condition.getInstance() will throw a null pointer exception. So here the whole Condition node is removed from the
+     * rule node.
+     */
+    public List<Mutant> createRuleConditionTrueMutants(String xpathString) throws XPathExpressionException, ParsingException, ParserConfigurationException, SAXException, IOException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "RCT";
+        String conditionXpathString = xpathString + "/*[local-name()='Condition' and 1]";
+        List<Mutant> list = new ArrayList<>();
+        NodeList nodes = (NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+        Node node = nodes.item(0);
+        if (node != null && !isEmptyNode(node)) {
+            //change doc
+            Node ruleNode = node.getParentNode();
+            ruleNode.removeChild(node);
+            AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+            list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+            //restore doc
+            ruleNode.appendChild(node);
+        }
+        return list;
+    }
 }

@@ -108,7 +108,7 @@ public class MutatorTest {
                 Node node = nodes.item(0);
 //                System.out.println(XpathSolver.NodeToString(node, false, true));
                 List<Mutant> mutants = mutator.createPolicyTargetTrueMutants(xpathString);
-                if (!Mutator.isEmptyTarget(node)) {
+                if (!Mutator.isEmptyNode(node)) {
                     Assert.assertEquals(1, mutants.size());
                     Mutant mutant = mutants.get(0);
                     Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
@@ -116,7 +116,7 @@ public class MutatorTest {
                     Assert.assertEquals(1, nodes.getLength());
                     Node newNode = nodes.item(0);
 //                    System.out.println(XpathSolver.NodeToString(newNode, false, true));
-                    Assert.assertTrue(Mutator.isEmptyTarget(newNode));
+                    Assert.assertTrue(Mutator.isEmptyNode(newNode));
                 } else {
 //                    System.out.println(XpathSolver.NodeToString(node, false, true));
                     Assert.assertEquals(0, mutants.size());
@@ -137,7 +137,7 @@ public class MutatorTest {
                 Node node = nodes.item(0);
 //                System.out.println(XpathSolver.NodeToString(node, false, true));
                 List<Mutant> mutants = mutator.createRuleTargetTrueMutants(xpathString);
-                if (!Mutator.isEmptyTarget(node)) {
+                if (!Mutator.isEmptyNode(node)) {
                     Assert.assertEquals(1, mutants.size());
                     Mutant mutant = mutants.get(0);
                     Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
@@ -145,10 +145,39 @@ public class MutatorTest {
                     Assert.assertEquals(1, nodes.getLength());
                     Node newNode = nodes.item(0);
 //                    System.out.println(XpathSolver.NodeToString(newNode, false, true));
-                    Assert.assertTrue(Mutator.isEmptyTarget(newNode));
+                    Assert.assertTrue(Mutator.isEmptyNode(newNode));
                 } else {
 //                    System.out.println(XpathSolver.NodeToString(node, false, true));
                     Assert.assertEquals(0, mutants.size());
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
+
+    @Test
+    public void createRuleConditionTrueMutantsTest() throws XPathExpressionException, ParsingException, ParserConfigurationException, SAXException, IOException {
+        for (String xpathString : xpathList) {
+            if (isRuleXpathString(xpathString)) {
+//                System.out.println(xpathString);
+                Node ruleNode = ((NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+//                System.out.println(XpathSolver.NodeToString(ruleNode, false, true));
+                String conditionXpathString = xpathString + "/*[local-name()='Condition' and 1]";
+                Node conditionNode = ((NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+                List<Mutant> mutants = mutator.createRuleConditionTrueMutants(xpathString);
+                if (conditionNode != null && !Mutator.isEmptyNode(conditionNode)) {
+                    Assert.assertEquals(1, mutants.size());
+                    Mutant mutant = mutants.get(0);
+                    Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                    NodeList nodes = (NodeList) xPath.evaluate(conditionXpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                    //because the way we make condition always true is to delete the Condition node
+                    Assert.assertEquals(0, nodes.getLength());
+                    ruleNode = ((NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+//                    System.out.println(XpathSolver.NodeToString(ruleNode, false, true));
+                } else {
+                    Assert.assertEquals(0, mutants.size());
+//                    ruleNode = ((NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+//                    System.out.println(XpathSolver.NodeToString(ruleNode, false, true));
                 }
 //                System.out.println("===========");
             }
