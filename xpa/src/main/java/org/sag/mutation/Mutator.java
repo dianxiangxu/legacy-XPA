@@ -112,6 +112,18 @@ public class Mutator {
     }
 
     public List<Mutant> createPolicyTargetTrueMutants(String xpathString) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
+        int faultLocation = xpathMapping.get(xpathString);
+        return createTargetTrueMutants(xpathString, "PTT", faultLocation);
+
+    }
+
+    public List<Mutant> createRuleTargetTrueMutants(String xpathString) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
+        int faultLocation = xpathMapping.get(xpathString);
+        return createTargetTrueMutants(xpathString + "/*[local-name()='Target' and 1]", "RTT", faultLocation);
+
+    }
+
+    private List<Mutant> createTargetTrueMutants(String xpathString, String mutantName, int faultLocation) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         List<Mutant> list = new ArrayList<>();
         NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         Node node = nodes.item(0);
@@ -124,8 +136,7 @@ public class Mutator {
                 node.removeChild(child);
             }
             AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
-            int faultLocation = xpathMapping.get(xpathString);
-            list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), "PTT" + faultLocation));
+            list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
             //restore doc
             for (Node child : children) {
                 node.appendChild(child);

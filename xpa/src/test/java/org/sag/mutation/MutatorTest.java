@@ -55,7 +55,7 @@ public class MutatorTest {
     }
 
     @After
-    public void checkIfDocIsStored() {
+    public void checkIfDocIsRestored() {
         // make sure the doc in Mutator is properly restored
         // compiler warnings like "" will appear, which is caused by a bug in JVM
         // there's little we can do about this
@@ -113,6 +113,35 @@ public class MutatorTest {
                     Mutant mutant = mutants.get(0);
                     Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
                     nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                    Assert.assertEquals(1, nodes.getLength());
+                    Node newNode = nodes.item(0);
+//                    System.out.println(XpathSolver.NodeToString(newNode, false, true));
+                    Assert.assertTrue(Mutator.isEmptyTarget(newNode));
+                } else {
+//                    System.out.println(XpathSolver.NodeToString(node, false, true));
+                    Assert.assertEquals(0, mutants.size());
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
+
+    @Test
+    public void createRuleTargetTrueMutantsTest() throws XPathExpressionException, ParsingException, ParserConfigurationException, SAXException, IOException {
+        for (String xpathString : xpathList) {
+            if (isRuleXpathString(xpathString)) {
+                String targetXpathString = xpathString + "/*[local-name()='Target' and 1]";
+//                System.out.println(xpathString);
+                NodeList nodes = (NodeList) xPath.evaluate(targetXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+                Assert.assertEquals(1, nodes.getLength());
+                Node node = nodes.item(0);
+//                System.out.println(XpathSolver.NodeToString(node, false, true));
+                List<Mutant> mutants = mutator.createRuleTargetTrueMutants(xpathString);
+                if (!Mutator.isEmptyTarget(node)) {
+                    Assert.assertEquals(1, mutants.size());
+                    Mutant mutant = mutants.get(0);
+                    Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                    nodes = (NodeList) xPath.evaluate(targetXpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
                     Assert.assertEquals(1, nodes.getLength());
                     Node newNode = nodes.item(0);
 //                    System.out.println(XpathSolver.NodeToString(newNode, false, true));
