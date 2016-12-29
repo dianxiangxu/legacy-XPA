@@ -211,7 +211,7 @@ public privileged aspect PolicyTracer {
 	}
 
 	pointcut runNewTest(AbstractPolicy policy, String request,
-			String oracleString): call(boolean PolicyRunner.runTest(AbstractPolicy, String, String)) && args(policy, request, oracleString);
+			String oracleString): call(boolean TestSuite.runTest(AbstractPolicy, String, String)) && args(policy, request, oracleString);
 
 	before(AbstractPolicy policy, String request, String oracleString) : runNewTest(policy, request, oracleString) {
 		logger.debug("start running a test on " + policy.getId());
