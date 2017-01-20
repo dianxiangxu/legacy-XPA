@@ -29,16 +29,30 @@ import java.util.*;
 public class Mutator {
     private static Log logger = LogFactory.getLog(Mutator.class);
     // so far only string and integer are considered.
-    private String int_function = "urn:oasis:names:tc:xacml:1.0:function:integer-equal";
-    private String str_function = "urn:oasis:names:tc:xacml:1.0:function:string-equal";
+    private static Map<String, String> matchIDMap = new HashMap<>();
+    private static Map<String, List<String>> unequalValuesMap = new HashMap<>();
+
+    static {
+        /*
+          see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html#_Toc325047117 Section 10.2.7 Data-types
+         */
+        matchIDMap.put("http://www.w3.org/2001/XMLSchema#string", "urn:oasis:names:tc:xacml:1.0:function:string-equal");
+        matchIDMap.put("http://www.w3.org/2001/XMLSchema#boolean", "urn:oasis:names:tc:xacml:1.0:function:boolean-equal");
+        matchIDMap.put("http://www.w3.org/2001/XMLSchema#integer", "urn:oasis:names:tc:xacml:1.0:function:integer-equal");
+        matchIDMap.put("http://www.w3.org/2001/XMLSchema#double", "urn:oasis:names:tc:xacml:1.0:function:double-equal");
+        matchIDMap.put("http://www.w3.org/2001/XMLSchema#date", "urn:oasis:names:tc:xacml:1.0:function:date-equal");
+        /*
+          see https://www.w3.org/TR/xmlschema-2/#built-in-primitive-datatypes for legal literals for different types
+         */
+        unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#string", Arrays.asList("a", "b"));
+        unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#boolean", Arrays.asList("true", "false"));
+        unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#integer", Arrays.asList("1", "2"));
+        unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#double", Arrays.asList("1.0", "2.0"));
+        unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#date", Arrays.asList("2002-10-10+13:00", "2002-10-11+13:00"));
+    }
+
     private String int_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only";
     private String str_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:string-one-and-only";
-    private String str_value = "RANDOM$@^$%#&!";
-    private String str_value1 = "str_A";
-    private String str_value2 = "str_B";
-    private String int_value = "-98274365923795632";
-    private String int_value1 = "123456789";
-    private String int_value2 = "-987654321";
     private Mutant baseMutant;
     private List<String> xpathList;
     private Map<String, Integer> xpathMapping;
@@ -80,15 +94,18 @@ public class Mutator {
         NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         // assert only one
         Node node = nodes.item(0);
-        System.out.println(XpathSolver.NodeToString(node, false, true));
+        System.out.println(XpathSolver.nodeToString(node, false, true));
         Node child = node.getFirstChild();
         node.removeChild(child);
-        System.out.println(XpathSolver.NodeToString(node, false, true));
+        System.out.println(XpathSolver.nodeToString(node, false, true));
         node.appendChild(child);
-        System.out.println(XpathSolver.NodeToString(node, false, true));
+        System.out.println(XpathSolver.nodeToString(node, false, true));
 
     }
 
+    /**
+     * flip rule effect
+     */
     public List<Mutant> createRuleEffectFlippingMutants(String xpathString) throws XPathExpressionException, ParsingException {
         List<Mutant> list = new ArrayList<>();
         NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
@@ -113,12 +130,18 @@ public class Mutator {
         return list;
     }
 
+    /**
+     * Make Policy Target always true
+     */
     public List<Mutant> createPolicyTargetTrueMutants(String xpathString) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         int faultLocation = xpathMapping.get(xpathString);
         return createTargetTrueMutants(xpathString, "PTT", faultLocation);
 
     }
 
+    /**
+     * Make Rule Target always true
+     */
     public List<Mutant> createRuleTargetTrueMutants(String xpathString) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         int faultLocation = xpathMapping.get(xpathString);
         return createTargetTrueMutants(xpathString + "/*[local-name()='Target' and 1]", "RTT", faultLocation);
@@ -147,6 +170,8 @@ public class Mutator {
     }
 
     /**
+     * Make Rule Condition always true
+     *
      * We cannot remove all child nodes of Condition as we do to policy target and rule target, because
      * Condition.getInstance() will throw a null pointer exception. So here the whole Condition node is removed from the
      * rule node.
@@ -168,5 +193,92 @@ public class Mutator {
             ruleNode.appendChild(node);
         }
         return list;
+    }
+
+    /**
+     * Make Rule Target always false
+     */
+    public List<Mutant> createRuleTargetFalseMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "RTT";
+        String matchXpathString = xpathString + "/*[local-name()='Target' and 1]/*[local-name()='AnyOf' and 1]/*[local-name()='AllOf' and 1]/*[local-name()='Match' and 1]";
+        return createTargetFalseMutants(matchXpathString, faultLocation, mutantName);
+    }
+
+    /**
+     * Make the Target of a Policy or PolicySet always false
+     *
+     * @param xpathString xpath to the Target of a Policy or PolicySet
+     */
+    public List<Mutant> createPolicyTargetFalseMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "PTT";
+        String matchXpathString = xpathString + "/*[local-name()='AnyOf' and 1]/*[local-name()='AllOf' and 1]/*[local-name()='Match' and 1]";
+        return createTargetFalseMutants(matchXpathString, faultLocation, mutantName);
+    }
+
+    /**
+     * If Match element exists, we can make the Target always evaluate to false by adding two conflicting Match elements
+     * to the parent of Match element. For example, if the Match element says role == "physician", then we add 2 Match
+     * elements: role == "a" and role == "b".
+     * First make 2 clones of the Match element, for each clone: find the AttributeValue element in the Match element,
+     * get the DataType attribute from the AttributeValue. Set the MatchId attribute according to DataType. And set the
+     * text content of AttributeValue element according the DataType. For example, if DataType is string, we set MatchId
+     * to string-equals, set the text context to "a" and "b" for the 2 clones separately.
+     * element.
+     *
+     * @param matchXpathString the xpath to the first Match element in a Target element
+     */
+    private List<Mutant> createTargetFalseMutants(String matchXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
+        List<Mutant> list = new ArrayList<>();
+        NodeList nodes = (NodeList) xPath.evaluate(matchXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+        Node matchNode = nodes.item(0);
+        if (matchNode != null && !isEmptyNode(matchNode)) {
+            //change doc
+            List<Node> clonedNodes = new ArrayList<>();
+            for (int k = 0; k < 2; k++) {
+                Node cloned = matchNode.cloneNode(true);
+                clonedNodes.add(cloned);
+                //find the AttributeValue child node
+                List<Node> attributeValueNodes = findChildrenByLocalName(cloned, "AttributeValue");
+                if (attributeValueNodes.size() == 0) {
+                    throw new RuntimeException("couldn't find AttributeValue in Mathch");
+                }
+                Node attributeValueNode = attributeValueNodes.get(0);
+                //set MatchId and AttributeValue according to DataType
+                String dataType = attributeValueNode.getAttributes().getNamedItem("DataType").getNodeValue();
+                if (!matchIDMap.containsKey(dataType)) {
+                    throw new RuntimeException("unsupported DataType: " + dataType);
+                }
+                cloned.getAttributes().getNamedItem("MatchId").setNodeValue(matchIDMap.get(dataType));
+                attributeValueNode.setTextContent(unequalValuesMap.get(dataType).get(k));
+                //add two conflicting Match nodes to parent
+                matchNode.getParentNode().appendChild(cloned);
+            }
+//            System.out.println(XpathSolver.nodeToString(matchNode.getParentNode(), false, true));
+            AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+            list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+            //restore doc by removing the two conflicting Match nodes from parent
+            for (Node cloned : clonedNodes) {
+                matchNode.getParentNode().removeChild(cloned);
+            }
+//            System.out.println(XpathSolver.nodeToString(matchNode.getParentNode(), false, true));
+        }
+        return list;
+    }
+
+    /**
+     * @return all the child nodes of input node whose local name equals to input argument localName
+     */
+    private List<Node> findChildrenByLocalName(Node node, String localName) {
+        List<Node> matchedChildNodes = new ArrayList<>();
+        NodeList childNodes = node.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node child = childNodes.item(i);
+            if (localName.equals(child.getLocalName())) {
+                matchedChildNodes.add(child);
+            }
+        }
+        return matchedChildNodes;
     }
 }

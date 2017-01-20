@@ -39,7 +39,7 @@ public class XpathSolver {
      * @param prettyPrint
      * @return string representation of a DOM node
      */
-    public static String NodeToString(Node node, boolean omitXmlDeclaration, boolean prettyPrint) {
+    public static String nodeToString(Node node, boolean omitXmlDeclaration, boolean prettyPrint) {
         if (node == null) {
             throw new IllegalArgumentException("node is null.");
         }
@@ -74,6 +74,24 @@ public class XpathSolver {
             return writer.toString();
         } catch (TransformerException | XPathExpressionException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+    public static String nodeToStringTrimmed(Node node, boolean omitXmlDeclaration) {
+        Node cloned = node.cloneNode(true);
+        trimWhitespace(cloned);
+        return nodeToString(cloned, omitXmlDeclaration, false);
+    }
+
+    private static void trimWhitespace(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); ++i) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.TEXT_NODE) {
+                child.setTextContent(child.getTextContent().trim());
+            }
+            trimWhitespace(child);
         }
     }
 

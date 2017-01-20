@@ -230,7 +230,7 @@ public class XpathSolverTest {
             // the xpath should identify a unique node
             Assert.assertEquals(1, nodes.getLength());
             Node node = nodes.item(0);
-//            System.out.println(XpathSolver.NodeToString(node, false, true));
+//            System.out.println(XpathSolver.nodeToString(node, false, true));
             // get xpath of node
 //            System.out.println("\"" + XpathSolver.buildNodeXpath(node) + "\",");
             Assert.assertEquals(expectedXPathString, XpathSolver.buildNodeXpath(node));
