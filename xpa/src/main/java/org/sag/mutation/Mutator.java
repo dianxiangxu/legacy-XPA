@@ -12,11 +12,13 @@ import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.ParsingException;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,18 +31,27 @@ import java.util.*;
 public class Mutator {
     private static Log logger = LogFactory.getLog(Mutator.class);
     // so far only string and integer are considered.
-    private static Map<String, String> matchIDMap = new HashMap<>();
+    private static Map<String, String> equalsFunctionMap = new HashMap<>();
     private static Map<String, List<String>> unequalValuesMap = new HashMap<>();
+    private static Map<String, String> oneAndOnlyFunctionMap = new HashMap<>();
 
     static {
         /*
-          see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html#_Toc325047117 Section 10.2.7 Data-types
+          see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html#_Toc325047233 Section 10.2.7 Data-types
          */
-        matchIDMap.put("http://www.w3.org/2001/XMLSchema#string", "urn:oasis:names:tc:xacml:1.0:function:string-equal");
-        matchIDMap.put("http://www.w3.org/2001/XMLSchema#boolean", "urn:oasis:names:tc:xacml:1.0:function:boolean-equal");
-        matchIDMap.put("http://www.w3.org/2001/XMLSchema#integer", "urn:oasis:names:tc:xacml:1.0:function:integer-equal");
-        matchIDMap.put("http://www.w3.org/2001/XMLSchema#double", "urn:oasis:names:tc:xacml:1.0:function:double-equal");
-        matchIDMap.put("http://www.w3.org/2001/XMLSchema#date", "urn:oasis:names:tc:xacml:1.0:function:date-equal");
+        equalsFunctionMap.put("http://www.w3.org/2001/XMLSchema#string", "urn:oasis:names:tc:xacml:1.0:function:string-equal");
+        equalsFunctionMap.put("http://www.w3.org/2001/XMLSchema#boolean", "urn:oasis:names:tc:xacml:1.0:function:boolean-equal");
+        equalsFunctionMap.put("http://www.w3.org/2001/XMLSchema#integer", "urn:oasis:names:tc:xacml:1.0:function:integer-equal");
+        equalsFunctionMap.put("http://www.w3.org/2001/XMLSchema#double", "urn:oasis:names:tc:xacml:1.0:function:double-equal");
+        equalsFunctionMap.put("http://www.w3.org/2001/XMLSchema#date", "urn:oasis:names:tc:xacml:1.0:function:date-equal");
+        /*
+          see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html#_Toc325047234 Section 10.2.8 Functions
+         */
+        oneAndOnlyFunctionMap.put("http://www.w3.org/2001/XMLSchema#string", "urn:oasis:names:tc:xacml:1.0:function:string-one-and-only");
+        oneAndOnlyFunctionMap.put("http://www.w3.org/2001/XMLSchema#boolean", "urn:oasis:names:tc:xacml:1.0:function:boolean-one-and-only");
+        oneAndOnlyFunctionMap.put("http://www.w3.org/2001/XMLSchema#integer", "urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only");
+        oneAndOnlyFunctionMap.put("http://www.w3.org/2001/XMLSchema#double", "urn:oasis:names:tc:xacml:1.0:function:double-one-and-only");
+        oneAndOnlyFunctionMap.put("http://www.w3.org/2001/XMLSchema#date", "urn:oasis:names:tc:xacml:1.0:function:date-one-and-only");
         /*
           see https://www.w3.org/TR/xmlschema-2/#built-in-primitive-datatypes for legal literals for different types
          */
@@ -74,6 +85,9 @@ public class Mutator {
     static boolean isEmptyNode(Node node) {
         // When the target is empty, it may have one child node that contains only text "\n"; when the target is not empty,
         // it may have three nodes: "\n", AnyOf element and "\n".
+        if (node == null) {
+            return true;
+        }
         NodeList children = node.getChildNodes();
         boolean isEmptyTarget = true;
         for (int i = 0; i < children.getLength(); i++) {
@@ -247,10 +261,10 @@ public class Mutator {
                 Node attributeValueNode = attributeValueNodes.get(0);
                 //set MatchId and AttributeValue according to DataType
                 String dataType = attributeValueNode.getAttributes().getNamedItem("DataType").getNodeValue();
-                if (!matchIDMap.containsKey(dataType)) {
+                if (!equalsFunctionMap.containsKey(dataType)) {
                     throw new RuntimeException("unsupported DataType: " + dataType);
                 }
-                cloned.getAttributes().getNamedItem("MatchId").setNodeValue(matchIDMap.get(dataType));
+                cloned.getAttributes().getNamedItem("MatchId").setNodeValue(equalsFunctionMap.get(dataType));
                 attributeValueNode.setTextContent(unequalValuesMap.get(dataType).get(k));
                 //add two conflicting Match nodes to parent
                 matchNode.getParentNode().appendChild(cloned);
@@ -280,5 +294,85 @@ public class Mutator {
             }
         }
         return matchedChildNodes;
+    }
+
+    /**
+     * Make Rule Condition always false
+     */
+    public List<Mutant> createRuleConditionFalseMutants(String xpathString) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "RCF";
+        List<Mutant> mutants = new ArrayList<>();
+        String conditionXpathString = xpathString + "/*[local-name()='Condition' and 1]";
+        Node conditionNode = ((NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        if (conditionNode != null && !isEmptyNode(conditionNode)) {
+            Node attributeDesignator = findNodeByLocalNameRecursively(conditionNode, "AttributeDesignator");
+            if (attributeDesignator != null) {
+                //get DataType and attributes
+//                String dataType = ((Element) attributeDesignator).getAttribute("DataType");
+                Node tmp = attributeDesignator.getAttributes().getNamedItem("DataType");
+                String dataType = attributeDesignator.getAttributes().getNamedItem("DataType").getNodeValue();
+                String attributeId = attributeDesignator.getAttributes().getNamedItem("AttributeId").getNodeValue();
+                String category = attributeDesignator.getAttributes().getNamedItem("Category").getNodeValue();
+                if (!equalsFunctionMap.containsKey(dataType)) {
+                    throw new RuntimeException("unsupported DataType: " + dataType);
+                }
+                //build false condition
+                String falseCondition = "";
+                falseCondition += "\t<Condition>\n";
+                falseCondition += "\t\t<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:and\">\n";
+                falseCondition += "\t\t\t<Apply FunctionId=\"" + equalsFunctionMap.get(dataType) + "\">\n";
+                falseCondition += "\t\t\t\t<Apply FunctionId=\"" + oneAndOnlyFunctionMap.get(dataType) + "\">\n";
+                falseCondition += "\t\t\t\t\t<AttributeDesignator AttributeId=\"" + attributeId + "\" Category=\"" + category + "\" DataType=\"" + dataType + "\" MustBePresent=\"true\"/>\n";
+                falseCondition += "\t\t\t\t</Apply>\n";
+                falseCondition += "\t\t\t\t<AttributeValue DataType=\"" + dataType + "\">" + unequalValuesMap.get(dataType).get(0) + "</AttributeValue>\n";
+                falseCondition += "\t\t\t</Apply>\n";
+                falseCondition += "\t\t\t<Apply FunctionId=\"" + equalsFunctionMap.get(dataType) + "\">\n";
+                falseCondition += "\t\t\t\t<Apply FunctionId=\"" + oneAndOnlyFunctionMap.get(dataType) + "\">\n";
+                falseCondition += "\t\t\t\t\t<AttributeDesignator AttributeId=\"" + attributeId + "\" Category=\"" + category + "\" DataType=\"" + dataType + "\" MustBePresent=\"true\"/>\n";
+                falseCondition += "\t\t\t\t</Apply>\n";
+                falseCondition += "\t\t\t\t<AttributeValue DataType=\"" + dataType + "\">" + unequalValuesMap.get(dataType).get(1) + "</AttributeValue>\n";
+                falseCondition += "\t\t\t</Apply>\n";
+                falseCondition += "\t\t</Apply>\n";
+                falseCondition += "\t</Condition>\n";
+                Node falseConditionNode = DocumentBuilderFactory
+                        .newInstance()
+                        .newDocumentBuilder()
+                        .parse(new ByteArrayInputStream(falseCondition.getBytes())).getFirstChild();
+                Node importedFalseConditionNode = doc.importNode(falseConditionNode, true);
+                //change doc
+                Node parent = conditionNode.getParentNode();
+                parent.removeChild(conditionNode);
+                parent.appendChild(importedFalseConditionNode);
+//                System.out.println(XpathSolver.nodeToString(parent, false, true));
+                AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+                mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+                //restore doc
+                parent.removeChild(importedFalseConditionNode);
+                parent.appendChild(conditionNode);
+//                System.out.println(XpathSolver.nodeToString(parent, false, true));
+            }
+        }
+        return mutants;
+    }
+
+    /**
+     * recursively look for a node such that node.getLocalName() equals localName
+     *
+     * @return the node we found, or null if there's no such node
+     */
+    private Node findNodeByLocalNameRecursively(Node node, String localName) {
+        if (localName.equals(node.getLocalName())) {
+            return node;
+        }
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            Node target = findNodeByLocalNameRecursively(child, localName);
+            if (target != null) {
+                return target;
+            }
+        }
+        return null;
     }
 }
