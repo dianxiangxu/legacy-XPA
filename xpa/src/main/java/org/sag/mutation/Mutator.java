@@ -415,7 +415,46 @@ public class Mutator {
         return createTargetChangeComparisonFunctionMutants(xpathString, faultLocation, mutantName);
     }
 
-    public List<Mutant> createTargetChangeComparisonFunctionMutants(String targetXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
+    public List<Mutant> createRuleChangeComparisonFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "CCF";
+        List<Mutant> mutants = new ArrayList<>();
+        String ruleTargetXpathString = xpathString + "/*[local-name()='Target' and 1]";
+        mutants.addAll(createTargetChangeComparisonFunctionMutants(ruleTargetXpathString, faultLocation, mutantName));
+        mutants.addAll(createRuleConditionChangeComparisonFunctionMutants(xpathString, faultLocation, mutantName));
+        return mutants;
+    }
+
+    private List<Mutant> createRuleConditionChangeComparisonFunctionMutants(String ruleXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
+        String conditionXpathString = ruleXpathString + "/*[local-name()='Condition' and 1]";
+        List<Mutant> list = new ArrayList<>();
+        Node conditionNode = ((NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        if (!isEmptyNode(conditionNode)) {
+            Node attributeDesignator = findNodeByLocalNameRecursively(conditionNode, "AttributeDesignator");
+            if (attributeDesignator != null) {
+                String dataType = attributeDesignator.getAttributes().getNamedItem("DataType").getNodeValue();
+                Node applyNode = attributeDesignator.getParentNode();
+                Node functionNode = findNodeByLocalNameRecursively(applyNode, "Function");
+                if (functionNode != null) {
+                    String originalComparisonFunction = functionNode.getAttributes().getNamedItem("FunctionId").getNodeValue();
+                    for (String comparisonFunction : comparisonFunctionMap.get(dataType)) {
+                        if (!comparisonFunction.equals(originalComparisonFunction)) {
+                            //change doc
+                            functionNode.getAttributes().getNamedItem("FunctionId").setNodeValue(comparisonFunction);
+                            AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+                            list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+                        }
+                    }
+                    //restore doc
+                    functionNode.getAttributes().getNamedItem("FunctionId").setNodeValue(originalComparisonFunction);
+                }
+            }
+        }
+        return list;
+
+    }
+
+    private List<Mutant> createTargetChangeComparisonFunctionMutants(String targetXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
         String matchXpathString = targetXpathString + "/*[local-name()='AnyOf' and 1]/*[local-name()='AllOf' and 1]/*[local-name()='Match' and 1]";
         Node matchNode = ((NodeList) xPath.evaluate(matchXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
         List<Mutant> mutants = new ArrayList<>();
