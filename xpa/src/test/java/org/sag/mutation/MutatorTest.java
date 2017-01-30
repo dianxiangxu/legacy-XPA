@@ -251,10 +251,10 @@ public class MutatorTest {
     public void createRuleConditionFalseMutantsTest() throws ParserConfigurationException, ParsingException, SAXException, XPathExpressionException, IOException {
         for (String xpathString : xpathList) {
             if (isRuleXpathString(xpathString)) {
-                System.out.println(xpathString);
+//                System.out.println(xpathString);
                 NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
                 Node node = nodes.item(0);
-                System.out.println(XpathSolver.nodeToString(node, false, true));
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
                 String conditionXpathString = xpathString + "/*[local-name()='Condition' and 1]";
                 nodes = (NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
                 Node conditionNode = nodes.item(0);
@@ -266,12 +266,12 @@ public class MutatorTest {
                     nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
                     Assert.assertEquals(1, nodes.getLength());
                     Node newNode = nodes.item(0);
-                    System.out.println(XpathSolver.nodeToString(newNode, false, true));
+//                    System.out.println(XpathSolver.nodeToString(newNode, false, true));
                 } else {
-                    System.out.println(XpathSolver.nodeToString(node, false, true));
+//                    System.out.println(XpathSolver.nodeToString(node, false, true));
                     Assert.assertEquals(0, mutants.size());
                 }
-                System.out.println("=================");
+//                System.out.println("=================");
             }
         }
     }
@@ -293,6 +293,32 @@ public class MutatorTest {
         Node newNode = nodes.item(0);
         String expectedNewString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Rule Effect=\"Permit\" RuleId=\"http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.createNote\" xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\"><Description>A primary physician can create a patient's progress note</Description><Target><AnyOf><AllOf><Match MatchId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\"><AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">physician</AttributeValue><AttributeDesignator AttributeId=\"com.axiomatics.hl7.user.role\" Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"false\"/></Match><Match MatchId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\"><AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">create</AttributeValue><AttributeDesignator AttributeId=\"com.axiomatics.hl7.action.id\" Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"false\"/></Match></AllOf></AnyOf></Target><Condition><Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:and\"><Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\"><Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:string-one-and-only\"><AttributeDesignator AttributeId=\"com.axiomatics.hl7.patient.primaryPhysician\" Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"true\"/></Apply><AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">a</AttributeValue></Apply><Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:string-equal\"><Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:string-one-and-only\"><AttributeDesignator AttributeId=\"com.axiomatics.hl7.patient.primaryPhysician\" Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\" DataType=\"http://www.w3.org/2001/XMLSchema#string\" MustBePresent=\"true\"/></Apply><AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">b</AttributeValue></Apply></Apply></Condition></Rule>";
         Assert.assertEquals(expectedNewString, XpathSolver.nodeToStringTrimmed(newNode, false));
+    }
 
+    @Test
+    public void createPolicyTargetChangeComparisonFunctionMutantsTest() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, ParsingException {
+        for (String xpathString : xpathList) {
+            if (isTargetXpathString(xpathString)) {
+//                System.out.println(xpathString);
+                NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+                Assert.assertEquals(1, nodes.getLength());
+                Node node = nodes.item(0);
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
+                List<Mutant> mutants = mutator.createPolicyTargetChangeComparisonFunctionMutants(xpathString);
+                if (!Mutator.isEmptyNode(node)) {
+                    for (Mutant mutant : mutants) {
+                        Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                        nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                        Assert.assertEquals(1, nodes.getLength());
+                        Node newNode = nodes.item(0);
+//                        System.out.println(XpathSolver.nodeToString(newNode, false, true));
+                    }
+                } else {
+//                    System.out.println(XpathSolver.nodeToString(node, false, true));
+                    Assert.assertEquals(0, mutants.size());
+                }
+//                System.out.println("===========");
+            }
+        }
     }
 }

@@ -34,6 +34,7 @@ public class Mutator {
     private static Map<String, String> equalsFunctionMap = new HashMap<>();
     private static Map<String, List<String>> unequalValuesMap = new HashMap<>();
     private static Map<String, String> oneAndOnlyFunctionMap = new HashMap<>();
+    private static Map<String, List<String>> comparisonFunctionMap = new HashMap<>();
 
     static {
         /*
@@ -60,6 +61,39 @@ public class Mutator {
         unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#integer", Arrays.asList("1", "2"));
         unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#double", Arrays.asList("1.0", "2.0"));
         unequalValuesMap.put("http://www.w3.org/2001/XMLSchema#date", Arrays.asList("2002-10-10+13:00", "2002-10-11+13:00"));
+        /*
+          see http://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-os-en.html#_Toc325047234 Section 10.2.8 Functions
+         */
+        comparisonFunctionMap.put("http://www.w3.org/2001/XMLSchema#string",
+                Arrays.asList("urn:oasis:names:tc:xacml:1.0:function:string-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:string-greater-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:string-greater-than-or-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:string-less-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:string-less-than-or-equal"
+                ));
+        comparisonFunctionMap.put("http://www.w3.org/2001/XMLSchema#boolean",
+                Collections.singletonList("urn:oasis:names:tc:xacml:1.0:function:boolean-equal"));
+        comparisonFunctionMap.put("http://www.w3.org/2001/XMLSchema#integer",
+                Arrays.asList("urn:oasis:names:tc:xacml:1.0:function:integer-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:integer-greater-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:integer-greater-than-or-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:integer-less-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:integer-less-than-or-equal"
+                ));
+        comparisonFunctionMap.put("http://www.w3.org/2001/XMLSchema#double",
+                Arrays.asList("urn:oasis:names:tc:xacml:1.0:function:double-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:double-greater-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:double-greater-than-or-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:double-less-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:double-less-than-or-equal"
+                ));
+        comparisonFunctionMap.put("http://www.w3.org/2001/XMLSchema#date",
+                Arrays.asList("urn:oasis:names:tc:xacml:1.0:function:date-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:date-greater-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:date-greater-than-or-equal",
+                        "urn:oasis:names:tc:xacml:1.0:function:date-less-than",
+                        "urn:oasis:names:tc:xacml:1.0:function:date-less-than-or-equal"
+                ));
     }
 
     private String int_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only";
@@ -197,7 +231,7 @@ public class Mutator {
         List<Mutant> list = new ArrayList<>();
         NodeList nodes = (NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         Node node = nodes.item(0);
-        if (node != null && !isEmptyNode(node)) {
+        if (!isEmptyNode(node)) {
             //change doc
             Node ruleNode = node.getParentNode();
             ruleNode.removeChild(node);
@@ -310,7 +344,6 @@ public class Mutator {
             if (attributeDesignator != null) {
                 //get DataType and attributes
 //                String dataType = ((Element) attributeDesignator).getAttribute("DataType");
-                Node tmp = attributeDesignator.getAttributes().getNamedItem("DataType");
                 String dataType = attributeDesignator.getAttributes().getNamedItem("DataType").getNodeValue();
                 String attributeId = attributeDesignator.getAttributes().getNamedItem("AttributeId").getNodeValue();
                 String category = attributeDesignator.getAttributes().getNamedItem("Category").getNodeValue();
@@ -374,5 +407,38 @@ public class Mutator {
             }
         }
         return null;
+    }
+
+    public List<Mutant> createPolicyTargetChangeComparisonFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "CCF";
+        return createTargetChangeComparisonFunctionMutants(xpathString, faultLocation, mutantName);
+    }
+
+    public List<Mutant> createTargetChangeComparisonFunctionMutants(String targetXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
+        String matchXpathString = targetXpathString + "/*[local-name()='AnyOf' and 1]/*[local-name()='AllOf' and 1]/*[local-name()='Match' and 1]";
+        Node matchNode = ((NodeList) xPath.evaluate(matchXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        List<Mutant> mutants = new ArrayList<>();
+        if (!isEmptyNode(matchNode)) {
+            Node attributeDesignator = findNodeByLocalNameRecursively(matchNode, "AttributeDesignator");
+            if (attributeDesignator != null) {
+//                System.out.println(XpathSolver.nodeToString(matchNode, false, true));
+                String dataType = attributeDesignator.getAttributes().getNamedItem("DataType").getNodeValue();
+                String orignalComparisonFunction = matchNode.getAttributes().getNamedItem("MatchId").getNodeValue();
+                //change doc
+                for (String comparisonFunction : comparisonFunctionMap.get(dataType)) {
+                    if (!comparisonFunction.equals(orignalComparisonFunction)) {
+                        matchNode.getAttributes().getNamedItem("MatchId").setNodeValue(comparisonFunction);
+//                        System.out.println(XpathSolver.nodeToString(matchNode, false, true));
+                        AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+                        mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+                    }
+                }
+                //restore doc
+                matchNode.getAttributes().getNamedItem("MatchId").setNodeValue(orignalComparisonFunction);
+//                System.out.println(XpathSolver.nodeToString(matchNode, false, true));
+            }
+        }
+        return mutants;
     }
 }
