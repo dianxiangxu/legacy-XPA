@@ -326,12 +326,39 @@ public class MutatorTest {
     public void createRuleChangeComparisonFunctionMutantsTest() throws XPathExpressionException, ParserConfigurationException, SAXException, IOException, ParsingException {
         for (String xpathString : xpathList) {
             if (isRuleXpathString(xpathString)) {
+//                System.out.println(xpathString);
+                NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+                Assert.assertEquals(1, nodes.getLength());
+                Node node = nodes.item(0);
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
+                List<Mutant> mutants = mutator.createRuleChangeComparisonFunctionMutants(xpathString);
+                if (!Mutator.isEmptyNode(node)) {
+                    for (Mutant mutant : mutants) {
+                        Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                        nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                        Assert.assertEquals(1, nodes.getLength());
+                        Node newNode = nodes.item(0);
+//                        System.out.println(XpathSolver.nodeToString(newNode, false, true));
+                    }
+                } else {
+//                    System.out.println(XpathSolver.nodeToString(node, false, true));
+                    Assert.assertEquals(0, mutants.size());
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
+
+    @Test
+    public void createAddNotFunctionMutantsTest() throws XPathExpressionException, ParserConfigurationException, ParsingException, SAXException, IOException {
+        for (String xpathString : xpathList) {
+            if (isRuleXpathString(xpathString)) {
                 System.out.println(xpathString);
                 NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
                 Assert.assertEquals(1, nodes.getLength());
                 Node node = nodes.item(0);
                 System.out.println(XpathSolver.nodeToString(node, false, true));
-                List<Mutant> mutants = mutator.createRuleChangeComparisonFunctionMutants(xpathString);
+                List<Mutant> mutants = mutator.createAddNotFunctionMutants(xpathString);
                 if (!Mutator.isEmptyNode(node)) {
                     for (Mutant mutant : mutants) {
                         Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));

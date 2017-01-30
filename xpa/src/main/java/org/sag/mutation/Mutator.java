@@ -415,9 +415,8 @@ public class Mutator {
      * "<" or "<=".
      *
      * @param xpathString xpath string to the target of a policy or a policy set
-     * @return
-     * @throws XPathExpressionException
-     * @throws ParsingException
+     * @return a list of mutants generated using this mutation operator, or an empty list if this mutation operator is
+     * not applicable this rule
      */
     public List<Mutant> createPolicyTargetChangeComparisonFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {
         int faultLocation = xpathMapping.get(xpathString);
@@ -499,6 +498,46 @@ public class Mutator {
                 //restore doc
                 matchNode.getAttributes().getNamedItem("MatchId").setNodeValue(orignalComparisonFunction);
 //                System.out.println(XpathSolver.nodeToString(matchNode, false, true));
+            }
+        }
+        return mutants;
+    }
+
+    public List<Mutant> createAddNotFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException, ParserConfigurationException, IOException, SAXException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "ANF";
+        List<Mutant> mutants = new ArrayList<>();
+        String conditionXpathString = xpathString + "/*[local-name()='Condition' and 1]";
+        Node conditionNode = ((NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        if (!isEmptyNode(conditionNode)) {
+            List<Node> childNodes = new ArrayList<>();
+            NodeList children = conditionNode.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                childNodes.add(children.item(i));
+            }
+            //change doc
+            for (Node child : childNodes) {
+                conditionNode.removeChild(child);
+            }
+            String notFunctionString = "\t<Apply FunctionId=\"urn:oasis:names:tc:xacml:1.0:function:not\">\n\t</Apply>\n";
+            Node notFunctionNode = DocumentBuilderFactory
+                    .newInstance()
+                    .newDocumentBuilder()
+                    .parse(new ByteArrayInputStream(notFunctionString.getBytes())).getFirstChild();
+            Node importedNotFunctionNode = doc.importNode(notFunctionNode, true);
+            for (Node child : childNodes) {
+                importedNotFunctionNode.appendChild(child);
+            }
+            conditionNode.appendChild(importedNotFunctionNode);
+            AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+            mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+            //restore doc
+            for (Node child : childNodes) {
+                importedNotFunctionNode.removeChild(child);
+            }
+            conditionNode.removeChild(importedNotFunctionNode);
+            for (Node child : childNodes) {
+                conditionNode.appendChild(child);
             }
         }
         return mutants;
