@@ -96,16 +96,12 @@ public class Mutator {
                 ));
     }
 
-    private String int_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:integer-one-and-only";
-    private String str_function_one_and_only = "urn:oasis:names:tc:xacml:1.0:function:string-one-and-only";
-    private Mutant baseMutant;
     private List<String> xpathList;
     private Map<String, Integer> xpathMapping;
     private Document doc;
     private XPath xPath;
 
     public Mutator(Mutant baseMutant) throws ParserConfigurationException, SAXException, IOException {
-        this.baseMutant = baseMutant;
         InputStream stream = IOUtils.toInputStream(baseMutant.encode(), Charset.defaultCharset());
         doc = PolicyLoader.getDocument(stream);
         xpathList = XpathSolver.getEntryListRelativeXPath(doc);
@@ -195,6 +191,10 @@ public class Mutator {
         return createTargetTrueMutants(xpathString + "/*[local-name()='Target' and 1]", "RTT", faultLocation);
     }
 
+    /**
+     * Make a Target always true by removing all its child nodes. According to the specification of XACML, a Target is
+     * always evaluated to true if it is empty.
+     */
     private List<Mutant> createTargetTrueMutants(String xpathString, String mutantName, int faultLocation) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         List<Mutant> list = new ArrayList<>();
         NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
@@ -332,6 +332,8 @@ public class Mutator {
 
     /**
      * Make Rule Condition always false
+     * First find the condition node, then remove and replace it with a condition node we built. The condition node we
+     * built is always false because it has two conflicting conditions, e.g. role == "a" and role == "b".
      */
     public List<Mutant> createRuleConditionFalseMutants(String xpathString) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException, ParsingException {
         int faultLocation = xpathMapping.get(xpathString);
@@ -343,7 +345,6 @@ public class Mutator {
             Node attributeDesignator = findNodeByLocalNameRecursively(conditionNode, "AttributeDesignator");
             if (attributeDesignator != null) {
                 //get DataType and attributes
-//                String dataType = ((Element) attributeDesignator).getAttribute("DataType");
                 String dataType = attributeDesignator.getAttributes().getNamedItem("DataType").getNodeValue();
                 String attributeId = attributeDesignator.getAttributes().getNamedItem("AttributeId").getNodeValue();
                 String category = attributeDesignator.getAttributes().getNamedItem("Category").getNodeValue();
@@ -409,12 +410,26 @@ public class Mutator {
         return null;
     }
 
+    /**
+     * Change the comparison function in the target of a policy or a policy set. For example, change "==" to ">", ">=",
+     * "<" or "<=".
+     *
+     * @param xpathString xpath string to the target of a policy or a policy set
+     * @return
+     * @throws XPathExpressionException
+     * @throws ParsingException
+     */
     public List<Mutant> createPolicyTargetChangeComparisonFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {
         int faultLocation = xpathMapping.get(xpathString);
         String mutantName = "CCF";
         return createTargetChangeComparisonFunctionMutants(xpathString, faultLocation, mutantName);
     }
 
+    /**
+     * Change the comparison functions in a rule. The changed comparison function can be in a the target or the condition
+     * of the rule.
+     * @param xpathString xpath string to a rule element
+     */
     public List<Mutant> createRuleChangeComparisonFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {
         int faultLocation = xpathMapping.get(xpathString);
         String mutantName = "CCF";
@@ -425,6 +440,10 @@ public class Mutator {
         return mutants;
     }
 
+    /**
+     * Change the first comparision function in the condition of a rule.
+     * @param ruleXpathString xpath string to a rule element
+     */
     private List<Mutant> createRuleConditionChangeComparisonFunctionMutants(String ruleXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
         String conditionXpathString = ruleXpathString + "/*[local-name()='Condition' and 1]";
         List<Mutant> list = new ArrayList<>();
@@ -454,6 +473,10 @@ public class Mutator {
 
     }
 
+    /**
+     * Change the first comparision function in a policy target or rule target.
+     * @param targetXpathString the xpath string to a target element
+     */
     private List<Mutant> createTargetChangeComparisonFunctionMutants(String targetXpathString, int faultLocation, String mutantName) throws XPathExpressionException, ParsingException {
         String matchXpathString = targetXpathString + "/*[local-name()='AnyOf' and 1]/*[local-name()='AllOf' and 1]/*[local-name()='Match' and 1]";
         Node matchNode = ((NodeList) xPath.evaluate(matchXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
