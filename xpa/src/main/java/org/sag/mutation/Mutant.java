@@ -24,7 +24,7 @@ public class Mutant extends AbstractPolicy {
     private List<Integer> faultLocations;
 
     public Mutant(AbstractPolicy policy, String name) {
-        this(policy, new ArrayList<>(), name);
+        this(policy, new ArrayList<Integer>(), name);
     }
 
     public Mutant(AbstractPolicy policy, List<Integer> faultLocations, String name) {
