@@ -39,7 +39,7 @@ public class XpathSolver {
      * @param prettyPrint
      * @return string representation of a DOM node
      */
-    public static String NodeToString(Node node, boolean omitXmlDeclaration, boolean prettyPrint) {
+    public static String nodeToString(Node node, boolean omitXmlDeclaration, boolean prettyPrint) {
         if (node == null) {
             throw new IllegalArgumentException("node is null.");
         }
@@ -77,6 +77,24 @@ public class XpathSolver {
         }
     }
 
+
+    public static String nodeToStringTrimmed(Node node, boolean omitXmlDeclaration) {
+        Node cloned = node.cloneNode(true);
+        trimWhitespace(cloned);
+        return nodeToString(cloned, omitXmlDeclaration, false);
+    }
+
+    private static void trimWhitespace(Node node) {
+        NodeList children = node.getChildNodes();
+        for (int i = 0; i < children.getLength(); ++i) {
+            Node child = children.item(i);
+            if (child.getNodeType() == Node.TEXT_NODE) {
+                child.setTextContent(child.getTextContent().trim());
+            }
+            trimWhitespace(child);
+        }
+    }
+
     private static void buildEntryListAbsoluteXPath(List<String> entries, String parentXPath, Element parent) {
         String name = DOMHelper.getLocalName(parent);
         //here we use regex match instead of simply String.equals() because some XACML may use namespace, in such case
@@ -103,7 +121,7 @@ public class XpathSolver {
      * @param doc
      * @return a list of absolute xpathes
      */
-    static List<String> getEntryListAbsoluteXPath(Document doc) {
+    public static List<String> getEntryListAbsoluteXPath(Document doc) {
         ArrayList<String> entries = new ArrayList<>();
         Element root = doc.getDocumentElement();
         buildEntryListAbsoluteXPath(entries, "/" + getNodeIdentifier(root), root);
@@ -168,7 +186,7 @@ public class XpathSolver {
      * @return
      */
     public static String buildRuleXpath(Rule rule) {
-        return String.format("//%s[@%s='%s']", "Rule", "RuleId", rule.getId());
+        return String.format("//*[local-name()='%s' and @%s='%s']", "Rule", "RuleId", rule.getId());
     }
 
     /**
@@ -185,7 +203,7 @@ public class XpathSolver {
             policyString = "PolicySet";
         else
             throw new RuntimeException(policy.getId().toString() + " is neither Policy or PolicySet");
-        return String.format("//%s[@%s='%s']/Target[1]", policyString, policyString + "Id", policy.getId().toString());
+        return String.format("//*[local-name()='%s' and @%s='%s']/*[local-name()='Target' and 1]", policyString, policyString + "Id", policy.getId().toString());
     }
 
     /**
@@ -214,9 +232,9 @@ public class XpathSolver {
         }
         String identifier;
         if (StringUtils.isEmpty(idValue))
-            identifier = String.format("%s[1]", nodeName);
+            identifier = String.format("*[local-name()='%s' and 1]", nodeName);
         else
-            identifier = String.format("%s[@%s='%s']", nodeName, idAttr, idValue);
+            identifier = String.format("*[local-name()='%s' and @%s='%s']", nodeName, idAttr, idValue);
         return identifier;
     }
 }

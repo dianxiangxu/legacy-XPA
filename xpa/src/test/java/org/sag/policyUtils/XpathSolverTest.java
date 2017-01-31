@@ -28,44 +28,49 @@ import java.util.List;
 public class XpathSolverTest {
     @Test
     public void getEntryListAbsoluteXPathTest() throws ParserConfigurationException, IOException, SAXException, ParsingException {
-//        String fileName = "org/sag/policies/conference3.xml";
+//        String fileName = "org/sag/policies/conference3/conference3.xml";
         String fileName = "org/sag/policies/HL7/HL7.xml";
         ClassLoader classLoader = XpathSolver.class.getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
         // by load the policy and then encode it back to string, we replace the namespace declaration with default namespace declaration
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         InputStream stream = IOUtils.toInputStream(policy.encode(), Charset.defaultCharset());
-        Document doc = PolicyLoader.getDocument(stream, false);
+        Document doc = PolicyLoader.getDocument(stream);
         List<String> list = XpathSolver.getEntryListAbsoluteXPath(doc);
 //        for (String entry: list)
 //            System.out.println("\"" + entry + "\",");
 
         String[] expected = new String[]{
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.createNote']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.updateNote']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments.createAssessment']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory.readPaymentHistory']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.readMedicalRecord']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.explicitDenyAccess']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess.withAdditionalAuthority']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess.accessMedicalRecord']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.conditionpolicyset']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.conditionpolicyset']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.conditionpolicyset']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateRead']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.conditionpolicyset']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateUpdate']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan.Id_105']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Target[1]",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.clinicalObjectAccess']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']"
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.createNote']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.updateNote']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.safetyHarness']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments.createAssessment']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments.safetyHarness']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory.readPaymentHistory']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory.safetyHarness']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.readMedicalRecord']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.explicitDenyAccess']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess.withAdditionalAuthority']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess.accessMedicalRecord']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateRead']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateUpdate']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.safetyHarness']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan.Id_10']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan.safetyHarness']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/*[local-name()='Target' and 1]",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.clinicalObjectAccess']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.safetyHarness']"
         };
 
         Assert.assertArrayEquals(list.toArray(), expected);
@@ -76,22 +81,22 @@ public class XpathSolverTest {
         String fileName = "org/sag/policies/conference3/conference3.xml";
 
         String[] expected = new String[]{
-                "//Policy[@PolicyId='conference']/Target[1]",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule1']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule2']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule3']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule4']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule5']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule6']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule7']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule8']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule9']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule10']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule11']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule12']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule13']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule14']"
+                "//*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule1']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule2']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule3']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule4']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule5']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule6']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule7']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule8']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule9']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule10']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule11']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule12']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule13']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule14']"
         };
 
         getEntryListRelativeXPathTest(fileName, expected);
@@ -102,31 +107,36 @@ public class XpathSolverTest {
         String fileName = "org/sag/policies/HL7/HL7.xml";
 
         String[] expected = new String[]{
-                "//PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Target[1]",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.createNote']",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.updateNote']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments.createAssessment']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory.readPaymentHistory']",
-                "//PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/Target[1]",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.readMedicalRecord']",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.explicitDenyAccess']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess.withAdditionalAuthority']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess.accessMedicalRecord']",
-                "//PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.conditionpolicyset']/Target[1]",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateRead']",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateUpdate']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan.Id_105']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Target[1]",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.clinicalObjectAccess']",
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']"
+                "//*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.createNote']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.updateNote']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes.safetyHarness']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments.createAssessment']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.assessments.safetyHarness']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory.readPaymentHistory']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.paymentHistory.safetyHarness']",
+                "//*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.readMedicalRecord']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.physiciansAccessMedicalRecords.explicitDenyAccess']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.admissionClerkMedicalRecordAccess.withAdditionalAuthority']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.medicalRecords.healthRelatedProfessionalAccess.accessMedicalRecord']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateRead']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.alternateUpdate']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.alternatePrivilegedHealthcareProfessionalAccess.safetyHarness']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan.Id_10']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.updateCarePlan.safetyHarness']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.clinicalObjectAccess']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.safetyHarness']"
         };
 
         getEntryListRelativeXPathTest(fileName, expected);
@@ -138,7 +148,7 @@ public class XpathSolverTest {
         // by load the policy and then encode it back to string, we replace the namespace declaration with default namespace declaration
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         InputStream stream = IOUtils.toInputStream(policy.encode(), Charset.defaultCharset());
-        Document doc = PolicyLoader.getDocument(stream, false);
+        Document doc = PolicyLoader.getDocument(stream);
         List<String> list = XpathSolver.getEntryListRelativeXPath(doc);
 //        for (String entry: list)
 //            System.out.println("\"" + entry + "\",");
@@ -149,40 +159,40 @@ public class XpathSolverTest {
     public void evaluateXpathTestConference3() throws ParserConfigurationException, IOException, SAXException, XPathExpressionException, ParsingException {
         String fileName = "org/sag/policies/conference3/conference3.xml";
         List<String> xpathList = Arrays.asList(
-                "//Policy[@PolicyId='conference']/Target[1]",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule1']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule2']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule3']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule4']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule5']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule6']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule7']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule8']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule9']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule10']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule11']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule12']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule13']",
-                "//Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule14']"
+                "//*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Target' and 1]",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule1']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule2']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule3']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule4']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule5']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule6']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule7']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule8']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule9']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule10']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule11']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule12']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule13']",
+                "//*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule14']"
         );
         List<String> expectedXpathList = Arrays.asList(
-                "/Policy[@PolicyId='conference']/Target[1]",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule1']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule2']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule3']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule4']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule5']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule6']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule7']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule8']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule9']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule10']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule11']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule12']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule13']",
-                "/Policy[@PolicyId='conference']/Rule[@RuleId='urn:oasis:names:tc:xacml:1.0:Rule14']"
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Target' and 1]",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule0']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule1']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule2']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule3']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule4']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule5']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule6']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule7']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule8']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule9']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule10']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule11']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule12']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule13']",
+                "/*[local-name()='Policy' and @PolicyId='conference']/*[local-name()='Rule' and @RuleId='urn:oasis:names:tc:xacml:1.0:Rule14']"
         );
         evaluateXpathTest(fileName, xpathList, expectedXpathList);
     }
@@ -191,12 +201,12 @@ public class XpathSolverTest {
     public void evaluateXpathTestHL7() throws ParserConfigurationException, IOException, SAXException, XPathExpressionException, ParsingException {
         String fileName = "org/sag/policies/HL7/HL7.xml";
         List<String> xpathList = Arrays.asList(
-                "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
-                "//Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Target[1]"
+                "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
+                "//*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Target' and 1]"
         );
         List<String> expectedXpathList = Arrays.asList(
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
-                "/PolicySet[@PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/Policy[@PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/Target[1]"
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess']/*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']",
+                "/*[local-name()='PolicySet' and @PolicySetId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global']/*[local-name()='Policy' and @PolicyId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.progressNotes']/*[local-name()='Target' and 1]"
         );
         evaluateXpathTest(fileName, xpathList, expectedXpathList);
     }
@@ -207,7 +217,7 @@ public class XpathSolverTest {
         // by load the policy and then encode it back to string, we replace the namespace declaration with default namespace declaration
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         InputStream stream = IOUtils.toInputStream(policy.encode(), Charset.defaultCharset());
-        Document doc = PolicyLoader.getDocument(stream, false);
+        Document doc = PolicyLoader.getDocument(stream);
 
         //Evaluate XPath against Document itself
         XPath xPath = XPathFactory.newInstance().newXPath();
@@ -220,7 +230,7 @@ public class XpathSolverTest {
             // the xpath should identify a unique node
             Assert.assertEquals(1, nodes.getLength());
             Node node = nodes.item(0);
-//            System.out.println(XpathSolver.NodeToString(node, false, true));
+//            System.out.println(XpathSolver.nodeToString(node, false, true));
             // get xpath of node
 //            System.out.println("\"" + XpathSolver.buildNodeXpath(node) + "\",");
             Assert.assertEquals(expectedXPathString, XpathSolver.buildNodeXpath(node));
@@ -243,11 +253,11 @@ public class XpathSolverTest {
                 "    </Target>\n" +
                 "</Rule>";
         InputStream stream = IOUtils.toInputStream(ruleString, Charset.defaultCharset());
-        Document doc = PolicyLoader.getDocument(stream, false);
+        Document doc = PolicyLoader.getDocument(stream);
         Rule rule = Rule.getInstance(doc.getDocumentElement(), new PolicyMetaData(XACMLConstants.XACML_1_0_IDENTIFIER,
                 null), null);
         String xpathString = XpathSolver.buildRuleXpath(rule);
-        String expected = "//Rule[@RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']";
+        String expected = "//*[local-name()='Rule' and @RuleId='http://axiomatics.com/alfa/identifier/com.axiomatics.hl7.global.clinicalObjectAccess.billingStatementAccess']";
         Assert.assertEquals(expected, xpathString);
     }
 }

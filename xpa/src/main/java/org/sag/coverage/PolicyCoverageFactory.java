@@ -34,7 +34,7 @@ public class PolicyCoverageFactory {
         coverageMatrix = new ArrayList<>();
         InputStream stream = IOUtils.toInputStream(policy.encode(), Charset.defaultCharset());
         try {
-            List<String> entryList = XpathSolver.getEntryListRelativeXPath(PolicyLoader.getDocument(stream, false));
+            List<String> entryList = XpathSolver.getEntryListRelativeXPath(PolicyLoader.getDocument(stream));
             mapping = new HashMap<>();
             for (int i = 0; i < entryList.size(); i++)
                 mapping.put(entryList.get(i), i);
