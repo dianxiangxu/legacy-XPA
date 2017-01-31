@@ -19,7 +19,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * A rather comprehensive test. Run test suite against a set of mutants; for each mutant, use a set of fault localizer
