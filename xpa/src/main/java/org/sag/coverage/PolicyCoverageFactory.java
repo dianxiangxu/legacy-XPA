@@ -27,7 +27,7 @@ public class PolicyCoverageFactory {
     static void newRow() {
         // the TargetCoverage here is only a position occupier
         // new TargetCoverage(1) means NO_MATCH, will result a 0 in coverage matrix in the spectrum fault localizer
-        coverageMatrix.add(new ArrayList<>(Collections.nCopies(mapping.size(), new TargetCoverage(1))));
+        coverageMatrix.add(new ArrayList<Coverage>(Collections.nCopies(mapping.size(), new TargetCoverage(1))));
     }
 
     static void init(AbstractPolicy policy) {
