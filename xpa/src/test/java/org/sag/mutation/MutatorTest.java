@@ -353,12 +353,47 @@ public class MutatorTest {
     public void createAddNotFunctionMutantsTest() throws XPathExpressionException, ParserConfigurationException, ParsingException, SAXException, IOException {
         for (String xpathString : xpathList) {
             if (isRuleXpathString(xpathString)) {
-                System.out.println(xpathString);
+//                System.out.println(xpathString);
                 NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
                 Assert.assertEquals(1, nodes.getLength());
                 Node node = nodes.item(0);
-                System.out.println(XpathSolver.nodeToString(node, false, true));
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
                 List<Mutant> mutants = mutator.createAddNotFunctionMutants(xpathString);
+                if (!Mutator.isEmptyNode(node)) {
+                    for (Mutant mutant : mutants) {
+                        Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                        nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                        Assert.assertEquals(1, nodes.getLength());
+                        Node newNode = nodes.item(0);
+//                        System.out.println(XpathSolver.nodeToString(newNode, false, true));
+                    }
+                } else {
+//                    System.out.println(XpathSolver.nodeToString(node, false, true));
+                    Assert.assertEquals(0, mutants.size());
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
+
+    @Test
+    public void createRemoveNotFunctionMutantsTest() throws XPathExpressionException, ParserConfigurationException, ParsingException, SAXException, IOException {
+        //use HL7.notFunction.xml instead of HL7.xml because the later doesn't have not function in Condition elements
+        File file = new File("src/test/resources/org/sag/policies/HL7/HL7.notFunction.xml");
+        AbstractPolicy policy = PolicyLoader.loadPolicy(file);
+        //note that a local doc and mutator variable is used
+        Document doc = PolicyLoader.getDocument(IOUtils.toInputStream(policy.encode(), Charset.defaultCharset()));
+        Mutator mutator = new Mutator(new Mutant(policy, ""));
+        for (String xpathString : xpathList) {
+            if (isRuleXpathString(xpathString)) {
+                System.out.println(xpathString);
+                //check if there the first Apply element's FunctionId is not function
+                String notFunctionXpathString = xpathString + "/*[local-name()='Condition' and 1]/*[local-name()='Apply' and @FunctionId='urn:oasis:names:tc:xacml:1.0:function:not']";
+                NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+//                Assert.assertEquals(1, nodes.getLength());
+                Node node = nodes.item(0);
+                System.out.println(XpathSolver.nodeToString(node, false, true));
+                List<Mutant> mutants = mutator.createRemoveNotFunctionMutants(xpathString);
                 if (!Mutator.isEmptyNode(node)) {
                     for (Mutant mutant : mutants) {
                         Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));

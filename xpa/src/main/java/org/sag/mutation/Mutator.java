@@ -503,6 +503,11 @@ public class Mutator {
         return mutants;
     }
 
+    /**
+     * add a not function in the Condition element
+     *
+     * @param xpathString xpath string to a rule
+     */
     public List<Mutant> createAddNotFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException, ParserConfigurationException, IOException, SAXException {
         int faultLocation = xpathMapping.get(xpathString);
         String mutantName = "ANF";
@@ -538,6 +543,50 @@ public class Mutator {
             conditionNode.removeChild(importedNotFunctionNode);
             for (Node child : childNodes) {
                 conditionNode.appendChild(child);
+            }
+        }
+        return mutants;
+    }
+
+    /**
+     * remove the outmost not function in the Condition element, if there is such
+     *
+     * @param xpathString xpath string to a rule
+     */
+    public List<Mutant> createRemoveNotFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "RNF";
+        List<Mutant> mutants = new ArrayList<>();
+        String conditionXpathString = xpathString + "/*[local-name()='Condition' and 1]";
+        Node conditionNode = ((NodeList) xPath.evaluate(conditionXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        if (!isEmptyNode(conditionNode)) {
+            Node applyNode = findNodeByLocalNameRecursively(conditionNode, "Apply");
+            String notFunctionString = "urn:oasis:names:tc:xacml:1.0:function:not";
+            if (applyNode != null && applyNode.getAttributes().getNamedItem("FunctionId").getNodeValue().equals(notFunctionString)) {
+                List<Node> childNodes = new ArrayList<>();
+                NodeList children = applyNode.getChildNodes();
+                for (int i = 0; i < children.getLength(); i++) {
+                    childNodes.add(children.item(i));
+                }
+                //change doc
+                for (Node child : childNodes) {
+                    applyNode.removeChild(child);
+                }
+                Node parent = applyNode.getParentNode();
+                parent.removeChild(applyNode);
+                for (Node child : childNodes) {
+                    parent.appendChild(child);
+                }
+                AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+                mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+                //restore doc
+                for (Node child : childNodes) {
+                    parent.removeChild(child);
+                }
+                for (Node child : childNodes) {
+                    applyNode.appendChild(child);
+                }
+                parent.appendChild(applyNode);
             }
         }
         return mutants;
