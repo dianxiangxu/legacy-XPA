@@ -16,23 +16,47 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.8.7</aspectj.version>
         <java.source-target.version>1.7</java.source-target.version>
-        <balana.version>1.0.4</balana.version>
+        <!--<balana.version>1.0.4</balana.version>-->
     </properties>
 
-    <repositories>
-        <repository>
-            <id>wso2-nexus</id>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases</url>
-        </repository>
-    </repositories>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>wso2-nexus</id>-->
+            <!--<url>http://maven.wso2.org/nexus/content/repositories/releases</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
 
     <dependencies>
-        <dependency>
-            <groupId>org.wso2.balana</groupId>
-            <artifactId>org.wso2.balana</artifactId>
-            <version>${balana.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.wso2.balana</groupId>-->
+            <!--<artifactId>org.wso2.balana</artifactId>-->
+            <!--<version>${balana.version}</version>-->
+        <!--</dependency>-->
         <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjrt -->
+        <!--commons-logging is added only for compiling balana-->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>logkit</groupId>
+                    <artifactId>logkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>avalon-framework</groupId>
+                    <artifactId>avalon-framework</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
@@ -87,12 +111,12 @@
                     <complianceLevel>${java.source-target.version}</complianceLevel>
                     <source>${java.source-target.version}</source>
                     <target>${java.source-target.version}</target>
-                    <weaveDependencies>
-                        <weaveDependency>
-                            <groupId>org.wso2.balana</groupId>
-                            <artifactId>org.wso2.balana</artifactId>
-                        </weaveDependency>
-                    </weaveDependencies>
+                    <!--<weaveDependencies>-->
+                        <!--<weaveDependency>-->
+                            <!--<groupId>org.wso2.balana</groupId>-->
+                            <!--<artifactId>org.wso2.balana</artifactId>-->
+                        <!--</weaveDependency>-->
+                    <!--</weaveDependencies>-->
                 </configuration>
                 <executions>
                     <execution>
@@ -103,15 +127,15 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<version>2.6</version>-->
-                <!--<configuration>-->
-                    <!--<descriptorRefs>-->
-                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
-                    <!--</descriptorRefs>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
