@@ -1,10 +1,10 @@
-package org.sag.semanticCoverage;
+package org.seal.semanticCoverage;
 
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sag.policyUtils.XpathSolver;
+import org.seal.policyUtils.XpathSolver;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.AbstractTarget;
 import org.wso2.balana.MatchResult;

@@ -29,12 +29,12 @@ public class faultLocalizationTest {
 
     @Test
     public void faultLocalizationTestConference3() throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        String mutantsCSVfileName = "org/sag/policies/conference3/mutants/mutants.csv";
+        String mutantsCSVfileName = "org/seal/policies/conference3/mutants/mutants.csv";
         File mutantsCSVfile = new File(faultLocalizationTest.class.getClassLoader().getResource(mutantsCSVfileName).getFile());
         List<String> faultLocalizeMethods = Arrays.asList("jaccard", "tarantula", "ochiai", "ochiai2", "cbi", "hamann",
                 "simpleMatching", "sokal", "naish2", "goodman", "sorensenDice", "anderberg", "euclid", "rogersTanimoto");
         List<Mutant> mutants = PolicyLoader.readMutantsCSVFile(mutantsCSVfile);
-        String testsCSVfileName = "org/sag/policies/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv";
+        String testsCSVfileName = "org/seal/policies/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv";
         File testsCSVfile = new File(faultLocalizationTest.class.getClassLoader().getResource(testsCSVfileName).getFile());
         TestSuite testSuite = TestSuite.loadTestSuite(testsCSVfile);
         StringWriter stringWriter = new StringWriter();
@@ -58,7 +58,7 @@ public class faultLocalizationTest {
         }
         String resultCSV = stringWriter.toString();
         csvWriter.close();
-        String expectedResultCSVFileName = "org/sag/policies/conference3/fault-localization/conference3_MCDCCoverage_fault-localiazation-benchmark.csv";
+        String expectedResultCSVFileName = "org/seal/policies/conference3/fault-localization/conference3_MCDCCoverage_fault-localiazation-benchmark.csv";
         InputStream inputStream = faultLocalizationTest.class.getClassLoader().getResourceAsStream(expectedResultCSVFileName);
         String expectedCSV = IOUtils.toString(inputStream, Charset.defaultCharset());
         Assert.assertEquals(expectedCSV, resultCSV);
