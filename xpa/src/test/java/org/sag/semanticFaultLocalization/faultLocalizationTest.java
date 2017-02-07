@@ -1,13 +1,13 @@
-package org.sag.faultLocalization;
+package org.sag.semanticFaultLocalization;
 
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sag.coverage.Coverage;
-import org.sag.coverage.PolicyCoverageFactory;
-import org.sag.coverage.TestSuite;
-import org.sag.mutation.Mutant;
+import org.sag.semanticCoverage.Coverage;
+import org.sag.semanticCoverage.PolicyCoverageFactory;
+import org.sag.semanticCoverage.TestSuite;
+import org.sag.semanticMutation.Mutant;
 import org.sag.policyUtils.PolicyLoader;
 
 import java.io.File;

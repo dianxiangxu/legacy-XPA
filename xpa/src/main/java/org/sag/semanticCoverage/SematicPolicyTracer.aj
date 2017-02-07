@@ -1,4 +1,4 @@
-package org.sag.coverage;
+package org.sag.semanticCoverage;
 
 import java.util.List;
 
@@ -19,8 +19,8 @@ import org.wso2.balana.ctx.ResultFactory;
 import org.wso2.balana.ctx.xacml2.Result;
 import org.wso2.balana.PolicySet;
 
-public privileged aspect PolicyTracer {
-	private static Log logger = LogFactory.getLog(PolicyTracer.class);
+public privileged aspect SematicPolicyTracer {
+	private static Log logger = LogFactory.getLog(SematicPolicyTracer.class);
 
 	pointcut ruleEvaluationPointcut(Rule rule, EvaluationCtx context): call(AbstractResult Rule.evaluate(*)) && target(rule) && args(context);
 

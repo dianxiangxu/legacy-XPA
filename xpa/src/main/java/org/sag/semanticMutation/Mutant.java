@@ -1,4 +1,4 @@
-package org.sag.mutation;
+package org.sag.semanticMutation;
 
 import org.wso2.balana.*;
 import org.wso2.balana.combine.CombinerElement;

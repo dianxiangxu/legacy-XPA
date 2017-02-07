@@ -4,7 +4,7 @@ import com.opencsv.CSVReader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sag.mutation.Mutant;
+import org.sag.semanticMutation.Mutant;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.balana.*;

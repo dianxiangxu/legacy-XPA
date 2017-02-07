@@ -1,9 +1,9 @@
-package org.sag.faultLocalization;
+package org.sag.semanticFaultLocalization;
 
-import org.sag.coverage.Coverage;
-import org.sag.coverage.PolicyCoverageFactory;
-import org.sag.coverage.RuleCoverage;
-import org.sag.coverage.TargetCoverage;
+import org.sag.semanticCoverage.Coverage;
+import org.sag.semanticCoverage.PolicyCoverageFactory;
+import org.sag.semanticCoverage.RuleCoverage;
+import org.sag.semanticCoverage.TargetCoverage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +36,7 @@ public class SpectrumBasedFaultLocalizer {
                 }
             }
         }
+//        printMatrix(matrix);
         List<Boolean> results = PolicyCoverageFactory.getResults();
         verdicts = new int[numTests];
         for (int i = 0; i < results.size(); i++)
@@ -45,7 +46,7 @@ public class SpectrumBasedFaultLocalizer {
     /**
      * for debugging
      *
-     * @param matrix coverage matrix
+     * @param matrix semanticCoverage matrix
      */
     private static void printMatrix(int[][] matrix) {
         for (int i = 0; i < matrix.length; i++)

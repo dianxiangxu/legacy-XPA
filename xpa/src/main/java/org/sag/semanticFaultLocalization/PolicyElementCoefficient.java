@@ -1,4 +1,4 @@
-package org.sag.faultLocalization;
+package org.sag.semanticFaultLocalization;
 
 /**
  * Created by shuaipeng on 10/14/16.

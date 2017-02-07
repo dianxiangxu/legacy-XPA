@@ -1,10 +1,10 @@
-package org.sag.faultLocalization;
+package org.sag.semanticFaultLocalization;
 
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.sag.coverage.*;
-import org.sag.mutation.Mutant;
+import org.sag.semanticCoverage.*;
+import org.sag.semanticMutation.Mutant;
 import org.sag.policyUtils.PolicyLoader;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.ParsingException;
@@ -23,10 +23,22 @@ import java.util.List;
  * Created by shuaipeng on 10/11/16.
  */
 public class FaultLocalizationExperiment {
+    //TODO write a program to modify the given requests, generating test suites
     public static void main(String[] args) throws IOException {
-        String mutantsCSVfileName = "experiments/conference3/mutants/mutants.csv";
+        try {
+            runTest();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (ParsingException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+//        String mutantsCSVfileName = "experiments/conference3/mutants/mutants.csv";
+        String mutantsCSVfileName = "experiments/HL7/mutants/manual/mutants.csv";
         File mutantsCSVfile = new File(mutantsCSVfileName);
-        String faultLocalizeResultsFile = "experiments/conference3/fault-localization/conference3_faultLocalization.csv";
+//        String faultLocalizeResultsFile = "experiments/conference3/fault-localization/conference3_faultLocalization.csv";
+        String faultLocalizeResultsFile = "experiments/HL7/fault-localization/HL7_faultLocalization.csv";
         FileUtils.forceMkdir(new File(FilenameUtils.getPath(faultLocalizeResultsFile)));
         CSVWriter writer = new CSVWriter(new FileWriter(faultLocalizeResultsFile), ',');
         List<String> faultLocalizeMethods = Arrays.asList("jaccard","tarantula","ochiai","ochiai2","cbi","hamann",
@@ -35,12 +47,11 @@ public class FaultLocalizationExperiment {
 
         try {
             List<Mutant> mutants = PolicyLoader.readMutantsCSVFile(mutantsCSVfile);
-            File testsCSVfile = new File("experiments/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv");
+//            File testsCSVfile = new File("experiments/HL7/test_suites/manual/HL7.csv");
+            File testsCSVfile = new File("experiments/HL7/test_suites/mcdc/HL7.csv");
             TestSuite testSuite = TestSuite.loadTestSuite(testsCSVfile);
             for (Mutant mutant: mutants) {
                 System.out.println(mutant.getName());
-                if (mutant.getName().trim().equals("MUTANT RTT1_1"))
-                    System.out.println("");
                 List<Boolean> results = testSuite.runTests(mutant);
                 if (booleanListAnd(results))
                     continue;
@@ -67,6 +78,7 @@ public class FaultLocalizationExperiment {
             writer.close();
         }
     }
+
 
     static boolean booleanListAnd(List<Boolean> booleanList) {
         for (boolean b: booleanList)
@@ -98,12 +110,13 @@ public class FaultLocalizationExperiment {
         writer.flushQuietly();
     }
 
-    private void runTest() throws ParserConfigurationException, ParsingException, SAXException, IOException {
+    private static void runTest() throws ParserConfigurationException, ParsingException, SAXException, IOException {
 //        File csvFile = new File("experiments/conference3/test_suites/conference3_MCDCCoverage/conference3_MCDCCoverage.csv");
-        File csvFile = new File("experiments/HL7/test_suites/manual/HL7.csv");
+//        File csvFile = new File("experiments/HL7/test_suites/manual/HL7.csv");
+        File csvFile = new File("experiments/HL7/test_suites/mcdc/HL7.csv");
         TestSuite testSuite = TestSuite.loadTestSuite(csvFile);
 //        File file = new File("/media/shuaipeng/data/XPA/xpa/src/main/resources/org/sag/policies/conference3.xml");
-        File file = new File("/media/shuaipeng/data/XPA/xpa/src/main/resources/org/sag/policies/HL7.xml");
+        File file = new File("/media/shuaipeng/data/XPA/xpa/src/test/resources/org/sag/policies/HL7/HL7.xml");
         AbstractPolicy policy = PolicyLoader.loadPolicy(file);
         List<Boolean> results = testSuite.runTests(policy);
         System.out.println(results.toString());

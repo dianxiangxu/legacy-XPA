@@ -1,10 +1,10 @@
-package org.sag.coverage;
+package org.sag.semanticCoverage;
 
 import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.sag.mutation.Mutant;
+import org.sag.semanticMutation.Mutant;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.ctx.AbstractResult;
 
@@ -55,6 +55,7 @@ public class TestSuite {
     private static boolean runTest(AbstractPolicy policy, String request, String oracleString) {
         int oracle = balanaFinalDecision(oracleString);
         int response = PolicyRunner.evaluate(policy, request);
+//        System.out.println(oracleString + ", " + decisionToString(response));
         return response == oracle;
     }
 
@@ -103,6 +104,7 @@ public class TestSuite {
     public List<Boolean> runTests(AbstractPolicy policy) {
         List<Boolean> results = new ArrayList<>();
         for (int i = 0; i < requests.size(); i++) {
+            System.out.print(requestFileNames.get(i) + ", ");
             results.add(runTest(policy, requests.get(i), oracles.get(i)));
         }
         return results;

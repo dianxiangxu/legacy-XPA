@@ -1,4 +1,4 @@
-package org.sag.mutation;
+package org.sag.semanticMutation;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
@@ -386,13 +386,13 @@ public class MutatorTest {
         Mutator mutator = new Mutator(new Mutant(policy, ""));
         for (String xpathString : xpathList) {
             if (isRuleXpathString(xpathString)) {
-                System.out.println(xpathString);
+//                System.out.println(xpathString);
                 //check if there the first Apply element's FunctionId is not function
                 String notFunctionXpathString = xpathString + "/*[local-name()='Condition' and 1]/*[local-name()='Apply' and @FunctionId='urn:oasis:names:tc:xacml:1.0:function:not']";
                 NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
 //                Assert.assertEquals(1, nodes.getLength());
                 Node node = nodes.item(0);
-                System.out.println(XpathSolver.nodeToString(node, false, true));
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
                 List<Mutant> mutants = mutator.createRemoveNotFunctionMutants(xpathString);
                 if (!Mutator.isEmptyNode(node)) {
                     for (Mutant mutant : mutants) {
@@ -400,13 +400,13 @@ public class MutatorTest {
                         nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
                         Assert.assertEquals(1, nodes.getLength());
                         Node newNode = nodes.item(0);
-                        System.out.println(XpathSolver.nodeToString(newNode, false, true));
+//                        System.out.println(XpathSolver.nodeToString(newNode, false, true));
                     }
                 } else {
-                    System.out.println(XpathSolver.nodeToString(node, false, true));
+//                    System.out.println(XpathSolver.nodeToString(node, false, true));
                     Assert.assertEquals(0, mutants.size());
                 }
-                System.out.println("===========");
+//                System.out.println("===========");
             }
         }
     }

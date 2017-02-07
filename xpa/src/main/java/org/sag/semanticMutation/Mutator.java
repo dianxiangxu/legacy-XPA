@@ -1,4 +1,4 @@
-package org.sag.mutation;
+package org.sag.semanticMutation;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -35,6 +35,8 @@ public class Mutator {
     private static Map<String, List<String>> unequalValuesMap = new HashMap<>();
     private static Map<String, String> oneAndOnlyFunctionMap = new HashMap<>();
     private static Map<String, List<String>> comparisonFunctionMap = new HashMap<>();
+    private static List<String> ruleCombiningAlgorithms;
+    private static List<String> policyCombiningAlgorithms;
 
     static {
         /*
@@ -94,6 +96,21 @@ public class Mutator {
                         "urn:oasis:names:tc:xacml:1.0:function:date-less-than",
                         "urn:oasis:names:tc:xacml:1.0:function:date-less-than-or-equal"
                 ));
+        ruleCombiningAlgorithms = Arrays.asList("urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides",
+                "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:permit-overrides",
+                "urn:oasis:names:tc:xacml:1.0:rule-combining-algorithm:first-applicable",
+                "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:ordered-deny-overrides",
+                "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:ordered-permit-overrides",
+                "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-unless-permit",
+                "urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:permit-unless-deny");
+        policyCombiningAlgorithms = Arrays.asList("urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides",
+                "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:permit-overrides",
+                "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable",
+                "urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:only-one-applicable",
+                "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:ordered-deny-overrides",
+                "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:ordered-permit-overrides",
+                "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-unless-permit",
+                "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:permit-unless-deny");
     }
 
     private List<String> xpathList;
@@ -415,7 +432,7 @@ public class Mutator {
      * "<" or "<=".
      *
      * @param xpathString xpath string to the target of a policy or a policy set
-     * @return a list of mutants generated using this mutation operator, or an empty list if this mutation operator is
+     * @return a list of mutants generated using this semanticMutation operator, or an empty list if this semanticMutation operator is
      * not applicable this rule
      */
     public List<Mutant> createPolicyTargetChangeComparisonFunctionMutants(String xpathString) throws XPathExpressionException, ParsingException {

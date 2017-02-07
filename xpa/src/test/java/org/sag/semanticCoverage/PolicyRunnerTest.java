@@ -1,6 +1,5 @@
-package org.sag.coverage;
+package org.sag.semanticCoverage;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.sag.policyUtils.PolicyLoader;
 import org.wso2.balana.AbstractPolicy;

@@ -1,4 +1,4 @@
-package org.sag.coverage;
+package org.sag.semanticCoverage;
 
 public abstract class Coverage {
 

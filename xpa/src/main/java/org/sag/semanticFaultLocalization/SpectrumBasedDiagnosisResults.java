@@ -1,4 +1,4 @@
-package org.sag.faultLocalization;
+package org.sag.semanticFaultLocalization;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,8 +1,8 @@
-package org.sag.faultLocalization;
+package org.sag.semanticFaultLocalization;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.sag.coverage.*;
+import org.sag.semanticCoverage.*;
 import org.sag.policyUtils.PolicyLoader;
 import org.wso2.balana.AbstractPolicy;
 import org.wso2.balana.ParsingException;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * This class tests if the coverage information collected by {@link PolicyCoverageFactory} is correct.
+ * This class tests if the semanticCoverage information collected by {@link PolicyCoverageFactory} is correct.
  * Created by shuaipeng on 10/14/16.
  */
 public class PolicyCoverageFactoryTest {
@@ -30,7 +30,7 @@ public class PolicyCoverageFactoryTest {
         for (boolean result : results)
             Assert.assertTrue(result);
         List<List<Coverage>> coverageMatrix = PolicyCoverageFactory.getCoverageMatrix();
-        // convert the coverage matrix to a matrix of integer to ease testing
+        // convert the semanticCoverage matrix to a matrix of integer to ease testing
         int numTests = coverageMatrix.size();
         int numElems = 0;
         for (List<Coverage> row : coverageMatrix)
