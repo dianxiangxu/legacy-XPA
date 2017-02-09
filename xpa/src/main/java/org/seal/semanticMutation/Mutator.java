@@ -609,6 +609,9 @@ public class Mutator {
         return mutants;
     }
 
+    /**
+     * Replaces the existing combining algorithm with another combining algorithm, works for both Policy and PolicySet.
+     */
     public List<Mutant> createCombiningAlgorithmMutants(String targetXpathString) throws XPathExpressionException, ParsingException {
         int faultLocation = xpathMapping.get(targetXpathString);
         String mutantName = "CRC";
@@ -640,4 +643,26 @@ public class Mutator {
         return mutants;
     }
 
+    /**
+     * remove the rule.
+     * Note that this mutation method should not be used for fault localization as it will cause the position of the
+     * following policy elements to shift by 1.
+     */
+    public List<Mutant> createRemoveRuleMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "RER";
+        List<Mutant> mutants = new ArrayList<>();
+        Node ruleNode = ((NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        Node parent = ruleNode.getParentNode();
+        //change doc
+        Node nextSibling = ruleNode.getNextSibling();
+        parent.removeChild(ruleNode);
+        AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+        mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+        //restore
+        //use insertBefore() instead of appendChild() because we want to restore the Rule node to the same previous index
+        // as for combining algorithms like "first applicable", the order of rules matters
+        parent.insertBefore(ruleNode, nextSibling);
+        return mutants;
+    }
 }

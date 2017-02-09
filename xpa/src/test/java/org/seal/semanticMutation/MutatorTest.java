@@ -440,4 +440,26 @@ public class MutatorTest {
             }
         }
     }
+
+    @Test
+    public void createRemoveRuleMutantsTest() throws XPathExpressionException, ParsingException, ParserConfigurationException, SAXException, IOException {
+        for (String xpathString : xpathList) {
+            if (isRuleXpathString(xpathString)) {
+//                System.out.println(xpathString);
+                NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+                Assert.assertEquals(1, nodes.getLength());
+                Node node = nodes.item(0);
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
+                List<Mutant> mutants = mutator.createRemoveRuleMutants(xpathString);
+                for (Mutant mutant : mutants) {
+                    Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                    nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                    Assert.assertEquals(0, nodes.getLength());
+                    Node newNode = nodes.item(0);
+//                    System.out.println(newNode);
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
 }
