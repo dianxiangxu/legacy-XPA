@@ -608,4 +608,36 @@ public class Mutator {
         }
         return mutants;
     }
+
+    public List<Mutant> createCombiningAlgorithmMutants(String targetXpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(targetXpathString);
+        String mutantName = "CRC";
+        List<Mutant> mutants = new ArrayList<>();
+        String PolicyXpathString = targetXpathString.replace("/*[local-name()='Target' and 1]", "");
+        Node policyNode = ((NodeList) xPath.evaluate(PolicyXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        List<String> combiningAlgList = null;
+        String combiningAlgAttribute = null;
+        if (policyNode.getLocalName().equals("PolicySet")) {
+            combiningAlgList = policyCombiningAlgorithms;
+            combiningAlgAttribute = "PolicyCombiningAlgId";
+        } else if (policyNode.getLocalName().equals("Policy")) {
+            combiningAlgList = ruleCombiningAlgorithms;
+            combiningAlgAttribute = "RuleCombiningAlgId";
+        }
+        if (combiningAlgList != null) {
+            //change doc
+            String originalCombiningAlgId = policyNode.getAttributes().getNamedItem(combiningAlgAttribute).getNodeValue();
+            for (String combiningAlgoId : combiningAlgList) {
+                if (!combiningAlgoId.equals(originalCombiningAlgId)) {
+                    policyNode.getAttributes().getNamedItem(combiningAlgAttribute).setNodeValue(combiningAlgoId);
+                    AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+                    mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+                }
+            }
+            //restore doc
+            policyNode.getAttributes().getNamedItem(combiningAlgAttribute).setNodeValue(originalCombiningAlgId);
+        }
+        return mutants;
+    }
+
 }

@@ -410,4 +410,34 @@ public class MutatorTest {
             }
         }
     }
+
+
+    @Test
+    public void createCombiningAlgorithmMutantsTest() throws XPathExpressionException, ParserConfigurationException, ParsingException, SAXException, IOException {
+        for (String xpathString : xpathList) {
+            if (isTargetXpathString(xpathString)) {
+                String PolicyXpathString = xpathString.replace("/*[local-name()='Target' and 1]", "");
+//                System.out.println(PolicyXpathString);
+                Node node = ((NodeList) xPath.evaluate(PolicyXpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+//                Node attributeNode = node.getAttributes().getNamedItem("PolicyCombiningAlgId") == null ? node.getAttributes().getNamedItem("RuleCombiningAlgId") : node.getAttributes().getNamedItem("PolicyCombiningAlgId");
+//                System.out.println(attributeNode);
+                List<Mutant> mutants = mutator.createCombiningAlgorithmMutants(xpathString);
+                if (!Mutator.isEmptyNode(node)) {
+                    for (Mutant mutant : mutants) {
+                        Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                        NodeList nodes = (NodeList) xPath.evaluate(PolicyXpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                        Assert.assertEquals(1, nodes.getLength());
+                        Node newNode = nodes.item(0);
+//                        attributeNode = newNode.getAttributes().getNamedItem("PolicyCombiningAlgId") == null ? newNode.getAttributes().getNamedItem("RuleCombiningAlgId") : newNode.getAttributes().getNamedItem("PolicyCombiningAlgId");
+//                        System.out.println(attributeNode);
+                    }
+                } else {
+//                    attributeNode = node.getAttributes().getNamedItem("PolicyCombiningAlgId") == null ? node.getAttributes().getNamedItem("RuleCombiningAlgId") : node.getAttributes().getNamedItem("PolicyCombiningAlgId");
+//                    System.out.println(attributeNode);
+                    Assert.assertEquals(0, mutants.size());
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
 }
