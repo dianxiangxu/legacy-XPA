@@ -9,6 +9,7 @@ import org.seal.policyUtils.PolicyLoader;
 import org.seal.policyUtils.ReflectionUtils;
 import org.seal.policyUtils.XpathSolver;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.balana.AbstractPolicy;
@@ -457,6 +458,32 @@ public class MutatorTest {
                     Assert.assertEquals(0, nodes.getLength());
                     Node newNode = nodes.item(0);
 //                    System.out.println(newNode);
+                }
+//                System.out.println("===========");
+            }
+        }
+    }
+
+    @Test
+    public void createAddNewRuleMutantsTest() throws XPathExpressionException, ParsingException, ParserConfigurationException, SAXException, IOException {
+        for (String xpathString : xpathList) {
+            if (isRuleXpathString(xpathString)) {
+//                System.out.println(xpathString);
+                NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+                Assert.assertEquals(1, nodes.getLength());
+                Node node = nodes.item(0);
+//                System.out.println(XpathSolver.nodeToString(node, false, true));
+                List<Mutant> mutants = mutator.createAddNewRuleMutants(xpathString);
+                for (Mutant mutant : mutants) {
+                    Document newDoc = PolicyLoader.getDocument(IOUtils.toInputStream(mutant.encode(), Charset.defaultCharset()));
+                    nodes = (NodeList) xPath.evaluate(xpathString, newDoc.getDocumentElement(), XPathConstants.NODESET);
+                    Assert.assertEquals(1, nodes.getLength());
+                    Node newNode = nodes.item(0);
+                    Node prev = newNode.getPreviousSibling();
+                    while (!(prev instanceof Element)) {
+                        prev = prev.getPreviousSibling();
+                    }
+//                    System.out.println(XpathSolver.nodeToString(prev, false, true));
                 }
 //                System.out.println("===========");
             }

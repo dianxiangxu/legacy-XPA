@@ -212,9 +212,9 @@ public class Mutator {
      * Make a Target always true by removing all its child nodes. According to the specification of XACML, a Target is
      * always evaluated to true if it is empty.
      */
-    private List<Mutant> createTargetTrueMutants(String xpathString, String mutantName, int faultLocation) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
+    private List<Mutant> createTargetTrueMutants(String targetXpathString, String mutantName, int faultLocation) throws XPathExpressionException, ParsingException, IOException, ParserConfigurationException, SAXException {
         List<Mutant> list = new ArrayList<>();
-        NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+        NodeList nodes = (NodeList) xPath.evaluate(targetXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         Node node = nodes.item(0);
         if (node != null && !isEmptyNode(node)) {
             //change doc
@@ -663,6 +663,50 @@ public class Mutator {
         //use insertBefore() instead of appendChild() because we want to restore the Rule node to the same previous index
         // as for combining algorithms like "first applicable", the order of rules matters
         parent.insertBefore(ruleNode, nextSibling);
+        return mutants;
+    }
+
+    /**
+     * add a new rule. The new rule is based on this rule, but its effect is flipped, or its target is always true if
+     * the target of this rule is not always true.
+     * Note that this mutation method should not be used for fault localization as it will cause the position of the
+     * following policy elements to shift by 1.
+     */
+    public List<Mutant> createAddNewRuleMutants(String xpathString) throws XPathExpressionException, ParsingException {
+        int faultLocation = xpathMapping.get(xpathString);
+        String mutantName = "ANR";
+        List<Mutant> mutants = new ArrayList<>();
+        Node ruleNode = ((NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET)).item(0);
+        Node parent = ruleNode.getParentNode();
+        //make a clone of the rule, flip the Effect of the clone, and insert it before the rule
+        Node clone = ruleNode.cloneNode(true);
+        String originEffect = clone.getAttributes().getNamedItem("Effect").getNodeValue();
+        String flippedEffect = originEffect.equals("Permit") ? "Deny" : "Permit";
+        clone.getAttributes().getNamedItem("Effect").setNodeValue(flippedEffect);
+        String newRuleId = UUID.randomUUID().toString();
+        clone.getAttributes().getNamedItem("RuleId").setNodeValue(newRuleId);
+        //change doc
+        parent.insertBefore(clone, ruleNode);
+        AbstractPolicy newPolicy = PolicyLoader.loadPolicy(doc);
+        mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+        //restore doc
+        parent.removeChild(clone);
+        //if the rule has a Target, make a clone of the rule, make the target of the clone always true, and insert it before the rule.
+        clone = ruleNode.cloneNode(true);
+        Node targetNode = findNodeByLocalNameRecursively(clone, "Target");
+        if (!isEmptyNode(targetNode)) {
+            while (targetNode.getFirstChild() != null) {
+                targetNode.removeChild(targetNode.getFirstChild());
+            }
+            newRuleId = UUID.randomUUID().toString();
+            clone.getAttributes().getNamedItem("RuleId").setNodeValue(newRuleId);
+            //change doc
+            parent.insertBefore(clone, ruleNode);
+            newPolicy = PolicyLoader.loadPolicy(doc);
+            mutants.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), mutantName + faultLocation));
+            //restore doc
+            parent.removeChild(clone);
+        }
         return mutants;
     }
 }
