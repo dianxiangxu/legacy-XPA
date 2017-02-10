@@ -167,9 +167,9 @@ public class Mutator {
     /**
      * flip rule effect
      */
-    public List<Mutant> createRuleEffectFlippingMutants(String xpathString) throws XPathExpressionException, ParsingException {
+    public List<Mutant> createRuleEffectFlippingMutants(String ruleXpathString) throws XPathExpressionException, ParsingException {
         List<Mutant> list = new ArrayList<>();
-        NodeList nodes = (NodeList) xPath.evaluate(xpathString, doc.getDocumentElement(), XPathConstants.NODESET);
+        NodeList nodes = (NodeList) xPath.evaluate(ruleXpathString, doc.getDocumentElement(), XPathConstants.NODESET);
         Node node = nodes.item(0);
         if (node != null) {
             //change doc
@@ -185,7 +185,7 @@ public class Mutator {
             } else {
                 node.getAttributes().getNamedItem("Effect").setTextContent("Deny");
             }
-            int faultLocation = xpathMapping.get(xpathString);
+            int faultLocation = xpathMapping.get(ruleXpathString);
             list.add(new Mutant(newPolicy, Collections.singletonList(faultLocation), "CRE" + faultLocation));
         }
         return list;
